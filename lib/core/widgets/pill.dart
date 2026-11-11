@@ -17,10 +17,11 @@ class Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
+        color: color.withValues(alpha: isDark ? 0.22 : 0.14),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -35,6 +36,7 @@ class Pill extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontSize: 12,
+              height: 1.3,
               fontWeight: FontWeight.w600,
             ),
           ),
