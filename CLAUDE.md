@@ -36,9 +36,10 @@ lib/
     l10n/app_lang.dart      # AppLang, appLangProvider, context.tr(uz:, ru:, en:), context.trMap(json)
     routing/app_routes.dart # AppRoutes.* (пути), rootNavigatorKey
     storage/prefs.dart      # sharedPreferencesProvider
-    theme/                  # AppColors, AppTheme (светлая/тёмная)
+    theme/                  # AppColors, AppTheme (светлая/тёмная), AppSpacing, AppShadows
     widgets/                # AppScaffold, AppCard, ShortcutCard, SectionTitle, Pill, EmojiBox,
-                            # ProgressRing, EmptyState, ErrorView, Money/formatMoney
+                            # ProgressRing, EmptyState, ErrorView (+ errorMessage), LoadingView,
+                            # Skeleton/SkeletonList, AsyncValueView, Money/formatMoney
   features/<x>/
     <x>_feature.dart        # ЕДИНСТВЕННЫЙ публичный файл: <x>Routes, <x>HomeCards
     presentation/           # экраны и виджеты
@@ -103,7 +104,8 @@ final medicinesRepositoryProvider = Provider<MedicinesRepository>((ref) =>
 8. Все строки UI через `context.tr(uz: …, ru: …, en: …)`; узбекский (латиница) обязателен. jsonb-тексты — `context.trMap`.
 9. У каждого репозитория Supabase- и Fake-реализация (Fake читает JSON из `assets/<модуль>/`).
    Приложение полностью работает офлайн в fake-режиме.
-10. На каждом экране — состояния загрузки и ошибки (`AsyncValue.when` + `ErrorView`).
+10. На каждом экране — состояния загрузки и ошибки: `AsyncValueView(value:, data:, onRetry:)`
+    (или `AsyncValue.when` + `LoadingView` / `ErrorView`).
 11. Перед коммитом: `dart format lib test`, `flutter analyze`, `flutter test` — всё зелёное.
 12. Коммиты: `feat(<фича>): …`, `fix(<фича>): …`, `chore(core): …`.
 13. Медицинские советы всегда с дисклеймером **«Shifokor maslahatini almashtirmaydi»**.
