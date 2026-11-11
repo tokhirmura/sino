@@ -1,0 +1,36 @@
+# Замените заглушки на реальные GitHub-логины.
+# Общие файлы — только лид
+*                         @tokhirmura
+
+# Модуль A (лид)
+/lib/features/onboarding/ @tokhirmura
+/lib/features/home/       @tokhirmura
+/lib/features/profile/    @tokhirmura
+/lib/features/sos/        @tokhirmura
+/lib/features/assistant/  @tokhirmura
+/assets/core/             @tokhirmura
+
+# Модуль B
+/lib/features/pharmacy/   @MODULE_B_LOGIN
+/lib/features/reminders/  @MODULE_B_LOGIN
+/lib/features/doctors/    @MODULE_B_LOGIN
+/test/features/pharmacy/  @MODULE_B_LOGIN
+/test/features/reminders/ @MODULE_B_LOGIN
+/test/features/doctors/   @MODULE_B_LOGIN
+/assets/pharmacy/         @MODULE_B_LOGIN
+/tool/pharmacy/           @MODULE_B_LOGIN
+
+# Модуль C
+/lib/features/nutrition/  @MODULE_C_LOGIN
+/lib/features/workouts/   @MODULE_C_LOGIN
+/lib/features/vitals/     @MODULE_C_LOGIN
+/lib/features/weather/    @MODULE_C_LOGIN
+/test/features/nutrition/ @MODULE_C_LOGIN
+/test/features/workouts/  @MODULE_C_LOGIN
+/test/features/vitals/    @MODULE_C_LOGIN
+/test/features/weather/   @MODULE_C_LOGIN
+/assets/wellness/         @MODULE_C_LOGIN
+/tool/wellness/           @MODULE_C_LOGIN
+
+# Миграции ревьюит лид
+/supabase/                @tokhirmura

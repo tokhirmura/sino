@@ -1,0 +1,5 @@
+package uz.sino.sino
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
