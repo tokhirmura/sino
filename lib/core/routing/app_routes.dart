@@ -20,6 +20,9 @@ abstract final class AppRoutes {
   static const assistant = '/assistant';
   static const onboarding = '/onboarding';
 
+  /// First-run questionnaire; the router forces it while the profile is empty.
+  static const profileSetup = '/profile-setup';
+
   /// Contract: `/pharmacy?q=<query>` opens pharmacy search pre-filled.
   static String pharmacySearch(String query) =>
       Uri(path: pharmacy, queryParameters: {'q': query}).toString();

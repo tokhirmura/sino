@@ -8,6 +8,8 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/section_title.dart';
+import '../application/dev_mode.dart';
+import 'widgets/dev_tools.dart';
 
 /// Stub: user + family from core providers, language switch, sign out.
 class ProfileScreen extends ConsumerWidget {
@@ -79,7 +81,13 @@ class ProfileScreen extends ConsumerWidget {
             icon: const Icon(Icons.logout),
             label: Text(context.tr(uz: 'Chiqish', ru: 'Выйти', en: 'Sign out')),
           ),
-          const SizedBox(height: 24),
+          if (ref.watch(devModeProvider)) ...[
+            const SizedBox(height: 24),
+            const DevToolsCard(),
+          ],
+          const SizedBox(height: 16),
+          const VersionTapper(),
+          const SizedBox(height: 16),
         ],
       ),
     );

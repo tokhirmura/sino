@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sino/app/feature_registry.dart';
+import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/core/widgets/money.dart';
 
 import 'helpers/test_app.dart';
@@ -15,6 +16,16 @@ void main() {
     await tester.tap(find.text('O‘tkazib yuborish'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Mehmon sifatida davom etish'));
+    await tester.pumpAndSettle();
+
+    // First run: empty profile → questionnaire.
+    expect(find.text('Profilingiz'), findsOneWidget);
+    final field = find.byType(TextFormField);
+    await tester.enterText(field.at(0), 'Aziz');
+    await tester.enterText(field.at(1), '1997');
+    await tester.enterText(field.at(2), '178');
+    await tester.enterText(field.at(3), '76');
+    await tester.tap(find.widgetWithText(FilledButton, 'Saqlash'));
     await tester.pumpAndSettle();
 
     expect(find.byType(NavigationBar), findsOneWidget);
@@ -38,7 +49,13 @@ void main() {
     final orders = [for (final c in allHomeCards) c.order];
     expect(orders, [...orders]..sort());
     expect(tabBranchRoutes, hasLength(5));
-    expect(allRoutes, hasLength(12));
+    expect(allRoutes, hasLength(13));
+  });
+
+  test('text on brand buttons is white in both themes', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      expect(theme.colorScheme.onPrimary, Colors.white);
+    }
   });
 
   test('money format', () {

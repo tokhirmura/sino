@@ -1,0 +1,66 @@
+{
+  "family_members": [
+    { "name": "Dilfuza", "relation": "ona", "age": 56, "blood_type": "B(III) Rh+", "allergies": [] },
+    { "name": "Akbar", "relation": "ota", "age": 60, "blood_type": "A(II) Rh+", "allergies": ["Aspirin"] },
+    { "name": "Malika", "relation": "qizi", "age": 5, "blood_type": "A(II) Rh+", "allergies": [] }
+  ],
+  "medical_records": [
+    {
+      "member": null, "days_ago": 12, "kind": "visit", "source": "davlat",
+      "title": "Terapevt ko‘rigi",
+      "institution": "Yunusobod tumani 12-oilaviy poliklinika",
+      "notes": "Umumiy holat qoniqarli. Yiliga bir marta profilaktik ko‘rik."
+    },
+    {
+      "member": null, "days_ago": 12, "kind": "lab", "source": "davlat",
+      "title": "Umumiy qon tahlili",
+      "institution": "Yunusobod tumani 12-oilaviy poliklinika",
+      "notes": null
+    },
+    {
+      "member": null, "days_ago": 40, "kind": "lab", "source": "xususiy",
+      "title": "Biokimyoviy qon tahlili",
+      "institution": "Intermed laboratoriyasi",
+      "notes": "Xolesterin me’yordan biroz yuqori."
+    },
+    {
+      "member": null, "days_ago": 95, "kind": "prescription", "source": "davlat",
+      "title": "Retsept: Amoksitsillin 500 mg",
+      "institution": "Yunusobod tumani 12-oilaviy poliklinika",
+      "notes": "7 kun, kuniga 3 mahal."
+    },
+    {
+      "member": null, "days_ago": 210, "kind": "vaccine", "source": "davlat",
+      "title": "Gripp emlashi",
+      "institution": "Yunusobod tumani 12-oilaviy poliklinika",
+      "notes": null
+    },
+    {
+      "member": "Dilfuza", "days_ago": 20, "kind": "diagnosis", "source": "xususiy",
+      "title": "Arterial gipertoniya, 1-daraja",
+      "institution": "Akfa Medline klinikasi",
+      "notes": "Bosimni har kuni o‘lchash tavsiya etiladi."
+    },
+    {
+      "member": "Akbar", "days_ago": 60, "kind": "visit", "source": "davlat",
+      "title": "Kardiolog ko‘rigi",
+      "institution": "Respublika ixtisoslashtirilgan kardiologiya markazi",
+      "notes": null
+    },
+    {
+      "member": "Malika", "days_ago": 30, "kind": "vaccine", "source": "davlat",
+      "title": "Qizamiq, qizilcha, parotit (QQP) emlashi",
+      "institution": "Yunusobod tumani 12-oilaviy poliklinika",
+      "notes": null
+    }
+  ],
+  "lab_results": [
+    { "name": "Gemoglobin", "value": 142, "unit": "g/L", "ref_low": 130, "ref_high": 170, "days_ago": 12 },
+    { "name": "Leykotsitlar", "value": 6.8, "unit": "×10⁹/L", "ref_low": 4.0, "ref_high": 9.0, "days_ago": 12 },
+    { "name": "Glyukoza", "value": 5.4, "unit": "mmol/L", "ref_low": 3.9, "ref_high": 6.1, "days_ago": 40 },
+    { "name": "Umumiy xolesterin", "value": 5.6, "unit": "mmol/L", "ref_low": 0, "ref_high": 5.2, "days_ago": 40 },
+    { "name": "ALT", "value": 28, "unit": "U/L", "ref_low": 0, "ref_high": 41, "days_ago": 40 },
+    { "name": "Vitamin D", "value": 18, "unit": "ng/mL", "ref_low": 30, "ref_high": 100, "days_ago": 40 },
+    { "name": "TTG", "value": 2.1, "unit": "mIU/L", "ref_low": 0.4, "ref_high": 4.0, "days_ago": 95 }
+  ]
+}

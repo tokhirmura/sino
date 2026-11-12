@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/backend.dart';
+import '../../../core/data/user.dart';
 
 /// Outcome of an email sign-up.
 enum SignUpResult {
@@ -68,20 +69,21 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 }
 
-/// Offline: every path just sets the fake session flag.
+/// Offline: every path sets the fake session flag. Like a brand-new
+/// account, the fake profile starts empty → the questionnaire shows.
 class FakeAuthRepository implements AuthRepository {
-  FakeAuthRepository(this._setSignedIn);
+  FakeAuthRepository(this._signIn);
 
-  final Future<void> Function() _setSignedIn;
+  final Future<void> Function(String lang) _signIn;
 
   @override
-  Future<void> signInAnonymously({required String lang}) => _setSignedIn();
+  Future<void> signInAnonymously({required String lang}) => _signIn(lang);
 
   @override
   Future<void> signInWithEmail({
     required String email,
     required String password,
-  }) => _setSignedIn();
+  }) => _signIn('uz');
 
   @override
   Future<SignUpResult> signUpWithEmail({
@@ -89,13 +91,17 @@ class FakeAuthRepository implements AuthRepository {
     required String password,
     required String lang,
   }) async {
-    await _setSignedIn();
+    await _signIn(lang);
     return SignUpResult.signedIn;
   }
 }
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => ref.watch(useFakeProvider)
-      ? FakeAuthRepository(() => ref.read(fakeAuthProvider.notifier).signIn())
+      ? FakeAuthRepository((lang) async {
+          // Profile first, so the router goes straight to the questionnaire.
+          await ref.read(fakeProfileProvider.notifier).startEmpty(lang: lang);
+          await ref.read(fakeAuthProvider.notifier).signIn();
+        })
       : SupabaseAuthRepository(ref.watch(supabaseClientProvider)),
 );
