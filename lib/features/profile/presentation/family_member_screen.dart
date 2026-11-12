@@ -212,6 +212,7 @@ class _MemberFormState extends ConsumerState<_MemberForm> {
           ),
           gap,
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _relation,
             decoration: InputDecoration(
               labelText: context.tr(

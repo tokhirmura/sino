@@ -65,7 +65,7 @@ class OneIdAuthProvider {
   Future<OneIdProfile> verify() async {
     final results = await Future.wait([
       Future<void>.delayed(scanDuration),
-      _bundle.loadString(_mockAsset),
+      _bundle.loadString(_mockAsset, cache: false),
     ]);
     final json = jsonDecode(results[1] as String) as Map<String, dynamic>;
     return OneIdProfile.fromMap(json);

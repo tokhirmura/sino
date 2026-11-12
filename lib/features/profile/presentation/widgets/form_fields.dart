@@ -67,6 +67,7 @@ class BloodTypeField extends StatelessWidget {
       if (value != null && !bloodTypes.contains(value)) value!,
     ];
     return DropdownButtonFormField<String?>(
+      isExpanded: true,
       initialValue: value,
       decoration: InputDecoration(
         labelText: context.tr(
