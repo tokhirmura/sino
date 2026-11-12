@@ -14,6 +14,7 @@ import 'package:sino/core/routing/app_routes.dart';
 import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/features/assistant/application/chat_controller.dart';
 import 'package:sino/features/assistant/assistant_feature.dart';
+import 'package:sino/features/assistant/data/ai_assistant_repository.dart';
 import 'package:sino/features/assistant/data/assistant_rules.dart';
 import 'package:sino/features/assistant/presentation/assistant_screen.dart';
 
@@ -35,6 +36,7 @@ List<String> _ids(String text, List<AssistantRule> rules) => [
 Future<List<Uri>> _pump(
   WidgetTester tester, {
   AppLang lang = AppLang.uz,
+  AiAssistantRepository? ai,
 }) async {
   tester.view.physicalSize = const Size(412, 1400);
   tester.view.devicePixelRatio = 1;
@@ -45,6 +47,7 @@ Future<List<Uri>> _pump(
     ProviderScope(
       overrides: [
         ...appOverrides(prefs: prefs, useFake: true),
+        if (ai != null) aiAssistantRepositoryProvider.overrideWithValue(ai),
         assistantLauncherProvider.overrideWithValue((uri) async {
           opened.add(uri);
           return true;
@@ -69,6 +72,35 @@ Future<void> _ask(WidgetTester tester, String text) async {
   await tester.pump(ChatNotifier.typingDelay);
   await tester.pumpAndSettle();
 }
+
+/// Records questions; replies with [reply] or throws [error].
+class _StubAi implements AiAssistantRepository {
+  _StubAi({this.reply, this.error});
+
+  final AiReply? reply;
+  final Object? error;
+  final asked = <({String message, String lang, List<ChatTurn> history})>[];
+
+  @override
+  Future<AiReply?> ask(
+    String message, {
+    required String lang,
+    List<ChatTurn> history = const [],
+  }) async {
+    asked.add((message: message, lang: lang, history: history));
+    if (error != null) throw error!;
+    return reply;
+  }
+}
+
+const _aiHeadache = AiReply(
+  text: 'Suv iching va dam oling.',
+  redFlag: false,
+  actions: [
+    AssistantAction(type: ActionType.pharmacy, query: 'paracetamol'),
+    AssistantAction(type: ActionType.open, route: AppRoutes.doctors),
+  ],
+);
 
 void main() {
   test('assistant exposes its root route', () {
@@ -241,5 +273,73 @@ void main() {
       router.routerDelegate.currentConfiguration.uri.toString(),
       AppRoutes.pharmacySearch('ibuprofen'),
     );
+  });
+
+  group('LLM', () {
+    test('reply parsing keeps only known actions', () {
+      final r = AiReply.fromMap({
+        'text': ' Salom ',
+        'red_flag': true,
+        'actions': [
+          {'type': 'call', 'number': '103'},
+          {'type': 'hack', 'route': '/x'},
+        ],
+      });
+      expect(r.text, 'Salom');
+      expect(r.redFlag, isTrue);
+      expect(r.actions.single.type, ActionType.call);
+    });
+
+    testWidgets('answer from the LLM with buttons and an AI note', (
+      tester,
+    ) async {
+      final ai = _StubAi(reply: _aiHeadache);
+      await _pump(tester, ai: ai);
+      await _ask(tester, 'Boshim og‘riyapti');
+      expect(find.byKey(const ValueKey('ai-reply')), findsOneWidget);
+      expect(find.text('Suv iching va dam oling.'), findsOneWidget);
+      expect(find.text('Dorixonada: paracetamol'), findsOneWidget);
+      expect(find.text('Sun’iy intellekt javobi'), findsOneWidget);
+      expect(ai.asked.single.lang, 'uz');
+
+      // Earlier turns go along as context.
+      await _ask(tester, 'Yana nima qilay?');
+      final history = ai.asked.last.history;
+      expect(history.first, (fromUser: true, text: 'Boshim og‘riyapti'));
+      expect(history.last.text, 'Suv iching va dam oling.');
+    });
+
+    testWidgets('red flag is answered locally — LLM not asked', (tester) async {
+      final ai = _StubAi(reply: _aiHeadache);
+      await _pump(tester, ai: ai);
+      await _ask(tester, 'Ko‘kragim og‘riyapti');
+      expect(ai.asked, isEmpty);
+      expect(find.byKey(const ValueKey('red-flag-chest_pain')), findsOneWidget);
+    });
+
+    testWidgets('LLM error → offline rules answer', (tester) async {
+      await _pump(tester, ai: _StubAi(error: Exception('offline')));
+      await _ask(tester, 'Boshim og‘riyapti');
+      expect(find.byKey(const ValueKey('ai-reply')), findsNothing);
+      expect(find.text('Bosh og‘rig‘i'), findsOneWidget);
+    });
+
+    testWidgets('LLM red flag → red card with a 103 button', (tester) async {
+      final opened = await _pump(
+        tester,
+        ai: _StubAi(
+          reply: const AiReply(
+            text: 'Bu shoshilinch holat bo‘lishi mumkin.',
+            redFlag: true,
+            actions: [AssistantAction(type: ActionType.call, number: '103')],
+          ),
+        ),
+      );
+      await _ask(tester, 'Bolamning harorati 40');
+      expect(find.text('103 ga qo‘ng‘iroq qiling'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, '103 ga qo‘ng‘iroq'));
+      await tester.pumpAndSettle();
+      expect(opened.single.toString(), 'tel:103');
+    });
   });
 }
