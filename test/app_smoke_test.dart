@@ -10,9 +10,11 @@ void main() {
     tester,
   ) async {
     await pumpSinoApp(tester);
-    expect(find.text('Xush kelibsiz — tez orada'), findsOneWidget);
+    expect(find.text('Sog‘lig‘ingiz — bitta ilovada'), findsOneWidget);
 
-    await tester.tap(find.text('Boshlash'));
+    await tester.tap(find.text('O‘tkazib yuborish'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mehmon sifatida davom etish'));
     await tester.pumpAndSettle();
 
     expect(find.byType(NavigationBar), findsOneWidget);

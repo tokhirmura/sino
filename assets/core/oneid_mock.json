@@ -1,0 +1,17 @@
+{
+  "full_name": "Aziz Karimov",
+  "pinfl": "3**********12",
+  "birth_date": "1997-04-18",
+  "polyclinic": {
+    "uz": "Toshkent sh., Yunusobod tumani 12-oilaviy poliklinika",
+    "ru": "г. Ташкент, Юнусабадская семейная поликлиника № 12",
+    "en": "Tashkent, Yunusabad family polyclinic No. 12"
+  },
+  "medical_records": 14,
+  "prescriptions": 2,
+  "insurance": {
+    "uz": "Majburiy tibbiy sug‘urta — faol",
+    "ru": "Обязательное медстрахование — активно",
+    "en": "Mandatory health insurance — active"
+  }
+}
