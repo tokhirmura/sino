@@ -168,7 +168,13 @@ class _DevToolsCardState extends ConsumerState<DevToolsCard> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.download),
-            label: const Text('Namuna ma’lumotlarni yuklash'),
+            label: Text(
+              context.tr(
+                uz: 'Namuna ma’lumotlarni yuklash',
+                ru: 'Загрузить демо-данные',
+                en: 'Load sample data',
+              ),
+            ),
           ),
         ],
       ),

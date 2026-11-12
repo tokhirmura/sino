@@ -117,15 +117,22 @@ class _IntroSlidesState extends State<IntroSlides> {
           Row(
             children: [
               const LangSwitcher(),
-              const Spacer(),
+              const SizedBox(width: 8),
               if (!isLast)
-                TextButton(
-                  onPressed: widget.onDone,
-                  child: Text(
-                    context.tr(
-                      uz: 'O‘tkazib yuborish',
-                      ru: 'Пропустить',
-                      en: 'Skip',
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton(
+                      onPressed: widget.onDone,
+                      child: Text(
+                        context.tr(
+                          uz: 'O‘tkazib yuborish',
+                          ru: 'Пропустить',
+                          en: 'Skip',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ),
