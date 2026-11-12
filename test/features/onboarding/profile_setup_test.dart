@@ -142,7 +142,7 @@ void main() {
     await tester.enterText(_field('Vazn'), '76');
     await _tap(tester, find.widgetWithText(FilledButton, 'Saqlash'));
 
-    expect(find.text('Salom, Aziz Karimov'), findsOneWidget);
+    expect(find.text('Salom, Aziz'), findsOneWidget); // first name only
     expect(container.read(setupPrefillProvider), isNull);
   });
 
