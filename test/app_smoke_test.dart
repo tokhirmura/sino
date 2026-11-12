@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sino/app/feature_registry.dart';
+import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/core/widgets/money.dart';
 
 import 'helpers/test_app.dart';
@@ -49,6 +50,12 @@ void main() {
     expect(orders, [...orders]..sort());
     expect(tabBranchRoutes, hasLength(5));
     expect(allRoutes, hasLength(13));
+  });
+
+  test('text on brand buttons is white in both themes', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      expect(theme.colorScheme.onPrimary, Colors.white);
+    }
   });
 
   test('money format', () {
