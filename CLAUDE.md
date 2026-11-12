@@ -34,11 +34,12 @@ lib/
     contracts/home_card.dart# HomeCardSpec, homeCardsProvider
     data/user.dart          # currentUserProvider, familyMembersProvider (+ fake-данные),
                             # profileRepositoryProvider (сохранить profiles), profileGateProvider (анкета),
-                            # fakeProfileProvider (fake-профиль в prefs; по умолчанию «Aziz, 29»)
+                            # fakeProfileProvider (fake-профиль в prefs; по умолчанию «Aziz, 29»),
+                            # fakeFamilyProvider (fake-семья в prefs; меняет фича profile)
     l10n/app_lang.dart      # AppLang, appLangProvider, context.tr(uz:, ru:, en:), context.trMap(json)
     routing/app_routes.dart # AppRoutes.* (пути, в т.ч. profileSetup), rootNavigatorKey
     storage/prefs.dart      # sharedPreferencesProvider
-    theme/                  # AppColors, AppTheme (светлая/тёмная)
+    theme/                  # AppColors, AppTheme (светлая/тёмная), themeModeProvider (выбор в профиле)
     widgets/                # AppScaffold, AppCard, ShortcutCard, SectionTitle, Pill, EmojiBox,
                             # ProgressRing, EmptyState, ErrorView, Money/formatMoney
   features/<x>/

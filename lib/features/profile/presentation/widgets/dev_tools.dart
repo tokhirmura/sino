@@ -6,6 +6,7 @@ import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../application/dev_mode.dart';
+import '../../data/medical_repository.dart';
 import '../../data/sample_data_repository.dart';
 
 /// «Sino · v1.0.0» line. 7 taps toggle developer mode.
@@ -82,7 +83,10 @@ class _DevToolsCardState extends ConsumerState<DevToolsCard> {
     String message;
     try {
       final r = await ref.read(sampleDataRepositoryProvider).seed();
-      ref.invalidate(familyMembersProvider);
+      ref
+        ..invalidate(familyMembersProvider)
+        ..invalidate(medicalRecordsProvider)
+        ..invalidate(labResultsProvider);
       if (!mounted) return;
       message = r.skipped
           ? context.tr(

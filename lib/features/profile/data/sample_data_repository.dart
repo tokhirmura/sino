@@ -39,7 +39,8 @@ abstract class SampleDataRepository {
 const _asset = 'assets/core/sample_profile_data.json';
 
 Future<Map<String, dynamic>> _loadSample(AssetBundle bundle) async =>
-    jsonDecode(await bundle.loadString(_asset)) as Map<String, dynamic>;
+    jsonDecode(await bundle.loadString(_asset, cache: false))
+        as Map<String, dynamic>;
 
 List<Map<String, dynamic>> _list(Map<String, dynamic> json, String key) => [
   for (final e in json[key] as List) Map<String, dynamic>.from(e as Map),
