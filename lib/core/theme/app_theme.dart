@@ -13,11 +13,16 @@ abstract final class AppTheme {
           seedColor: AppColors.primary,
           brightness: brightness,
         ).copyWith(
+          // Brand colors are saturated in both themes, so text on them is
+          // always white (the dark seed scheme would make it dark/unreadable).
           primary: AppColors.primary,
           onPrimary: Colors.white,
           secondary: AppColors.sky,
+          onSecondary: Colors.white,
           tertiary: AppColors.violet,
+          onTertiary: Colors.white,
           error: AppColors.danger,
+          onError: Colors.white,
           surface: isDark ? AppColors.surfaceDark : Colors.white,
           outlineVariant: isDark
               ? const Color(0xFF243633)

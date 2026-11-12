@@ -5,11 +5,22 @@ import '../../core/l10n/app_lang.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/routing/app_routes.dart';
+import 'presentation/first_aid_screen.dart';
 import 'presentation/sos_screen.dart';
 
 /// The ONLY public file of the `sos` feature.
 final List<RouteBase> sosRoutes = [
-  GoRoute(path: AppRoutes.sos, builder: (context, state) => const SosScreen()),
+  GoRoute(
+    path: AppRoutes.sos,
+    builder: (context, state) => const SosScreen(),
+    routes: [
+      GoRoute(
+        path: 'first-aid/:id',
+        builder: (context, state) =>
+            FirstAidScreen(id: state.pathParameters['id']!),
+      ),
+    ],
+  ),
 ];
 
 final List<HomeCardSpec> sosHomeCards = [

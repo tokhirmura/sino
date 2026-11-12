@@ -1,0 +1,215 @@
+[
+  {
+    "id": "chest_pain",
+    "red_flag": true,
+    "keywords": {
+      "uz": ["ko'krak og'ri", "ko'kragim og'ri", "ko'kragim siq", "yurak og'ri", "yuragim og'ri", "yuragim sanch"],
+      "ru": ["боль в груди", "болит грудь", "болит в груди", "давит в груди", "жжёт в груди", "жжет в груди", "сердце болит", "болит сердце"],
+      "en": ["chest pain", "pain in my chest", "chest hurts", "heart pain"]
+    },
+    "title": { "uz": "Ko‘krakdagi og‘riq", "ru": "Боль в груди", "en": "Chest pain" },
+    "answer": {
+      "uz": ["Ko‘krakdagi og‘riq yurak xuruji belgisi bo‘lishi mumkin.", "Darhol 103 ga qo‘ng‘iroq qiling, harakatlanmang, o‘tiring yoki yarim yotib turing.", "Yolg‘iz bo‘lsangiz, eshikni oching va yaqinlaringizga xabar bering."],
+      "ru": ["Боль в груди может быть признаком инфаркта.", "Сразу звоните 103, не двигайтесь, сядьте или полулягте.", "Если вы одни — откройте дверь и сообщите близким."],
+      "en": ["Chest pain can be a sign of a heart attack.", "Call 103 right away, don’t move around, sit or half-lie down.", "If you’re alone, unlock the door and let your family know."]
+    },
+    "actions": [
+      { "type": "call", "number": "103" },
+      { "type": "open", "route": "/sos" }
+    ]
+  },
+  {
+    "id": "breathing",
+    "red_flag": true,
+    "keywords": {
+      "uz": ["nafas qis", "nafas ololmay", "nafas olish qiyin", "bo'g'ilyap", "havo yetishmay"],
+      "ru": ["одышк", "задыха", "не могу дышать", "трудно дышать", "тяжело дышать", "не хватает воздуха"],
+      "en": ["short of breath", "shortness of breath", "can't breathe", "cannot breathe", "hard to breathe", "breathless"]
+    },
+    "title": { "uz": "Nafas qisishi", "ru": "Одышка", "en": "Shortness of breath" },
+    "answer": {
+      "uz": ["To‘satdan nafas qisishi — shoshilinch holat.", "Darhol 103 ga qo‘ng‘iroq qiling. O‘tiring, oldinga biroz engashing, tor kiyimni bo‘shating.", "Shifokor buyurgan ingalyator bo‘lsa — ishlating."],
+      "ru": ["Внезапная одышка — неотложное состояние.", "Сразу звоните 103. Сядьте, слегка наклонитесь вперёд, ослабьте тесную одежду.", "Если есть назначенный врачом ингалятор — используйте."],
+      "en": ["Sudden shortness of breath is an emergency.", "Call 103 right away. Sit up, lean slightly forward, loosen tight clothing.", "If you have an inhaler prescribed by a doctor, use it."]
+    },
+    "actions": [
+      { "type": "call", "number": "103" },
+      { "type": "open", "route": "/sos" }
+    ]
+  },
+  {
+    "id": "unconscious",
+    "red_flag": true,
+    "keywords": {
+      "uz": ["hushdan ket", "hushini yo'qot", "hushsiz", "behush", "o'ziga kelmay"],
+      "ru": ["потерял сознание", "потеряла сознание", "потеря сознания", "без сознания", "обморок", "упал в обморок", "упала в обморок"],
+      "en": ["unconscious", "passed out", "fainted", "not responding", "lost consciousness"]
+    },
+    "title": { "uz": "Hushdan ketish", "ru": "Потеря сознания", "en": "Loss of consciousness" },
+    "answer": {
+      "uz": ["Darhol 103 ga qo‘ng‘iroq qiling.", "Nafas olayotganini tekshiring. Nafas olmasa — reanimatsiyani boshlang (SOS → Birinchi yordam).", "Nafas olsa — yonboshiga yotqizing va tez yordam kelguncha yonida bo‘ling."],
+      "ru": ["Сразу звоните 103.", "Проверьте дыхание. Не дышит — начинайте реанимацию (SOS → Первая помощь).", "Дышит — уложите на бок и оставайтесь рядом до приезда скорой."],
+      "en": ["Call 103 right away.", "Check breathing. If not breathing, start CPR (SOS → First aid).", "If breathing, put them on their side and stay until the ambulance arrives."]
+    },
+    "actions": [
+      { "type": "call", "number": "103" },
+      { "type": "open", "route": "/sos" }
+    ]
+  },
+  {
+    "id": "stroke",
+    "red_flag": true,
+    "keywords": {
+      "uz": ["insult", "yuzi qiyshay", "yuzim qiyshay", "tili aylanmay", "qo'li ko'tarilmay", "qo'lim ko'tarilmay"],
+      "ru": ["инсульт", "перекосило", "онемела рука", "онемела половина", "речь нарушилась", "не может говорить"],
+      "en": ["stroke", "face drooping", "face droops", "slurred speech", "arm weakness"]
+    },
+    "title": { "uz": "Insult belgilari", "ru": "Признаки инсульта", "en": "Signs of a stroke" },
+    "answer": {
+      "uz": ["Yuz qiyshayishi, qo‘l kuchsizligi yoki nutq buzilishi — insult belgisi bo‘lishi mumkin.", "Darhol 103 ga qo‘ng‘iroq qiling va belgilar boshlangan vaqtni yozib qo‘ying.", "Ovqat, suv va dori bermang."],
+      "ru": ["Перекос лица, слабость в руке или нарушение речи могут быть признаком инсульта.", "Сразу звоните 103 и запишите время начала симптомов.", "Не давайте еду, воду и лекарства."],
+      "en": ["Face drooping, arm weakness or speech trouble can be signs of a stroke.", "Call 103 right away and note when the symptoms started.", "Don’t give food, water or medicine."]
+    },
+    "actions": [
+      { "type": "call", "number": "103" },
+      { "type": "open", "route": "/sos" }
+    ]
+  },
+  {
+    "id": "headache",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["bosh og'ri", "boshim og'ri", "boshim aylan", "migren"],
+      "ru": ["голова болит", "болит голова", "головная боль", "головные боли", "мигрен", "голова кружится"],
+      "en": ["headache", "migraine", "head hurts", "dizzy"]
+    },
+    "title": { "uz": "Bosh og‘rig‘i", "ru": "Головная боль", "en": "Headache" },
+    "answer": {
+      "uz": ["Suv iching, salqin va qorong‘iroq xonada dam oling, ekrandan uzoqlashing.", "Og‘riq qoldiruvchi dori haqida farmatsevt yoki shifokor bilan maslahatlashing.", "Juda kuchli to‘satdan og‘riq, qusish, ko‘rish buzilishi yoki bosimi yuqori bo‘lsa — shifokorga murojaat qiling."],
+      "ru": ["Выпейте воды, отдохните в прохладной затемнённой комнате, отложите экран.", "Об обезболивающем посоветуйтесь с фармацевтом или врачом.", "Очень сильная внезапная боль, рвота, нарушение зрения или высокое давление — обратитесь к врачу."],
+      "en": ["Drink water, rest in a cool, dim room and step away from screens.", "Ask a pharmacist or doctor about a pain reliever.", "Very sudden severe pain, vomiting, vision problems or high blood pressure — see a doctor."]
+    },
+    "actions": [
+      { "type": "pharmacy", "query": "ibuprofen" },
+      { "type": "open", "route": "/vitals" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  },
+  {
+    "id": "fever",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["isitma", "harorat", "temperatura", "qizib ket"],
+      "ru": ["температур", "жар", "лихорад", "знобит", "озноб"],
+      "en": ["fever", "temperature", "chills"]
+    },
+    "title": { "uz": "Isitma", "ru": "Температура", "en": "Fever" },
+    "answer": {
+      "uz": ["Ko‘p suyuqlik iching, dam oling, yengil kiyining.", "Harorat 38,5 °C dan oshsa, isitma tushiruvchi dori haqida farmatsevt bilan maslahatlashing.", "3 kundan ortiq davom etsa, 39,5 °C dan oshsa yoki bolada bo‘lsa — shifokorga murojaat qiling."],
+      "ru": ["Пейте много жидкости, отдыхайте, оденьтесь легко.", "Если выше 38,5 °C — посоветуйтесь с фармацевтом о жаропонижающем.", "Дольше 3 дней, выше 39,5 °C или у ребёнка — обратитесь к врачу."],
+      "en": ["Drink plenty of fluids, rest and dress lightly.", "Above 38.5 °C, ask a pharmacist about a fever reducer.", "Lasting over 3 days, above 39.5 °C or in a child — see a doctor."]
+    },
+    "actions": [
+      { "type": "pharmacy", "query": "paracetamol" },
+      { "type": "open", "route": "/vitals" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  },
+  {
+    "id": "cold",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["shamolla", "tumov", "yo'tal", "tomog'im og'ri", "tomoq og'ri", "burnim bit", "gripp"],
+      "ru": ["просту", "насморк", "кашел", "кашл", "горло", "орви", "грипп", "сопли"],
+      "en": ["cold", "cough", "sore throat", "runny nose", "flu"]
+    },
+    "title": { "uz": "Shamollash", "ru": "Простуда", "en": "Common cold" },
+    "answer": {
+      "uz": ["Iliq suyuqlik (choy, sho‘rva) ko‘p iching va dam oling.", "Xonani shamollating, tomoqni iliq suv bilan chayqang.", "Antibiotiklarni shifokor buyurmasa ichmang. 7 kundan ortiq yoki nafas qisishi bo‘lsa — shifokorga."],
+      "ru": ["Пейте много тёплой жидкости (чай, бульон) и отдыхайте.", "Проветривайте комнату, полощите горло тёплой водой.", "Антибиотики — только по назначению врача. Дольше 7 дней или одышка — к врачу."],
+      "en": ["Drink plenty of warm fluids (tea, broth) and rest.", "Air the room and gargle with warm water.", "Take antibiotics only if a doctor prescribes them. Over 7 days or short of breath — see a doctor."]
+    },
+    "actions": [
+      { "type": "pharmacy", "query": "paracetamol" },
+      { "type": "open", "route": "/weather" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  },
+  {
+    "id": "stomach",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["qorin", "qornim", "oshqozon", "ich ket", "ichim ket", "ko'ngil ayn", "ko'nglim ayn", "qusish", "qusyap", "zaharlan", "jig'ildon"],
+      "ru": ["живот", "желуд", "понос", "диаре", "тошн", "рвот", "отрав", "изжог"],
+      "en": ["stomach", "nausea", "diarrh", "vomit", "heartburn", "food poisoning", "belly"]
+    },
+    "title": { "uz": "Oshqozon", "ru": "Живот и желудок", "en": "Stomach" },
+    "answer": {
+      "uz": ["Oz-ozdan tez-tez suv yoki regidratatsiya eritmasi iching.", "Yengil ovqat yeng: guruch, banan, quritilgan non; yog‘li va achchiqdan voz keching.", "Qonli ich ketish, kuchli og‘riq, yuqori isitma yoki suyuqlik ichib bo‘lmasa — shifokorga."],
+      "ru": ["Пейте часто маленькими глотками воду или регидратационный раствор.", "Ешьте лёгкое: рис, банан, сухари; откажитесь от жирного и острого.", "Кровь в стуле, сильная боль, высокая температура или не удаётся пить — к врачу."],
+      "en": ["Sip water or an oral rehydration solution often.", "Eat bland food: rice, bananas, toast; skip fatty and spicy food.", "Blood in stool, severe pain, high fever or unable to keep fluids down — see a doctor."]
+    },
+    "actions": [
+      { "type": "open", "route": "/nutrition" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  },
+  {
+    "id": "pressure",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["bosim", "qon bosimi", "gipertoniya", "gipotoniya"],
+      "ru": ["давлен", "гиперто", "гипото"],
+      "en": ["blood pressure", "hypertension", "hypotension"]
+    },
+    "title": { "uz": "Qon bosimi", "ru": "Давление", "en": "Blood pressure" },
+    "answer": {
+      "uz": ["5 daqiqa tinch o‘tirib, bosimni o‘lchang va natijani yozib boring.", "Tuzni kamaytiring, har kuni harakat qiling, dorilarni vaqtida iching.", "180/110 dan yuqori bo‘lsa yoki ko‘krak og‘rig‘i, kuchli bosh og‘rig‘i bo‘lsa — darhol 103."],
+      "ru": ["Посидите спокойно 5 минут, измерьте давление и запишите результат.", "Меньше соли, каждый день движение, лекарства — вовремя.", "Выше 180/110 или боль в груди, сильная головная боль — сразу 103."],
+      "en": ["Sit quietly for 5 minutes, measure your blood pressure and log it.", "Cut down on salt, move every day and take medicines on time.", "Above 180/110, or with chest pain or a severe headache — call 103 at once."]
+    },
+    "actions": [
+      { "type": "open", "route": "/vitals" },
+      { "type": "open", "route": "/reminders" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  },
+  {
+    "id": "sleep",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["uyqu", "uxlay olmay", "uxlolmay", "uyqum kel"],
+      "ru": ["сон", "спать", "бессонн", "не могу уснуть", "засыпа", "сплю"],
+      "en": ["sleep", "insomnia", "can't fall asleep"]
+    },
+    "title": { "uz": "Uyqu", "ru": "Сон", "en": "Sleep" },
+    "answer": {
+      "uz": ["Har kuni bir vaqtda yoting va turing, hatto dam olish kunlari ham.", "Yotishdan 1 soat oldin telefon va ekranni chetga qo‘ying, kechqurun choy va kofe ichmang.", "Kunduzi harakat qiling. 3 haftadan ortiq uyqusizlik bo‘lsa — shifokorga."],
+      "ru": ["Ложитесь и вставайте в одно время каждый день, даже в выходные.", "За час до сна отложите телефон, вечером без чая и кофе.", "Днём больше двигайтесь. Бессонница дольше 3 недель — к врачу."],
+      "en": ["Go to bed and wake up at the same time every day, weekends too.", "Put the phone away an hour before bed; no tea or coffee in the evening.", "Move more during the day. Insomnia over 3 weeks — see a doctor."]
+    },
+    "actions": [
+      { "type": "open", "route": "/workouts" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  },
+  {
+    "id": "stress",
+    "red_flag": false,
+    "keywords": {
+      "uz": ["stress", "asab", "xavotir", "tashvish", "charchadim", "charchoq", "siqilyap"],
+      "ru": ["стресс", "тревог", "нерв", "устал", "паник", "депресс"],
+      "en": ["stress", "anxiety", "anxious", "tired", "panic", "burnout"]
+    },
+    "title": { "uz": "Stress", "ru": "Стресс", "en": "Stress" },
+    "answer": {
+      "uz": ["Sekin nafas oling: 4 soniya nafas, 4 soniya ushlab turish, 6 soniya chiqarish — 5 marta.", "Har kuni 20–30 daqiqa sayr qiling, yaqinlaringiz bilan gaplashing.", "Holat uzoq davom etsa yoki o‘zingizga zarar yetkazish fikri bo‘lsa — darhol mutaxassisga murojaat qiling."],
+      "ru": ["Дышите медленно: 4 секунды вдох, 4 задержка, 6 выдох — 5 раз.", "Каждый день гуляйте 20–30 минут, разговаривайте с близкими.", "Если состояние затянулось или есть мысли навредить себе — сразу обратитесь к специалисту."],
+      "en": ["Breathe slowly: in for 4 seconds, hold 4, out for 6 — five times.", "Walk 20–30 minutes daily and talk to people close to you.", "If it lasts or you have thoughts of harming yourself, reach out to a professional right away."]
+    },
+    "actions": [
+      { "type": "open", "route": "/workouts" },
+      { "type": "open", "route": "/doctors" }
+    ]
+  }
+]

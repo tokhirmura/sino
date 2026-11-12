@@ -4,24 +4,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/backend/backend.dart';
+import '../core/data/user.dart';
 import '../core/routing/app_routes.dart';
 import 'feature_registry.dart';
 import 'shell_scaffold.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  // Re-runs redirect whenever the session (or fake flag) changes.
+  // Re-runs redirect whenever the session (or fake flag) or the
+  // profile-completeness gate changes.
   final signedIn = ValueNotifier<bool>(ref.read(isSignedInProvider));
+  final gate = ValueNotifier<ProfileGate>(ref.read(profileGateProvider));
   ref.listen<bool>(isSignedInProvider, (_, next) => signedIn.value = next);
+  ref.listen<ProfileGate>(profileGateProvider, (_, next) => gate.value = next);
 
   final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.home,
-    refreshListenable: signedIn,
+    refreshListenable: Listenable.merge([signedIn, gate]),
     redirect: (context, state) {
-      final atOnboarding = state.matchedLocation == AppRoutes.onboarding;
+      final location = state.matchedLocation;
+      final atOnboarding = location == AppRoutes.onboarding;
+      final atSetup = location == AppRoutes.profileSetup;
       if (!signedIn.value) return atOnboarding ? null : AppRoutes.onboarding;
-      if (atOnboarding) return AppRoutes.home;
-      return null;
+      return switch (gate.value) {
+        // Profile is loading: stay put (avoids a flash of home / setup).
+        ProfileGate.loading => null,
+        ProfileGate.needsSetup => atSetup ? null : AppRoutes.profileSetup,
+        ProfileGate.ready => atOnboarding || atSetup ? AppRoutes.home : null,
+      };
     },
     routes: [
       StatefulShellRoute.indexedStack(
@@ -38,6 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(() {
     router.dispose();
     signedIn.dispose();
+    gate.dispose();
   });
   return router;
 });
