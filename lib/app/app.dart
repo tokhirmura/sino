@@ -10,6 +10,7 @@ import '../core/contracts/home_card.dart';
 import '../core/l10n/app_lang.dart';
 import '../core/storage/prefs.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/theme_mode.dart';
 import 'feature_registry.dart';
 import 'router.dart';
 
@@ -36,6 +37,7 @@ class SinoApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: ref.watch(themeModeProvider),
       locale: lang.locale,
       supportedLocales: AppLang.locales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,

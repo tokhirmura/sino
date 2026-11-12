@@ -15,4 +15,6 @@ abstract final class PrefKeys {
   static const lang = 'core.lang';
   static const fakeSignedIn = 'core.fake_signed_in';
   static const fakeProfile = 'core.fake_profile';
+  static const fakeFamily = 'core.fake_family';
+  static const theme = 'core.theme';
 }

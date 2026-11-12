@@ -109,6 +109,15 @@ class FamilyMember {
 
   int? get age => birthYear == null ? null : DateTime.now().year - birthYear!;
 
+  /// Row for `family_members` without `id` / `user_id` (set by the caller).
+  Map<String, dynamic> toMap() => {
+    'name': name,
+    'relation': relation,
+    'birth_year': birthYear,
+    'blood_type': bloodType,
+    'allergies': allergies,
+  };
+
   factory FamilyMember.fromMap(Map<String, dynamic> m) => FamilyMember(
     id: m['id'] as String,
     name: m['name'] as String,
@@ -255,9 +264,65 @@ final profileGateProvider = Provider<ProfileGate>((ref) {
       : ProfileGate.ready;
 });
 
-/// Family members (`family_members`). Fake: Dilfuza, Akbar, Malika.
+/// Fake-mode family, persisted in SharedPreferences.
+/// Default (nothing stored): Dilfuza, Akbar, Malika.
+class FakeFamilyNotifier extends Notifier<List<FamilyMember>> {
+  @override
+  List<FamilyMember> build() {
+    final raw = ref
+        .watch(sharedPreferencesProvider)
+        .getString(PrefKeys.fakeFamily);
+    if (raw == null) return FamilyMember.fakes;
+    try {
+      return [
+        for (final m in jsonDecode(raw) as List)
+          FamilyMember.fromMap(Map<String, dynamic>.from(m as Map)),
+      ];
+    } catch (_) {
+      return FamilyMember.fakes;
+    }
+  }
+
+  Future<void> _save(List<FamilyMember> list) async {
+    state = list;
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(
+          PrefKeys.fakeFamily,
+          jsonEncode([
+            for (final m in list) {'id': m.id, ...m.toMap()},
+          ]),
+        );
+  }
+
+  /// Adds [member] with a new id; returns the stored member.
+  Future<FamilyMember> add(FamilyMember member) async {
+    final stored = FamilyMember.fromMap({
+      ...member.toMap(),
+      'id': 'fake-${DateTime.now().microsecondsSinceEpoch}',
+    });
+    await _save([...state, stored]);
+    return stored;
+  }
+
+  Future<void> update(FamilyMember member) =>
+      _save([for (final m in state) m.id == member.id ? member : m]);
+
+  Future<void> remove(String id) => _save([
+    for (final m in state)
+      if (m.id != id) m,
+  ]);
+}
+
+final fakeFamilyProvider =
+    NotifierProvider<FakeFamilyNotifier, List<FamilyMember>>(
+      FakeFamilyNotifier.new,
+    );
+
+/// Family members (`family_members`). Fake: [fakeFamilyProvider].
+/// Changes go through the profile feature's `FamilyRepository`.
 final familyMembersProvider = FutureProvider<List<FamilyMember>>((ref) async {
-  if (ref.watch(useFakeProvider)) return FamilyMember.fakes;
+  if (ref.watch(useFakeProvider)) return ref.watch(fakeFamilyProvider);
   ref.watch(authStateProvider);
   final client = ref.watch(supabaseClientProvider);
   final uid = client.auth.currentUser?.id;
