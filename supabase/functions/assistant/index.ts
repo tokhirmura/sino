@@ -1,15 +1,19 @@
-// Sino health assistant: one chat turn → Claude → short structured reply.
+// Sino health assistant: one chat turn → LLM → short structured reply.
 //
-// Secrets (never in the app or repo):
-//   npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+// Secrets (never in the app or repo) — one of:
+//   npx supabase secrets set GEMINI_API_KEY=...     (free tier, Google AI Studio)
+//   npx supabase secrets set ANTHROPIC_API_KEY=...  (Claude)
+// If both are set, Gemini is used. Optional: GEMINI_MODEL to change the model.
 // Deploy (lead only):
-//   npx supabase functions deploy assistant
+//   npx supabase functions deploy assistant --use-api
 //
-// JWT verification is on (default), so only signed-in users (incl. guests)
-// can spend LLM credits. The app falls back to its offline rules on any
-// error, and handles red flags locally before calling this function.
+// Only signed-in users (incl. guests) can call it — checked below. The app
+// falls back to its offline rules on any error, and handles red flags
+// locally before calling this function.
 
-const MODEL = "claude-haiku-5-5";
+const CLAUDE_MODEL = "claude-haiku-5-5";
+/// Available on Google AI Studio's free tier.
+const GEMINI_MODEL = "gemini-2.5-flash";
 const MAX_HISTORY = 8;
 const MAX_CHARS = 1000;
 
@@ -37,7 +41,7 @@ Rules:
 - Emergencies (chest pain, trouble breathing, fainting, stroke signs, heavy bleeding, suicidal thoughts, severe allergic reaction, a child with very high fever): set red_flag = true, tell them to call 103 now, and add a call action for 103.
 - Off-topic questions: politely say you only help with health and wellness.
 - Answer in the user's language given below. At most 4 short sentences, plain text, no markdown.
-- Always answer with the "reply" tool.`;
+- Always answer in the required structured format: text, red_flag, actions (up to 3).`;
 
 const REPLY_TOOL = {
   name: "reply",
@@ -69,8 +73,33 @@ const REPLY_TOOL = {
   },
 };
 
+/// The same shape in Gemini's schema dialect.
+const GEMINI_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    text: { type: "STRING" },
+    red_flag: { type: "BOOLEAN" },
+    actions: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          type: { type: "STRING", enum: ["open", "pharmacy", "call"] },
+          route: { type: "STRING", enum: ROUTES },
+          query: { type: "STRING" },
+          number: { type: "STRING", enum: ["103"] },
+        },
+        required: ["type"],
+      },
+    },
+  },
+  required: ["text", "red_flag", "actions"],
+};
+
 type Turn = { role: "user" | "assistant"; text: string };
+type Msg = { role: "user" | "assistant"; content: string };
 type Action = { type: string; route?: string; query?: string; number?: string };
+type Reply = Record<string, unknown>;
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -116,16 +145,79 @@ async function isSignedIn(req: Request): Promise<boolean> {
   return res.ok;
 }
 
+/// Claude: forced `reply` tool → its input.
+async function askClaude(
+  key: string,
+  system: string,
+  messages: Msg[],
+): Promise<Reply> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 600,
+      system,
+      tools: [REPLY_TOOL],
+      tool_choice: { type: "tool", name: "reply" },
+      messages,
+    }),
+  });
+  if (!res.ok) throw new Error(`claude ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  const tool = (data.content ?? []).find(
+    (c: { type: string }) => c.type === "tool_use",
+  );
+  return tool?.input ?? {};
+}
+
+/// Gemini: JSON output constrained by GEMINI_SCHEMA.
+async function askGemini(
+  key: string,
+  system: string,
+  messages: Msg[],
+): Promise<Reply> {
+  const model = Deno.env.get("GEMINI_MODEL") || GEMINI_MODEL;
+  const url =
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "x-goog-api-key": key, "content-type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents: messages.map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      })),
+      generationConfig: {
+        maxOutputTokens: 1024,
+        responseMimeType: "application/json",
+        responseSchema: GEMINI_SCHEMA,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  const parts: { text?: string }[] = data.candidates?.[0]?.content?.parts ??
+    [];
+  return JSON.parse(parts.map((p) => p.text ?? "").join(""));
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   // Only a signed-in user (incl. guests) — the publishable key alone is
-  // public, so the gateway check is not enough to protect LLM credits.
+  // public, so the gateway check is not enough to protect the LLM quota.
   if (!(await isSignedIn(req))) return json({ error: "unauthorized" }, 401);
 
-  const key = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!key) return json({ error: "not_configured" }, 503);
+  const geminiKey = Deno.env.get("GEMINI_API_KEY");
+  const claudeKey = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!geminiKey && !claudeKey) return json({ error: "not_configured" }, 503);
 
   let body: { message?: string; lang?: string; history?: Turn[] };
   try {
@@ -141,7 +233,7 @@ Deno.serve(async (req) => {
   const history = (Array.isArray(body.history) ? body.history : [])
     .filter((t) => (t.role === "user" || t.role === "assistant") && t.text)
     .slice(-MAX_HISTORY);
-  const messages: { role: string; content: string }[] = [];
+  const messages: Msg[] = [];
   for (const t of history) {
     const text = String(t.text).slice(0, MAX_CHARS);
     const last = messages[messages.length - 1];
@@ -156,31 +248,16 @@ Deno.serve(async (req) => {
     messages.push({ role: "user", content: message });
   }
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 600,
-      system: `${SYSTEM}\nUser's language: ${LANG_NAME[lang]}.`,
-      tools: [REPLY_TOOL],
-      tool_choice: { type: "tool", name: "reply" },
-      messages,
-    }),
-  });
-  if (!res.ok) {
-    console.error("anthropic error", res.status, await res.text());
+  const system = `${SYSTEM}\nUser's language: ${LANG_NAME[lang]}.`;
+  let input: Reply;
+  try {
+    input = geminiKey
+      ? await askGemini(geminiKey, system, messages)
+      : await askClaude(claudeKey!, system, messages);
+  } catch (e) {
+    console.error("llm error", e);
     return json({ error: "llm_failed" }, 502);
   }
-  const data = await res.json();
-  const tool = (data.content ?? []).find(
-    (c: { type: string }) => c.type === "tool_use",
-  );
-  const input = tool?.input ?? {};
   const text = typeof input.text === "string" ? input.text.trim() : "";
   if (!text) return json({ error: "llm_empty" }, 502);
 
