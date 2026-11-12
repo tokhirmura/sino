@@ -56,7 +56,7 @@ Future<ProviderContainer> _pumpSignedOut(
     ),
   );
   await tester.pumpAndSettle();
-  return ProviderScope.containerOf(tester.element(find.byType(Scaffold)));
+  return ProviderScope.containerOf(tester.element(find.byType(SinoApp)));
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {
@@ -136,16 +136,18 @@ void main() {
     expect(find.text('Continue as guest'), findsOneWidget);
   });
 
-  testWidgets('guest → signed in (fake flag) → home', (tester) async {
+  testWidgets('guest → signed in (fake flag) → questionnaire', (tester) async {
     final container = await _pumpSignedOut(tester);
     await _skipIntro(tester);
     await _tap(tester, find.text('Mehmon sifatida davom etish'));
 
     expect(container.read(fakeAuthProvider), isTrue);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Profilingiz'), findsOneWidget);
   });
 
-  testWidgets('email: validation, then sign in → home', (tester) async {
+  testWidgets('email: validation, then sign in → questionnaire', (
+    tester,
+  ) async {
     final container = await _pumpSignedOut(tester, introSeen: true);
     await _tap(tester, find.text('Email orqali kirish'));
 
@@ -159,10 +161,10 @@ void main() {
     await _tap(tester, submit);
 
     expect(container.read(fakeAuthProvider), isTrue);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Profilingiz'), findsOneWidget);
   });
 
-  testWidgets('email: sign-up mode → home', (tester) async {
+  testWidgets('email: sign-up mode → questionnaire', (tester) async {
     await _pumpSignedOut(tester, introSeen: true);
     await _tap(tester, find.text('Email orqali kirish'));
     await _tap(tester, find.text('Ro‘yxatdan o‘tish'));
@@ -171,7 +173,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(1), 'secret12');
     await _tap(tester, find.text('Hisob yaratish'));
 
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Profilingiz'), findsOneWidget);
   });
 
   testWidgets('email: server error → readable text, stays on form', (
@@ -215,7 +217,7 @@ void main() {
     expect(find.text('Kirish usulini tanlang'), findsOneWidget);
   });
 
-  testWidgets('OneID: biometrics → verified data → consent → home', (
+  testWidgets('OneID: biometrics → data → consent → prefilled questionnaire', (
     tester,
   ) async {
     final container = await _pumpSignedOut(tester, introSeen: true);
@@ -241,6 +243,10 @@ void main() {
     await _tap(tester, continueBtn);
 
     expect(container.read(fakeAuthProvider), isTrue);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Profilingiz'), findsOneWidget);
+    // Name and birth year come from OneID.
+    expect(find.text('Ism va tug‘ilgan yil OneID’dan olindi'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Aziz Karimov'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '1997'), findsOneWidget);
   });
 }

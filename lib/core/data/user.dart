@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../backend/backend.dart';
+import '../storage/prefs.dart';
 
 class UserProfile {
   const UserProfile({
@@ -24,6 +28,45 @@ class UserProfile {
   final String lang;
 
   int? get age => birthYear == null ? null : DateTime.now().year - birthYear!;
+
+  /// First-run questionnaire filled (name, birth year, height, weight).
+  /// Until then the router keeps the user on `AppRoutes.profileSetup`.
+  bool get isComplete =>
+      fullName.trim().isNotEmpty &&
+      birthYear != null &&
+      heightCm != null &&
+      weightKg != null;
+
+  UserProfile copyWith({
+    String? fullName,
+    int? birthYear,
+    double? heightCm,
+    double? weightKg,
+    String? bloodType,
+    List<String>? allergies,
+    String? lang,
+  }) => UserProfile(
+    id: id,
+    fullName: fullName ?? this.fullName,
+    birthYear: birthYear ?? this.birthYear,
+    heightCm: heightCm ?? this.heightCm,
+    weightKg: weightKg ?? this.weightKg,
+    bloodType: bloodType ?? this.bloodType,
+    allergies: allergies ?? this.allergies,
+    lang: lang ?? this.lang,
+  );
+
+  /// Row for `profiles` (column names as in the DB).
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'full_name': fullName,
+    'birth_year': birthYear,
+    'height_cm': heightCm,
+    'weight_kg': weightKg,
+    'blood_type': bloodType,
+    'allergies': allergies,
+    'lang': lang,
+  };
 
   factory UserProfile.fromMap(Map<String, dynamic> m) => UserProfile(
     id: m['id'] as String,
@@ -101,9 +144,82 @@ class FamilyMember {
   ];
 }
 
-/// Current user's profile (row in `profiles`). Fake: «Aziz, 29».
+/// Fake-mode profile, persisted in SharedPreferences.
+/// Default (nothing stored) is the complete «Aziz, 29» — so tests and
+/// teammates' fake sessions skip the questionnaire. Onboarding calls
+/// [startEmpty] on a fresh sign-in to show the questionnaire offline too.
+class FakeProfileNotifier extends Notifier<UserProfile> {
+  @override
+  UserProfile build() {
+    final raw = ref
+        .watch(sharedPreferencesProvider)
+        .getString(PrefKeys.fakeProfile);
+    if (raw == null) return UserProfile.fake;
+    try {
+      return UserProfile.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return UserProfile.fake;
+    }
+  }
+
+  Future<void> save(UserProfile profile) async {
+    state = profile;
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(PrefKeys.fakeProfile, jsonEncode(profile.toMap()));
+  }
+
+  Future<void> startEmpty({String lang = 'uz'}) =>
+      save(UserProfile(id: UserProfile.fake.id, fullName: '', lang: lang));
+}
+
+final fakeProfileProvider = NotifierProvider<FakeProfileNotifier, UserProfile>(
+  FakeProfileNotifier.new,
+);
+
+/// Writes the current user's row in `profiles`.
+abstract class ProfileRepository {
+  Future<void> save(UserProfile profile);
+}
+
+class SupabaseProfileRepository implements ProfileRepository {
+  SupabaseProfileRepository(this._client, {required this.onSaved});
+
+  final SupabaseClient _client;
+  final void Function() onSaved;
+
+  @override
+  Future<void> save(UserProfile profile) async {
+    // upsert: the row normally exists (DB trigger), but be safe.
+    await _client.from('profiles').upsert({
+      ...profile.toMap(),
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    });
+    onSaved();
+  }
+}
+
+class FakeProfileRepository implements ProfileRepository {
+  FakeProfileRepository(this._notifier);
+
+  final FakeProfileNotifier _notifier;
+
+  @override
+  Future<void> save(UserProfile profile) => _notifier.save(profile);
+}
+
+final profileRepositoryProvider = Provider<ProfileRepository>(
+  (ref) => ref.watch(useFakeProvider)
+      ? FakeProfileRepository(ref.read(fakeProfileProvider.notifier))
+      : SupabaseProfileRepository(
+          ref.watch(supabaseClientProvider),
+          onSaved: () => ref.invalidate(currentUserProvider),
+        ),
+);
+
+/// Current user's profile (row in `profiles`). Fake: [fakeProfileProvider].
 final currentUserProvider = FutureProvider<UserProfile?>((ref) async {
-  if (ref.watch(useFakeProvider)) return UserProfile.fake;
+  if (ref.watch(useFakeProvider)) return ref.watch(fakeProfileProvider);
   ref.watch(authStateProvider);
   final client = ref.watch(supabaseClientProvider);
   final uid = client.auth.currentUser?.id;
@@ -114,6 +230,29 @@ final currentUserProvider = FutureProvider<UserProfile?>((ref) async {
       .eq('id', uid)
       .maybeSingle();
   return row == null ? null : UserProfile.fromMap(row);
+});
+
+/// Where the router should keep a signed-in user.
+enum ProfileGate {
+  /// Profile is (re)loading — don't redirect.
+  loading,
+
+  /// Empty profile → `AppRoutes.profileSetup`.
+  needsSetup,
+
+  /// Profile filled (or failed to load — screens show the error).
+  ready,
+}
+
+final profileGateProvider = Provider<ProfileGate>((ref) {
+  if (!ref.watch(isSignedInProvider)) return ProfileGate.ready;
+  final user = ref.watch(currentUserProvider);
+  if (user.isLoading) return ProfileGate.loading;
+  if (user.hasError) return ProfileGate.ready;
+  final profile = user.value;
+  return profile == null || !profile.isComplete
+      ? ProfileGate.needsSetup
+      : ProfileGate.ready;
 });
 
 /// Family members (`family_members`). Fake: Dilfuza, Akbar, Malika.

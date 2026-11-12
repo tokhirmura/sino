@@ -17,6 +17,16 @@ void main() {
     await tester.tap(find.text('Mehmon sifatida davom etish'));
     await tester.pumpAndSettle();
 
+    // First run: empty profile → questionnaire.
+    expect(find.text('Profilingiz'), findsOneWidget);
+    final field = find.byType(TextFormField);
+    await tester.enterText(field.at(0), 'Aziz');
+    await tester.enterText(field.at(1), '1997');
+    await tester.enterText(field.at(2), '178');
+    await tester.enterText(field.at(3), '76');
+    await tester.tap(find.widgetWithText(FilledButton, 'Saqlash'));
+    await tester.pumpAndSettle();
+
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Salom, Aziz'), findsOneWidget);
     expect(find.text('Dorixona'), findsWidgets);
@@ -38,7 +48,7 @@ void main() {
     final orders = [for (final c in allHomeCards) c.order];
     expect(orders, [...orders]..sort());
     expect(tabBranchRoutes, hasLength(5));
-    expect(allRoutes, hasLength(12));
+    expect(allRoutes, hasLength(13));
   });
 
   test('money format', () {

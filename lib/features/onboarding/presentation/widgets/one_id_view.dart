@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../application/one_id_controller.dart';
+import '../../application/setup_prefill.dart';
 import '../../data/one_id_provider.dart';
 import '../auth_error_text.dart';
 import 'common.dart';
@@ -134,6 +135,15 @@ class _VerifiedProfileState extends ConsumerState<_VerifiedProfile> {
       _error = null;
     });
     try {
+      // Verified data pre-fills the questionnaire after sign-in.
+      await ref
+          .read(setupPrefillProvider.notifier)
+          .set(
+            SetupPrefill(
+              fullName: widget.profile.fullName,
+              birthYear: widget.profile.birthDate.year,
+            ),
+          );
       // Session appears → router leaves onboarding.
       await ref.read(oneIdAuthProvider).signIn(lang: lang);
     } catch (e) {
