@@ -12,8 +12,16 @@
 // locally before calling this function.
 
 const CLAUDE_MODEL = "claude-haiku-5-5";
-/// Available on Google AI Studio's free tier.
-const GEMINI_MODEL = "gemini-2.5-flash";
+/// Free tier, tried in order: busy (503/429) or retired (404) → next.
+/// `-latest` aliases follow Google's current models. The GEMINI_MODEL
+/// secret, if set, is tried first.
+const GEMINI_MODELS = [
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-flash-latest",
+];
+/// The app waits 20 s in total.
+const GEMINI_ATTEMPT_MS = 9000;
 const MAX_HISTORY = 8;
 const MAX_CHARS = 1000;
 
@@ -175,36 +183,54 @@ async function askClaude(
   return tool?.input ?? {};
 }
 
-/// Gemini: JSON output constrained by GEMINI_SCHEMA.
+/// Gemini: JSON output constrained by GEMINI_SCHEMA; falls through the
+/// model list while models are busy or retired. At most 2 attempts.
 async function askGemini(
   key: string,
   system: string,
   messages: Msg[],
 ): Promise<Reply> {
-  const model = Deno.env.get("GEMINI_MODEL") || GEMINI_MODEL;
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "x-goog-api-key": key, "content-type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: messages.map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      })),
-      generationConfig: {
-        maxOutputTokens: 1024,
-        responseMimeType: "application/json",
-        responseSchema: GEMINI_SCHEMA,
-      },
-    }),
+  const custom = Deno.env.get("GEMINI_MODEL");
+  const models = [...(custom ? [custom] : []), ...GEMINI_MODELS].slice(0, 2);
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: system }] },
+    contents: messages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    })),
+    generationConfig: {
+      maxOutputTokens: 1024,
+      responseMimeType: "application/json",
+      responseSchema: GEMINI_SCHEMA,
+    },
   });
-  if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  const parts: { text?: string }[] = data.candidates?.[0]?.content?.parts ??
-    [];
-  return JSON.parse(parts.map((p) => p.text ?? "").join(""));
+  let lastError = "";
+  for (const model of models) {
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "x-goog-api-key": key, "content-type": "application/json" },
+        body,
+        signal: AbortSignal.timeout(GEMINI_ATTEMPT_MS),
+      });
+    } catch (e) {
+      lastError = `${model}: ${e}`;
+      continue; // timeout → next model
+    }
+    if ([404, 429, 500, 503].includes(res.status)) {
+      lastError = `${model} ${res.status}: ${await res.text()}`;
+      continue;
+    }
+    if (!res.ok) throw new Error(`gemini ${model} ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    const parts: { text?: string }[] =
+      data.candidates?.[0]?.content?.parts ?? [];
+    return JSON.parse(parts.map((p) => p.text ?? "").join(""));
+  }
+  throw new Error(`gemini: all models failed — ${lastError}`);
 }
 
 Deno.serve(async (req) => {
