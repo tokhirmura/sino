@@ -42,7 +42,7 @@ void main() {
     await pumpSinoApp(tester, signedIn: true);
     await tester.tap(find.byIcon(Icons.person_outline));
     await tester.pumpAndSettle();
-    expect(find.text('Profil — tez orada'), findsOneWidget);
+    expect(find.text('Elektron tibbiy karta'), findsOneWidget);
   });
 
   test('registry: home cards sorted, routes registered', () {
