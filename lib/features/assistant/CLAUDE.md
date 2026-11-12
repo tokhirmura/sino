@@ -13,6 +13,11 @@
   регистр, **апострофы убираются** (пишут и «og‘riyapti», и «ogriyapti»), ключ ищется с начала слова.
 - Кнопки: `pharmacy` → `context.go(AppRoutes.pharmacySearch(query))`, `open` → вкладка `go`, иначе `push`,
   `call` → `tel:` (через `assistantLauncherProvider`, сам не звонит). Не понял — подсказки и «Shifokorga yozilish».
+- **LLM:** Edge Function `supabase/functions/assistant` (Claude Haiku, ответ через tool `reply`: текст, red_flag,
+  кнопки из белого списка). Ключ — только секрет `ANTHROPIC_API_KEY` (`npx supabase secrets set …`). Пускает только
+  вошедших пользователей (проверяет сессию). Порядок в чате: красный флаг по правилам → сразу локально, без сети;
+  иначе LLM (`aiAssistantRepositoryProvider`, контекст — последние реплики); ошибка, нет ключа или fake-режим →
+  ответ правилами. Деплой: `npx supabase functions deploy assistant --use-api` (только лид).
 - Новая тема: добавить объект в JSON (тест проверяет 3 языка ответа и что маршруты существуют).
 
 ## Маршруты
@@ -36,6 +41,5 @@
 - [x] P2-8 Красные флаги (боль в груди, одышка, потеря сознания) → карточка «103 ga qo‘ng‘iroq qiling»
 - [x] P2-8 Кнопки-действия ведут в фичи (например `context.go(AppRoutes.pharmacySearch('ibuprofen'))`)
 - [x] P2-8 Дисклеймер «Shifokor maslahatini almashtirmaydi» вверху экрана
-- [ ] P2-8 (опц.) Ответы LLM через Supabase Edge Function (ключ только в секретах функции); правила — запасной вариант.
-  Не сделано: нужен ключ LLM в секретах и деплой функции лидом.
+- [x] P2-8 (опц.) Ответы LLM через Supabase Edge Function (ключ только в секретах функции); правила — запасной вариант
 - [x] P1-6 Тёмная тема и uz/ru/en (проверяет `test/module_a_screens_test.dart`)

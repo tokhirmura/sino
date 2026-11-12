@@ -7,6 +7,7 @@ import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../application/chat_controller.dart';
+import '../data/ai_assistant_repository.dart';
 import '../data/assistant_rules.dart';
 
 /// Quick questions; each text contains its topic's keywords.
@@ -131,7 +132,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final q = text ?? _input.text;
     if (q.trim().isEmpty) return;
     _input.clear();
-    ref.read(chatProvider.notifier).send(q);
+    ref.read(chatProvider.notifier).send(q, lang: context.lang.name);
   }
 
   void _scrollToEnd() {
@@ -229,6 +230,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                 for (final m in chat.messages)
                   if (m.fromUser)
                     _Bubble(fromUser: true, child: Text(m.text!))
+                  else if (m.ai != null)
+                    _AiReplyCard(reply: m.ai!, onAction: _run)
                   else if (m.rules.isEmpty)
                     _NotUnderstood(onSuggestion: _send, onAction: _run)
                   else
@@ -546,6 +549,89 @@ class _NotUnderstood extends StatelessWidget {
               AssistantAction(type: ActionType.open, route: AppRoutes.doctors),
             ],
             onAction: onAction,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// LLM answer: text, action buttons, a small «AI» note. Red flag → red
+/// card with a big 103 button, like the rule-based one.
+class _AiReplyCard extends StatelessWidget {
+  const _AiReplyCard({required this.reply, required this.onAction});
+
+  final AiReply reply;
+  final ValueChanged<AssistantAction> onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final red = reply.redFlag;
+    final call = reply.actions.where((a) => a.type == ActionType.call);
+    final rest = reply.actions.where((a) => a.type != ActionType.call);
+    return _Bubble(
+      color: red ? AppColors.danger.withValues(alpha: 0.14) : null,
+      child: Column(
+        key: const ValueKey('ai-reply'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (red) ...[
+            Row(
+              children: [
+                const Text('🚨', style: TextStyle(fontSize: 22)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.tr(
+                      uz: '103 ga qo‘ng‘iroq qiling',
+                      ru: 'Позвоните 103',
+                      en: 'Call 103',
+                    ),
+                    style: text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.danger,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+          ],
+          Text(reply.text),
+          const SizedBox(height: 8),
+          if (red)
+            for (final a in call)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.danger,
+                    minimumSize: const Size.fromHeight(44),
+                  ),
+                  onPressed: () => onAction(a),
+                  icon: const Icon(Icons.call),
+                  label: Text(_actionLook(context, a).$2),
+                ),
+              ),
+          _Actions(
+            actions: red ? rest.toList() : reply.actions,
+            onAction: onAction,
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, size: 14, color: text.bodySmall?.color),
+              const SizedBox(width: 4),
+              Text(
+                context.tr(
+                  uz: 'Sun’iy intellekt javobi',
+                  ru: 'Ответ ИИ',
+                  en: 'AI answer',
+                ),
+                style: text.labelSmall,
+              ),
+            ],
           ),
         ],
       ),
