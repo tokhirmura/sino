@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sino/app/app.dart';
 import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/theme/app_theme.dart';
+import 'package:sino/features/assistant/presentation/assistant_screen.dart';
 import 'package:sino/features/home/presentation/home_screen.dart';
 import 'package:sino/features/onboarding/presentation/profile_setup_screen.dart';
 import 'package:sino/features/onboarding/presentation/widgets/email_auth_view.dart';
@@ -52,6 +53,7 @@ final _screens = <String, (Widget Function(), {bool data})>{
   'lab results': (() => const LabResultsScreen(), data: false),
   'doctor qr': (() => const DoctorQrScreen(), data: false),
   'sos': (() => const SosScreen(), data: false),
+  'assistant': (() => const AssistantScreen(), data: false),
   for (final id in ['cpr', 'choking', 'bleeding', 'burns', 'stroke', 'heat'])
     'first aid $id': (() => FirstAidScreen(id: id), data: false),
 };
