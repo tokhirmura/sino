@@ -15,6 +15,7 @@ class ProgressRing extends StatelessWidget {
     this.trackColor,
     this.duration = const Duration(milliseconds: 800),
     this.child,
+    this.semanticsLabel,
   });
 
   final double value;
@@ -25,26 +26,37 @@ class ProgressRing extends StatelessWidget {
   final Duration duration;
   final Widget? child;
 
+  /// Screen-reader label, e.g. «Suv: 6/8».
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
-    final track = trackColor ?? color.withValues(alpha: 0.15);
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
-      duration: duration,
-      curve: Curves.easeOutCubic,
-      builder: (context, v, child) => SizedBox.square(
-        dimension: size,
-        child: CustomPaint(
-          painter: _RingPainter(
-            value: v,
-            color: color,
-            track: track,
-            stroke: strokeWidth,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final track = trackColor ?? color.withValues(alpha: isDark ? 0.22 : 0.15);
+    final target = value.isNaN ? 0.0 : value.clamp(0.0, 1.0);
+    // Starts from 0 on first build; later value changes animate from the
+    // current position (TweenAnimationBuilder keeps it).
+    return Semantics(
+      label: semanticsLabel,
+      value: '${(target * 100).round()}%',
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: target),
+        duration: duration,
+        curve: Curves.easeOutCubic,
+        builder: (context, v, child) => SizedBox.square(
+          dimension: size,
+          child: CustomPaint(
+            painter: _RingPainter(
+              value: v,
+              color: color,
+              track: track,
+              stroke: strokeWidth,
+            ),
+            child: Center(child: child),
           ),
-          child: Center(child: child),
         ),
+        child: child,
       ),
-      child: child,
     );
   }
 }
@@ -84,5 +96,8 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.value != value || old.color != color || old.track != track;
+      old.value != value ||
+      old.color != color ||
+      old.track != track ||
+      old.stroke != stroke;
 }
