@@ -1,0 +1,224 @@
+[
+  {
+    "id": "cpr",
+    "emoji": "❤️",
+    "title": {
+      "uz": "Yurak to‘xtashi (reanimatsiya)",
+      "ru": "Остановка сердца (реанимация)",
+      "en": "Cardiac arrest (CPR)"
+    },
+    "when": {
+      "uz": "Odam javob bermaydi va normal nafas olmaydi",
+      "ru": "Человек не отвечает и не дышит нормально",
+      "en": "The person does not respond and is not breathing normally"
+    },
+    "steps": {
+      "uz": [
+        "Atrof xavfsiz ekaniga ishonch hosil qiling. Odamni yelkasidan silkitib, baland ovozda chaqiring.",
+        "Javob bermasa va normal nafas olmasa — darhol 103 ga qo‘ng‘iroq qiling yoki boshqalardan so‘rang.",
+        "Odamni qattiq tekis joyga chalqancha yotqizing. Kaftlarni ko‘krak qafasining o‘rtasiga qo‘ying, qo‘llar tirsakdan bukilmasin.",
+        "Ko‘krakni 5–6 sm chuqurlikda, daqiqasiga 100–120 marta bosing. Har bosishdan keyin ko‘krak to‘liq ko‘tarilsin.",
+        "Tez yordam kelguncha yoki odam normal nafas ola boshlaguncha to‘xtamang. Charchasangiz — boshqa odam bilan almashing."
+      ],
+      "ru": [
+        "Убедитесь, что вам ничего не угрожает. Встряхните человека за плечи и громко окликните.",
+        "Если не отвечает и не дышит нормально — сразу звоните 103 или попросите позвонить других.",
+        "Уложите человека на спину на твёрдую ровную поверхность. Положите ладони на центр грудной клетки, руки прямые.",
+        "Надавливайте на глубину 5–6 см с частотой 100–120 в минуту. После каждого нажатия грудь должна полностью подниматься.",
+        "Не останавливайтесь до приезда скорой или пока человек не начнёт нормально дышать. Устали — смените друг друга."
+      ],
+      "en": [
+        "Make sure the area is safe. Shake the person by the shoulders and call out loudly.",
+        "If they don’t respond and aren’t breathing normally, call 103 right away or ask someone else to.",
+        "Lay the person on their back on a firm flat surface. Put your hands on the centre of the chest, arms straight.",
+        "Press 5–6 cm deep, 100–120 times a minute. Let the chest rise fully after each push.",
+        "Don’t stop until the ambulance arrives or the person starts breathing normally. Swap with someone if you get tired."
+      ]
+    }
+  },
+  {
+    "id": "choking",
+    "emoji": "😮",
+    "title": {
+      "uz": "Bo‘g‘ilish (nafas yo‘li tiqilishi)",
+      "ru": "Удушье (инородное тело)",
+      "en": "Choking"
+    },
+    "when": {
+      "uz": "Odam to‘satdan gapira olmaydi, tomog‘ini ushlaydi",
+      "ru": "Человек внезапно не может говорить, хватается за горло",
+      "en": "The person suddenly can’t speak and clutches the throat"
+    },
+    "steps": {
+      "uz": [
+        "Yo‘tala olsa — kuchli yo‘talishga undang, orqasiga urmang.",
+        "Gapira olmasa va nafas ololmasa — oldinga engashtiring va kuraklar orasiga kaft bilan 5 marta kuchli uring.",
+        "Yordam bermasa — orqasidan quchoqlang, mushtni kindikdan biroz yuqoriga qo‘yib, ichkari-yuqoriga 5 marta keskin bosing.",
+        "Narsa chiqquncha 5 urish va 5 bosishni navbatma-navbat takrorlang.",
+        "Hushini yo‘qotsa — 103 ga qo‘ng‘iroq qiling va reanimatsiyani boshlang."
+      ],
+      "ru": [
+        "Если может кашлять — попросите кашлять сильнее, по спине не стучите.",
+        "Если не может говорить и дышать — наклоните вперёд и сделайте 5 сильных ударов ладонью между лопатками.",
+        "Не помогло — обхватите сзади, кулак чуть выше пупка, 5 резких толчков внутрь и вверх.",
+        "Чередуйте 5 ударов и 5 толчков, пока предмет не выйдет.",
+        "Потерял сознание — звоните 103 и начинайте реанимацию."
+      ],
+      "en": [
+        "If they can cough, encourage strong coughing; don’t slap their back.",
+        "If they can’t speak or breathe, lean them forward and give 5 firm blows between the shoulder blades.",
+        "If that fails, stand behind, fist just above the navel, and give 5 sharp inward-and-upward thrusts.",
+        "Alternate 5 blows and 5 thrusts until the object comes out.",
+        "If they lose consciousness, call 103 and start CPR."
+      ]
+    }
+  },
+  {
+    "id": "bleeding",
+    "emoji": "🩸",
+    "title": {
+      "uz": "Kuchli qon ketishi",
+      "ru": "Сильное кровотечение",
+      "en": "Severe bleeding"
+    },
+    "when": {
+      "uz": "Yaradan qon to‘xtamay oqmoqda yoki otilib chiqmoqda",
+      "ru": "Кровь из раны не останавливается или бьёт струёй",
+      "en": "Blood keeps flowing or spurting from a wound"
+    },
+    "steps": {
+      "uz": [
+        "103 ga qo‘ng‘iroq qiling. Imkon bo‘lsa, qo‘lqop yoki toza paket kiying.",
+        "Yaraga toza mato yoki bint qo‘yib, kaft bilan qattiq va to‘xtovsiz bosing.",
+        "Qon sizib chiqsa — eskisini olmasdan, ustidan yana bint qo‘yib bosishda davom eting.",
+        "Qo‘l yoki oyoqdan qon otilib chiqsa va bosish yordam bermasa — yaradan 5–7 sm yuqoriga jgut qo‘ying va vaqtini yozib qo‘ying.",
+        "Odamni yotqizing, ustini yoping va tez yordam kelguncha yonida bo‘ling."
+      ],
+      "ru": [
+        "Звоните 103. По возможности наденьте перчатки или чистый пакет.",
+        "Положите на рану чистую ткань или бинт и сильно, непрерывно прижимайте ладонью.",
+        "Кровь проступает — не снимайте повязку, добавьте бинт сверху и продолжайте давить.",
+        "Если кровь бьёт струёй из руки или ноги и давление не помогает — наложите жгут на 5–7 см выше раны и запишите время.",
+        "Уложите человека, укройте и оставайтесь рядом до приезда скорой."
+      ],
+      "en": [
+        "Call 103. Put on gloves or a clean plastic bag if you can.",
+        "Place a clean cloth or bandage on the wound and press hard without stopping.",
+        "If blood soaks through, don’t remove it — add more bandage on top and keep pressing.",
+        "If blood spurts from an arm or leg and pressure doesn’t help, apply a tourniquet 5–7 cm above the wound and note the time.",
+        "Lay the person down, keep them warm and stay with them until the ambulance arrives."
+      ]
+    }
+  },
+  {
+    "id": "burns",
+    "emoji": "🔥",
+    "title": {
+      "uz": "Kuyish",
+      "ru": "Ожог",
+      "en": "Burns"
+    },
+    "when": {
+      "uz": "Issiq suv, olov, bug‘ yoki issiq narsadan kuyish",
+      "ru": "Ожог кипятком, огнём, паром или горячим предметом",
+      "en": "Burn from hot water, fire, steam or a hot object"
+    },
+    "steps": {
+      "uz": [
+        "Kuygan joyni darhol 20 daqiqa salqin (muzli emas) oqar suv ostida tuting.",
+        "Uzuk, soat va kiyimni yeching — teriga yopishgan bo‘lsa, tortmang.",
+        "Toza, yopishmaydigan bint yoki oziq-ovqat plyonkasi bilan bo‘sh yoping.",
+        "Yog‘, krem, tish pastasi yoki muz surtmang, pufaklarni yormang.",
+        "Kuyish katta bo‘lsa, yuz, qo‘l, jinsiy a’zolarda yoki bolada bo‘lsa — 103 ga qo‘ng‘iroq qiling."
+      ],
+      "ru": [
+        "Сразу держите место ожога 20 минут под прохладной (не ледяной) проточной водой.",
+        "Снимите кольца, часы и одежду — если прилипла к коже, не отрывайте.",
+        "Свободно накройте чистым неприлипающим бинтом или пищевой плёнкой.",
+        "Не мажьте маслом, кремом, зубной пастой, не прикладывайте лёд, не вскрывайте пузыри.",
+        "Если ожог большой, на лице, руках, половых органах или у ребёнка — звоните 103."
+      ],
+      "en": [
+        "Cool the burn right away under cool (not icy) running water for 20 minutes.",
+        "Remove rings, watches and clothing — but don’t pull anything stuck to the skin.",
+        "Cover loosely with a clean non-stick dressing or cling film.",
+        "Don’t apply oil, cream, toothpaste or ice, and don’t pop blisters.",
+        "If the burn is large, on the face, hands or genitals, or on a child — call 103."
+      ]
+    }
+  },
+  {
+    "id": "stroke",
+    "emoji": "🧠",
+    "title": {
+      "uz": "Insult belgilari",
+      "ru": "Признаки инсульта",
+      "en": "Signs of a stroke"
+    },
+    "when": {
+      "uz": "To‘satdan yuz qiyshayishi, qo‘l kuchsizligi, nutq buzilishi",
+      "ru": "Внезапно перекосило лицо, слабость в руке, нарушена речь",
+      "en": "Sudden face drooping, arm weakness or slurred speech"
+    },
+    "steps": {
+      "uz": [
+        "Yuz: tabassum qilishni so‘rang — yuzning bir tomoni osilib qoladimi?",
+        "Qo‘l: ikkala qo‘lini oldinga ko‘tarishni so‘rang — biri pastga tushib ketadimi?",
+        "Nutq: oddiy gapni takrorlashni so‘rang — gapi g‘alati yoki tushunarsizmi?",
+        "Biror belgi bo‘lsa — darhol 103. Belgilar boshlangan vaqtni yozib qo‘ying: davolash vaqtga bog‘liq.",
+        "Ovqat, suv yoki dori bermang. Hushida bo‘lsa, boshini biroz ko‘tarib yotqizing."
+      ],
+      "ru": [
+        "Лицо: попросите улыбнуться — опущена ли одна сторона лица?",
+        "Рука: попросите поднять обе руки вперёд — опускается ли одна?",
+        "Речь: попросите повторить простую фразу — речь странная или невнятная?",
+        "Есть хоть один признак — сразу 103. Запишите время начала: от него зависит лечение.",
+        "Не давайте еду, воду и лекарства. Если в сознании — уложите, слегка приподняв голову."
+      ],
+      "en": [
+        "Face: ask them to smile — does one side of the face droop?",
+        "Arms: ask them to raise both arms — does one drift down?",
+        "Speech: ask them to repeat a simple phrase — is it slurred or strange?",
+        "Any one sign — call 103 at once. Note when it started: treatment depends on it.",
+        "Don’t give food, water or medicine. If conscious, lay them down with the head slightly raised."
+      ]
+    }
+  },
+  {
+    "id": "heat",
+    "emoji": "☀️",
+    "title": {
+      "uz": "Issiq urishi",
+      "ru": "Тепловой удар",
+      "en": "Heatstroke"
+    },
+    "when": {
+      "uz": "Jaziramada bosh og‘rig‘i, ko‘ngil aynishi, teri issiq, chalkashlik",
+      "ru": "В жару головная боль, тошнота, горячая кожа, спутанность",
+      "en": "In the heat: headache, nausea, hot skin, confusion"
+    },
+    "steps": {
+      "uz": [
+        "Odamni darhol soya yoki salqin xonaga olib o‘ting.",
+        "Ortiqcha kiyimni yeching, yotqizib, oyoqlarini biroz ko‘taring.",
+        "Terisini salqin suv bilan namlang, yelping; bo‘yin, qo‘ltiq va chov sohasiga salqin narsa qo‘ying.",
+        "Hushida va yuta olsa — oz-ozdan salqin suv ichiring.",
+        "Chalkashlik, tutqanoq, hushdan ketish yoki qusish bo‘lsa — darhol 103."
+      ],
+      "ru": [
+        "Сразу переведите человека в тень или прохладное помещение.",
+        "Снимите лишнюю одежду, уложите, слегка приподнимите ноги.",
+        "Смачивайте кожу прохладной водой и обмахивайте; приложите холод к шее, подмышкам и паху.",
+        "Если в сознании и может глотать — давайте пить прохладную воду маленькими глотками.",
+        "Спутанность, судороги, потеря сознания или рвота — сразу 103."
+      ],
+      "en": [
+        "Move the person into shade or a cool room right away.",
+        "Remove extra clothing, lay them down and raise the legs slightly.",
+        "Wet the skin with cool water and fan them; put something cold on the neck, armpits and groin.",
+        "If conscious and able to swallow, give small sips of cool water.",
+        "Confusion, seizures, fainting or vomiting — call 103 at once."
+      ]
+    }
+  }
+]

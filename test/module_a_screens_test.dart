@@ -19,6 +19,8 @@ import 'package:sino/features/profile/presentation/family_member_screen.dart';
 import 'package:sino/features/profile/presentation/lab_results_screen.dart';
 import 'package:sino/features/profile/presentation/medical_records_screen.dart';
 import 'package:sino/features/profile/presentation/profile_screen.dart';
+import 'package:sino/features/sos/presentation/first_aid_screen.dart';
+import 'package:sino/features/sos/presentation/sos_screen.dart';
 
 import 'helpers/test_app.dart';
 
@@ -49,6 +51,9 @@ final _screens = <String, (Widget Function(), {bool data})>{
   'medical records': (() => const MedicalRecordsScreen(), data: true),
   'lab results': (() => const LabResultsScreen(), data: false),
   'doctor qr': (() => const DoctorQrScreen(), data: false),
+  'sos': (() => const SosScreen(), data: false),
+  for (final id in ['cpr', 'choking', 'bleeding', 'burns', 'stroke', 'heat'])
+    'first aid $id': (() => FirstAidScreen(id: id), data: false),
 };
 
 /// Uzbek Latin letters o‘ / g‘ (U+2018) — never in Russian or English.
