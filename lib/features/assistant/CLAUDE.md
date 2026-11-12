@@ -13,8 +13,9 @@
   регистр, **апострофы убираются** (пишут и «og‘riyapti», и «ogriyapti»), ключ ищется с начала слова.
 - Кнопки: `pharmacy` → `context.go(AppRoutes.pharmacySearch(query))`, `open` → вкладка `go`, иначе `push`,
   `call` → `tel:` (через `assistantLauncherProvider`, сам не звонит). Не понял — подсказки и «Shifokorga yozilish».
-- **LLM:** Edge Function `supabase/functions/assistant` (Claude Haiku, ответ через tool `reply`: текст, red_flag,
-  кнопки из белого списка). Ключ — только секрет `ANTHROPIC_API_KEY` (`npx supabase secrets set …`). Пускает только
+- **LLM:** Edge Function `supabase/functions/assistant`: структурный ответ (текст, red_flag, кнопки из белого списка).
+  Провайдер по секрету: `GEMINI_API_KEY` — Gemini (бесплатный тариф Google AI Studio, по умолчанию `gemini-2.5-flash`,
+  можно сменить секретом `GEMINI_MODEL`), иначе `ANTHROPIC_API_KEY` — Claude Haiku. Ключи — только в секретах. Пускает только
   вошедших пользователей (проверяет сессию). Порядок в чате: красный флаг по правилам → сразу локально, без сети;
   иначе LLM (`aiAssistantRepositoryProvider`, контекст — последние реплики); ошибка, нет ключа или fake-режим →
   ответ правилами. Деплой: `npx supabase functions deploy assistant --use-api` (только лид).
