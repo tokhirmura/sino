@@ -5,6 +5,14 @@
 ## Что делает
 Дневник питания (завтрак/обед/ужин/перекус), калории и БЖУ (`fl_chart`, `ProgressRing`), трекер воды.
 
+Каталоги `foods` / `exercises`: источник — `assets/wellness/foods.json` и `exercises.json` (формат таблицы;
+`id` — фиксированные uuid `f0000000-…` / `e0000000-…`, общие для assets, Fake и Supabase; `slug` — только в
+assets, в БД не пишется). После правки JSON: `dart run tool/wellness/gen_seed.dart` → перегенерирует
+`supabase/migrations/20261114120100_wellness_seed.sql` (тест сверяет файл с assets). Колонка
+`exercises.kcal_per_min` — миграция `20261114120000_wellness_exercise_kcal.sql`. Миграции пушит лид.
+Fake-режим: пользовательские данные в prefs (`nutrition.fake_*`, `workouts.fake_*`, `vitals.fake_list`),
+при первом чтении — демо из `assets/wellness/fake_wellness.json` (даты относительно сегодня).
+
 ## Маршруты
 - `/nutrition` (`AppRoutes.nutrition`) — вкладка «Ovqat»
 
@@ -16,9 +24,24 @@
 
 ## Файлы
 - `nutrition_feature.dart` — единственный публичный файл (`nutritionRoutes`, `nutritionHomeCards`)
-- `presentation/` — экраны, `application/` — провайдеры, `data/` — репозиторий (abstract + Supabase + Fake)
+- `data/models.dart` — `Food`, `Meal`, `FoodLog` (join `foods(*)`), `WaterLog` (цель 8 стаканов)
+- `data/nutrition_repository.dart` — `NutritionRepository` (каталог, дневник, вода) + Supabase + Fake, `searchFoods`
+- `application/nutrition_math.dart` — суммы КБЖУ, non birligi (углеводы / 12), Миффлин–Сан Жеор (пола в профиле
+  нет → средняя константа −78), цели БЖУ 20/30/50 %, шаг порции 0.5
+- `application/nutrition_providers.dart` — `foodsCatalogProvider`, `dayLogsProvider(day)`, `waterProvider(day)`,
+  `kcalGoalFromProfileProvider`
+- `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов
 - Тесты: `test/features/nutrition/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
 ## Чеклист задач
-- [ ]
+- [x] P0-1 Данные: `assets/wellness/foods.json` (40 блюд), seed-миграция, модели `fromJson/toJson`, репозиторий
+  (каталог + `food_logs` + `water_logs`), провайдеры, юнит-тесты расчётов на Fake
+- [ ] P0-2 `/nutrition`: дневник дня по приёмам пищи (Nonushta, Tushlik, Kechki ovqat, Gazak), переключение даты
+- [ ] P0-2 Добавление/удаление еды из поиска, порции шагом 0.5, оптимистичное обновление UI
+- [ ] P0-2 Кольцо калорий к цели (Миффлин–Сан Жеор из профиля, цель можно поменять вручную), полоски БЖУ,
+  «non birligi» (углеводы / 12)
+- [ ] P0-2 Вода — 8 стаканов в `water_logs`; простая подсказка по балансу дня
+- [ ] P0-4 `nutritionHomeCards`: калории и вода сегодня
+- [ ] P2-8 «Taomni rasmdan aniqlash»: `image_picker` + мок-распознавание (анимация, 3 варианта, «beta»),
+  фото в Supabase Storage (bucket и политики — попросить лида миграцией core)

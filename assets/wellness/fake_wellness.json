@@ -1,0 +1,55 @@
+{
+  "food_logs": [
+    {"days_ago": 0, "meal": "breakfast", "food": "non", "servings": 1},
+    {"days_ago": 0, "meal": "breakfast", "food": "tuxum", "servings": 1},
+    {"days_ago": 0, "meal": "breakfast", "food": "kok_choy", "servings": 1},
+    {"days_ago": 0, "meal": "lunch", "food": "lagmon", "servings": 1},
+    {"days_ago": 0, "meal": "lunch", "food": "achchiq_chuchuk", "servings": 1},
+    {"days_ago": 0, "meal": "snack", "food": "olma", "servings": 1},
+    {"days_ago": 1, "meal": "breakfast", "food": "qatiq", "servings": 1},
+    {"days_ago": 1, "meal": "breakfast", "food": "non", "servings": 0.5},
+    {"days_ago": 1, "meal": "lunch", "food": "palov", "servings": 1},
+    {"days_ago": 1, "meal": "dinner", "food": "shorva", "servings": 1},
+    {"days_ago": 1, "meal": "snack", "food": "yongoq", "servings": 1}
+  ],
+  "water_logs": [
+    {"days_ago": 0, "glasses": 3},
+    {"days_ago": 1, "glasses": 7}
+  ],
+  "workout_sessions": [
+    {"days_ago": 1, "plan_day": 1, "kcal": 210},
+    {"days_ago": 2, "plan_day": 2, "kcal": 180},
+    {"days_ago": 4, "plan_day": 3, "kcal": 240}
+  ],
+  "vitals": [
+    {"days_ago": 6, "kind": "pulse", "value": 74},
+    {"days_ago": 5, "kind": "pulse", "value": 71},
+    {"days_ago": 4, "kind": "pulse", "value": 76},
+    {"days_ago": 3, "kind": "pulse", "value": 70},
+    {"days_ago": 2, "kind": "pulse", "value": 72},
+    {"days_ago": 1, "kind": "pulse", "value": 69},
+    {"days_ago": 0, "kind": "pulse", "value": 71},
+    {"days_ago": 6, "kind": "steps", "value": 6400},
+    {"days_ago": 5, "kind": "steps", "value": 8200},
+    {"days_ago": 4, "kind": "steps", "value": 5100},
+    {"days_ago": 3, "kind": "steps", "value": 9700},
+    {"days_ago": 2, "kind": "steps", "value": 7300},
+    {"days_ago": 1, "kind": "steps", "value": 10400},
+    {"days_ago": 0, "kind": "steps", "value": 3900},
+    {"days_ago": 6, "kind": "sleep", "value": 6.5},
+    {"days_ago": 5, "kind": "sleep", "value": 7.2},
+    {"days_ago": 4, "kind": "sleep", "value": 5.8},
+    {"days_ago": 3, "kind": "sleep", "value": 7.9},
+    {"days_ago": 2, "kind": "sleep", "value": 7.0},
+    {"days_ago": 1, "kind": "sleep", "value": 6.8},
+    {"days_ago": 0, "kind": "sleep", "value": 7.4},
+    {"days_ago": 6, "kind": "weight", "value": 78.4},
+    {"days_ago": 3, "kind": "weight", "value": 78.0},
+    {"days_ago": 0, "kind": "weight", "value": 77.6},
+    {"days_ago": 5, "kind": "pressure", "value": 124, "value2": 82},
+    {"days_ago": 3, "kind": "pressure", "value": 118, "value2": 78},
+    {"days_ago": 1, "kind": "pressure", "value": 121, "value2": 80},
+    {"days_ago": 4, "kind": "glucose", "value": 5.2},
+    {"days_ago": 1, "kind": "glucose", "value": 5.6}
+  ]
+}
