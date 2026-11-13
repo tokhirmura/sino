@@ -102,8 +102,65 @@ NutrientTotals macroGoals(num kcalGoal) => NutrientTotals(
 /// Servings step in the diary.
 const servingsStep = 0.5;
 
-/// Clamps and snaps [v] to the 0.5 grid, minimum one step.
+/// Most portions of one food in one log.
+const maxServings = 10.0;
+
+/// Snaps [v] to the 0.5 grid and clamps it to [servingsStep]…[maxServings].
 double snapServings(double v) {
   final snapped = (v / servingsStep).round() * servingsStep;
-  return snapped < servingsStep ? servingsStep : snapped;
+  return snapped.clamp(servingsStep, maxServings).toDouble();
+}
+
+/// Water balance of a day, for a one-line hint under the glasses.
+enum WaterStatus {
+  /// Daily goal reached.
+  done,
+
+  /// Today, keeping up with the hour-based pace.
+  onTrack,
+
+  /// Today, behind the pace — [WaterHint.missing] glasses to catch up.
+  behind,
+
+  /// A past day that ended below the goal.
+  missed,
+}
+
+class WaterHint {
+  const WaterHint(this.status, this.missing);
+
+  final WaterStatus status;
+
+  /// Glasses to drink now (behind) or that were missing (missed); else 0.
+  final int missing;
+}
+
+/// Hour the drinking day starts / ends for the pace (08:00–22:00).
+const waterDayStartHour = 8;
+const waterDayEndHour = 22;
+
+/// Glasses expected by [now] if [goal] is spread evenly over the day.
+int expectedWaterBy(DateTime now, {int goal = WaterLog.goal}) {
+  final hours = now.hour + now.minute / 60 - waterDayStartHour;
+  final span = waterDayEndHour - waterDayStartHour;
+  return (goal * (hours / span)).clamp(0, goal).floor();
+}
+
+/// Hint for [glasses] on [day] at [now]. A lag of one glass is still
+/// «on track» — nobody drinks exactly on schedule.
+WaterHint waterHint({
+  required int glasses,
+  required DateTime day,
+  required DateTime now,
+  int goal = WaterLog.goal,
+}) {
+  if (glasses >= goal) return const WaterHint(WaterStatus.done, 0);
+  final today = DateTime(now.year, now.month, now.day);
+  if (DateTime(day.year, day.month, day.day).isBefore(today)) {
+    return WaterHint(WaterStatus.missed, goal - glasses);
+  }
+  final lag = expectedWaterBy(now, goal: goal) - glasses;
+  return lag > 1
+      ? WaterHint(WaterStatus.behind, lag)
+      : const WaterHint(WaterStatus.onTrack, 0);
 }
