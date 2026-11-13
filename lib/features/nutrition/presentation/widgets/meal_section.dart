@@ -206,7 +206,9 @@ class _LogTile extends StatelessWidget {
                 ru: 'Увеличить порцию',
                 en: 'Bigger portion',
               ),
-              onPressed: () => onServings(log.servings + servingsStep),
+              onPressed: log.servings >= maxServings
+                  ? null
+                  : () => onServings(log.servings + servingsStep),
               icon: const Icon(Icons.add_rounded, size: 20),
             ),
           ],
@@ -218,7 +220,12 @@ class _LogTile extends StatelessWidget {
     return Dismissible(
       key: ValueKey('dismiss-${log.id}'),
       direction: DismissDirection.endToStart,
-      onDismissed: (_) => onRemove(),
+      // The notifier drops the row synchronously; returning false keeps
+      // Dismissible from asserting if the row was already gone.
+      confirmDismiss: (_) async {
+        onRemove();
+        return false;
+      },
       background: Container(
         color: theme.colorScheme.errorContainer,
         alignment: AlignmentDirectional.centerEnd,

@@ -9,15 +9,18 @@ import '../labels.dart';
 class DaySwitcher extends ConsumerWidget {
   const DaySwitcher({super.key});
 
-  /// How far back the calendar goes.
-  static const historyDays = 365;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final day = ref.watch(selectedDayProvider);
     final notifier = ref.read(selectedDayProvider.notifier);
     final today = dayOf(DateTime.now());
+    final first = DateTime(
+      today.year,
+      today.month,
+      today.day - nutritionHistoryDays,
+    );
     final isToday = !day.isBefore(today);
+    final isFirst = !day.isAfter(first);
     final theme = Theme.of(context);
 
     return Row(
@@ -28,7 +31,7 @@ class DaySwitcher extends ConsumerWidget {
             ru: 'Предыдущий день',
             en: 'Previous day',
           ),
-          onPressed: () => notifier.shift(-1),
+          onPressed: isFirst ? null : () => notifier.shift(-1),
           icon: const Icon(Icons.chevron_left_rounded),
         ),
         Expanded(
@@ -37,8 +40,10 @@ class DaySwitcher extends ConsumerWidget {
             onPressed: () async {
               final picked = await showDatePicker(
                 context: context,
-                initialDate: day,
-                firstDate: today.subtract(const Duration(days: historyDays)),
+                initialDate: day.isBefore(first)
+                    ? first
+                    : (day.isAfter(today) ? today : day),
+                firstDate: first,
                 lastDate: today,
               );
               if (picked != null) notifier.select(picked);

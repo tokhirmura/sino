@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/backend.dart';
@@ -15,15 +17,47 @@ final foodsCatalogProvider = FutureProvider<List<Food>>(
   (ref) => ref.watch(nutritionRepositoryProvider).foods(),
 );
 
-/// Day shown on the nutrition screen (today by default, never in the future).
+/// How far back the diary goes (days before today).
+const nutritionHistoryDays = 365;
+
+/// Day shown on the nutrition screen: today by default, never in the
+/// future nor older than [nutritionHistoryDays]. If the app stays open past
+/// midnight while «today» is shown, it moves on to the new day.
 class SelectedDayNotifier extends Notifier<DateTime> {
+  Timer? _midnight;
+
   @override
-  DateTime build() => dayOf(DateTime.now());
+  DateTime build() {
+    ref.onDispose(() => _midnight?.cancel());
+    _scheduleMidnight();
+    return dayOf(DateTime.now());
+  }
+
+  void _scheduleMidnight() {
+    _midnight?.cancel();
+    final now = DateTime.now();
+    final today = dayOf(now);
+    final next = DateTime(today.year, today.month, today.day + 1);
+    _midnight = Timer(next.difference(now) + const Duration(seconds: 1), () {
+      if (!ref.mounted) return;
+      if (state == today) state = dayOf(DateTime.now());
+      _scheduleMidnight();
+    });
+  }
 
   void select(DateTime day) {
     final today = dayOf(DateTime.now());
+    final first = DateTime(
+      today.year,
+      today.month,
+      today.day - nutritionHistoryDays,
+    );
     final d = dayOf(day);
-    state = d.isAfter(today) ? today : d;
+    state = d.isAfter(today)
+        ? today
+        : d.isBefore(first)
+        ? first
+        : d;
   }
 
   /// Calendar shift (DST-safe: day arithmetic, not hours).
@@ -40,12 +74,29 @@ const pendingLogPrefix = 'pending-';
 
 bool isPendingLog(FoodLog l) => l.id.startsWith(pendingLogPrefix);
 
+/// Runs writes one after another in call order, so quick taps never reach
+/// the server out of order. A failed write does not block the next ones.
+class _WriteQueue {
+  Future<void> _tail = Future.value();
+
+  Future<T> run<T>(Future<T> Function() task) {
+    final result = _tail.then((_) => task());
+    _tail = result.then((_) {}, onError: (Object _) {});
+    return result;
+  }
+}
+
 /// Diary of one day with optimistic add / servings / remove: the UI
-/// changes at once, a failed request rolls the change back and rethrows.
+/// changes at once, writes go to the server in order, a failed write rolls
+/// its change back (unless a newer change replaced it) and rethrows.
 class DayLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   DayLogsNotifier(DateTime day) : day = dayOf(day);
 
   final DateTime day;
+  final _queue = _WriteQueue();
+
+  /// Last servings the server confirmed, per log (rollback target).
+  final _confirmedServings = <String, double>{};
 
   NutritionRepository get _repo => ref.read(nutritionRepositoryProvider);
 
@@ -54,10 +105,20 @@ class DayLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   @override
   Future<List<FoodLog>> build() {
     ref.watch(authStateProvider);
+    _confirmedServings.clear();
     return ref.watch(nutritionRepositoryProvider).logsFor(day);
   }
 
   Future<void> add(Food food, Meal meal, {double servings = 1}) async {
+    // Failed load: refuse (the screen shows the error with «Retry»; Riverpod
+    // may be retrying it). Still loading: wait, so the optimistic row is not
+    // lost when the load completes.
+    final err = state.error;
+    if (state.hasError && err != null) {
+      Error.throwWithStackTrace(err, state.stackTrace ?? StackTrace.current);
+    }
+    if (state.isLoading) await future;
+    if (!ref.mounted) return;
     final temp = FoodLog(
       id: '$pendingLogPrefix${DateTime.now().microsecondsSinceEpoch}',
       date: day,
@@ -68,11 +129,13 @@ class DayLogsNotifier extends AsyncNotifier<List<FoodLog>> {
     );
     state = AsyncData([..._current, temp]);
     try {
-      final saved = await _repo.addLog(
-        day: day,
-        meal: meal,
-        food: food,
-        servings: temp.servings,
+      final saved = await _queue.run(
+        () => _repo.addLog(
+          day: day,
+          meal: meal,
+          food: food,
+          servings: temp.servings,
+        ),
       );
       if (!ref.mounted) return;
       state = AsyncData([
@@ -94,35 +157,49 @@ class DayLogsNotifier extends AsyncNotifier<List<FoodLog>> {
     if (old == null || isPendingLog(old)) return;
     final value = snapServings(servings);
     if (value == old.servings) return;
+    _confirmedServings.putIfAbsent(logId, () => old.servings);
     _replace(logId, (l) => l.copyWith(servings: value));
     try {
-      await _repo.updateServings(logId, value);
+      await _queue.run(() => _repo.updateServings(logId, value));
+      _confirmedServings[logId] = value;
     } catch (_) {
-      if (ref.mounted) {
-        _replace(logId, (l) => l.copyWith(servings: old.servings));
+      // Roll back only if no newer tap has changed the portion since.
+      if (ref.mounted && _find(logId)?.servings == value) {
+        final back = _confirmedServings[logId] ?? old.servings;
+        _replace(logId, (l) => l.copyWith(servings: back));
       }
       rethrow;
     }
   }
 
   /// Removes the log; returns it (for «Undo») or `null` if not found.
+  /// The list changes synchronously (before the first `await`).
   Future<FoodLog?> remove(String logId) async {
-    final list = _current;
-    final index = list.indexWhere((l) => l.id == logId);
-    if (index < 0 || isPendingLog(list[index])) return null;
-    final removed = list[index];
-    state = AsyncData([...list]..removeAt(index));
+    final removed = _find(logId);
+    if (removed == null || isPendingLog(removed)) return null;
+    state = AsyncData([
+      for (final l in _current)
+        if (l.id != logId) l,
+    ]);
     try {
-      await _repo.removeLog(logId);
+      await _queue.run(() => _repo.removeLog(logId));
+      _confirmedServings.remove(logId);
       return removed;
     } catch (_) {
-      if (ref.mounted) {
-        final cur = [..._current];
-        cur.insert(index.clamp(0, cur.length), removed);
-        state = AsyncData(cur);
-      }
+      if (ref.mounted) state = AsyncData(_insertByTime(_current, removed));
       rethrow;
     }
+  }
+
+  /// Puts [log] back where it belongs by `createdAt` (lists are oldest first).
+  static List<FoodLog> _insertByTime(List<FoodLog> list, FoodLog log) {
+    final at = log.createdAt;
+    final i = at == null
+        ? list.length
+        : list.indexWhere(
+            (l) => l.createdAt != null && l.createdAt!.isAfter(at),
+          );
+    return [...list]..insert(i < 0 ? list.length : i, log);
   }
 
   FoodLog? _find(String id) {
@@ -147,15 +224,20 @@ final dayLogsProvider =
 /// Upper bound of the water counter (glasses).
 const maxWaterGlasses = 20;
 
-/// Glasses of water on a day, optimistic like [DayLogsNotifier].
+/// Glasses of water on a day, optimistic and ordered like [DayLogsNotifier].
 class WaterNotifier extends AsyncNotifier<int> {
   WaterNotifier(DateTime day) : day = dayOf(day);
 
   final DateTime day;
+  final _queue = _WriteQueue();
+
+  /// Last count the server confirmed (rollback target).
+  int? _confirmed;
 
   @override
   Future<int> build() {
     ref.watch(authStateProvider);
+    _confirmed = null;
     return ref.watch(nutritionRepositoryProvider).waterFor(day);
   }
 
@@ -163,11 +245,18 @@ class WaterNotifier extends AsyncNotifier<int> {
     final old = state.value ?? 0;
     final value = glasses.clamp(0, maxWaterGlasses);
     if (value == old) return;
+    _confirmed ??= old;
     state = AsyncData(value);
     try {
-      await ref.read(nutritionRepositoryProvider).setWater(day, value);
+      await _queue.run(
+        () => ref.read(nutritionRepositoryProvider).setWater(day, value),
+      );
+      _confirmed = value;
     } catch (_) {
-      if (ref.mounted) state = AsyncData(old);
+      // Roll back only if no newer tap has changed the count since.
+      if (ref.mounted && state.value == value) {
+        state = AsyncData(_confirmed ?? old);
+      }
       rethrow;
     }
   }

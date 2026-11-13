@@ -102,10 +102,13 @@ NutrientTotals macroGoals(num kcalGoal) => NutrientTotals(
 /// Servings step in the diary.
 const servingsStep = 0.5;
 
-/// Clamps and snaps [v] to the 0.5 grid, minimum one step.
+/// Most portions of one food in one log.
+const maxServings = 10.0;
+
+/// Snaps [v] to the 0.5 grid and clamps it to [servingsStep]…[maxServings].
 double snapServings(double v) {
   final snapped = (v / servingsStep).round() * servingsStep;
-  return snapped < servingsStep ? servingsStep : snapped;
+  return snapped.clamp(servingsStep, maxServings).toDouble();
 }
 
 /// Water balance of a day, for a one-line hint under the glasses.

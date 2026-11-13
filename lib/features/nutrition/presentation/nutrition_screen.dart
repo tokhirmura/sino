@@ -63,9 +63,17 @@ class NutritionScreen extends ConsumerWidget {
           ),
           action: SnackBarAction(
             label: context.tr(uz: 'Qaytarish', ru: 'Вернуть', en: 'Undo'),
-            onPressed: () => notifier
-                .add(removed.food, removed.meal, servings: removed.servings)
-                .catchError((Object _) {}),
+            onPressed: () async {
+              try {
+                await notifier.add(
+                  removed.food,
+                  removed.meal,
+                  servings: removed.servings,
+                );
+              } catch (e) {
+                if (context.mounted) _snack(context, errorMessage(context, e));
+              }
+            },
           ),
         );
       } catch (e) {

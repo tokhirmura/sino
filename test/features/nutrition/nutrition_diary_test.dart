@@ -18,9 +18,24 @@ class _GatedRepo extends FakeNutritionRepository {
   Completer<void> gate = Completer<void>()..complete();
   bool fail = false;
 
-  Future<void> _write() async {
+  /// Water / servings values that fail once written.
+  final failValues = <num>{};
+
+  /// Values of setWater / updateServings in the order they ran.
+  final written = <num>[];
+
+  bool failLogs = false;
+
+  Future<void> _write([num? v]) async {
     await gate.future;
-    if (fail) throw Exception('network');
+    if (v != null) written.add(v);
+    if (fail || failValues.contains(v)) throw Exception('network');
+  }
+
+  @override
+  Future<List<FoodLog>> logsFor(DateTime day) async {
+    if (failLogs) throw Exception('offline');
+    return super.logsFor(day);
   }
 
   @override
@@ -36,7 +51,7 @@ class _GatedRepo extends FakeNutritionRepository {
 
   @override
   Future<void> updateServings(String logId, double servings) async {
-    await _write();
+    await _write(servings);
     return super.updateServings(logId, servings);
   }
 
@@ -48,7 +63,7 @@ class _GatedRepo extends FakeNutritionRepository {
 
   @override
   Future<void> setWater(DateTime day, int glasses) async {
-    await _write();
+    await _write(glasses);
     return super.setWater(day, glasses);
   }
 }
@@ -98,6 +113,8 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       repo = _GatedRepo(prefs);
       container = ProviderContainer(
+        // No automatic retries: failed loads must fail right away in tests.
+        retry: (_, _) => null,
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           useFakeProvider.overrideWithValue(true),
@@ -191,6 +208,106 @@ void main() {
 
       await container.read(manualKcalGoalProvider.notifier).set(null);
       expect(await container.read(kcalGoalProvider.future), fromProfile);
+    });
+
+    test('quick water taps are written in order; stale failure keeps the '
+        'newer value', () async {
+      await container.read(waterProvider(day).future);
+      final water = container.read(waterProvider(day).notifier);
+      repo.gate = Completer<void>();
+      repo.failValues.add(1);
+      final a = water.set(1);
+      final b = water.set(2);
+      expect(container.read(waterProvider(day)).value, 2);
+      repo.gate.complete();
+      await expectLater(a, throwsException);
+      await b;
+      expect(repo.written, [1, 2]);
+      expect(container.read(waterProvider(day)).value, 2);
+      expect(await repo.waterFor(day), 2);
+    });
+
+    test(
+      'failed latest water write rolls back to the confirmed value',
+      () async {
+        await container.read(waterProvider(day).future);
+        final water = container.read(waterProvider(day).notifier);
+        await water.set(2);
+        repo.failValues.add(4);
+        await water.set(3);
+        await expectLater(water.set(4), throwsException);
+        expect(container.read(waterProvider(day)).value, 3);
+      },
+    );
+
+    test(
+      'quick servings taps: ordered writes, rollback to confirmed',
+      () async {
+        await container.read(dayLogsProvider(day).future);
+        final notifier = container.read(dayLogsProvider(day).notifier);
+        await notifier.add(await food('palov'), Meal.lunch);
+        final id = logs().single.id;
+
+        repo.gate = Completer<void>();
+        repo.failValues.addAll([1.5, 2.5]);
+        final a = notifier.setServings(id, 1.5);
+        final b = notifier.setServings(id, 2);
+        final c = notifier.setServings(id, 2.5);
+        repo.gate.complete();
+        await expectLater(a, throwsException);
+        await b;
+        await expectLater(c, throwsException);
+        expect(repo.written, [1.5, 2, 2.5]);
+        expect(logs().single.servings, 2);
+        expect((await repo.logsFor(day)).single.servings, 2);
+      },
+    );
+
+    test('servings are capped at maxServings', () async {
+      await container.read(dayLogsProvider(day).future);
+      final notifier = container.read(dayLogsProvider(day).notifier);
+      await notifier.add(await food('palov'), Meal.lunch, servings: 40);
+      expect(logs().single.servings, maxServings);
+    });
+
+    test('add on a failed load rethrows and keeps the error', () async {
+      repo.failLogs = true;
+      await expectLater(
+        container.read(dayLogsProvider(day).future),
+        throwsException,
+      );
+      await expectLater(
+        container
+            .read(dayLogsProvider(day).notifier)
+            .add(await food('palov'), Meal.lunch),
+        throwsException,
+      );
+      expect(container.read(dayLogsProvider(day)).hasError, isTrue);
+    });
+
+    test('failed remove puts the log back in time order', () async {
+      await container.read(dayLogsProvider(day).future);
+      final notifier = container.read(dayLogsProvider(day).notifier);
+      await notifier.add(await food('palov'), Meal.lunch);
+      await notifier.add(await food('olma'), Meal.lunch);
+      await notifier.add(await food('non'), Meal.lunch);
+      final first = logs().first.id;
+      repo.fail = true;
+      final r1 = notifier.remove(first);
+      final r2 = notifier.remove(logs().first.id);
+      await expectLater(r1, throwsException);
+      await expectLater(r2, throwsException);
+      expect([for (final l in logs()) l.food.slug], ['palov', 'olma', 'non']);
+    });
+
+    test('selected day is clamped to the history range', () {
+      final notifier = container.read(selectedDayProvider.notifier);
+      final today = dayOf(DateTime.now());
+      notifier.select(DateTime(2000));
+      expect(
+        container.read(selectedDayProvider),
+        DateTime(today.year, today.month, today.day - nutritionHistoryDays),
+      );
     });
 
     test('selected day never goes into the future', () {

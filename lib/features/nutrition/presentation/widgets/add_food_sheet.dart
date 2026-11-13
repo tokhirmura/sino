@@ -127,7 +127,7 @@ class _AddFoodSheetState extends ConsumerState<_AddFoodSheet> {
                   ru: 'Больше',
                   en: 'More',
                 ),
-                onPressed: _servings < 10
+                onPressed: _servings < maxServings
                     ? () => setState(
                         () =>
                             _servings = snapServings(_servings + servingsStep),

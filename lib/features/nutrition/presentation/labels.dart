@@ -45,11 +45,12 @@ String formatServings(double v) =>
 
 /// «Bugun», «Kecha» or «Pn, 12.11» (year shown if not the current one).
 String dayLabel(BuildContext context, DateTime day, DateTime today) {
-  final diff = DateTime(
+  // UTC dates: a local day can be 23 h long across a DST change.
+  final diff = DateTime.utc(
     today.year,
     today.month,
     today.day,
-  ).difference(DateTime(day.year, day.month, day.day)).inDays;
+  ).difference(DateTime.utc(day.year, day.month, day.day)).inDays;
   if (diff == 0) return context.tr(uz: 'Bugun', ru: 'Сегодня', en: 'Today');
   if (diff == 1) return context.tr(uz: 'Kecha', ru: 'Вчера', en: 'Yesterday');
   final week = switch (context.lang) {
