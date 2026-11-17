@@ -12,7 +12,8 @@
 - `/workouts` (`AppRoutes.workouts`) — вкладка «Sport»
 
 ## Home-карточки
-- `workouts`, order 60
+- `workouts`, order 60 — `WorkoutsHomeCard`: следующая тренировка («Bugun · Dushanba» / «Ertaga · …» / день
+  недели, минуты, ~ккал, число упражнений, иконка вида) и серия 🔥; без плана — приглашение составить план
 
 ## Таблицы БД
 `exercises`, `workout_plans`, `workout_sessions`
@@ -22,7 +23,7 @@
 - `data/models.dart` — `WorkoutType`, `Exercise` (`kcalPerMin`), `PlanItem`, `PlanDay`, `WorkoutPlan`, `WorkoutSession`
 - `data/workouts_repository.dart` — `WorkoutsRepository` (каталог, план, сессии) + Supabase + Fake
 - `application/workout_math.dart` — время и ~ккал упражнения (повтор ≈ 3 с), оценка дня (отдых между подходами —
-  время + ~2 ккал/мин), серия дней
+  время + ~2 ккал/мин), серия дней, `nextWorkout` (сегодня, если сессии сегодня ещё нет, иначе следующий день плана)
 - `application/plan_generator.dart` — `PlanParams` (type × `WorkoutGoal` lose|gain|endurance|flexibility ×
   `WorkoutLevel` × 2–6 дней; `toJson` → `workout_plans.params`), `generatePlan` — детерминированные правила:
   - дни недели: 2 → Пн/Чт, 3 → Пн/Ср/Пт, 4 → Пн/Вт/Чт/Пт, 5 → Пн–Ср/Пт/Сб, 6 → Пн–Сб
@@ -37,10 +38,11 @@
   - каждый день есть упражнение выбранного вида; massa для бега/плавания/йоги добавляет силовые «uyda»,
     egiluvchanlik для любого вида — растяжки йоги
 - `application/workouts_providers.dart` — `exercisesProvider`, `exercisesByIdProvider`, `latestPlanProvider`,
-  `sessionsProvider`, `streakProvider`, `planActionsProvider` (`create(params)`: генерация → `workout_plans`)
+  `sessionsProvider`, `streakProvider`, `planActionsProvider` (`create(params)`: генерация → `workout_plans`),
+  `nextWorkoutProvider`
 - `presentation/workouts_screen.dart` — нет плана: форма генератора; есть — сводка недели и дни, «Yangi reja tuzish»
   (bottom sheet); `labels.dart` — названия видов/целей/уровней/дней недели, дозировка; `widgets/plan_form.dart`,
-  `widgets/plan_day_card.dart`
+  `widgets/plan_day_card.dart`, `widgets/workouts_home_card.dart`
 - Тесты: `test/features/workouts/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
@@ -51,7 +53,7 @@
 - [x] P0-3 Генератор плана: вид (uyda, zal, yugurish, yoga, suzish, kurash O‘FP) × цель (ozish, massa,
   chidamlilik, egiluvchanlik) × уровень × дней в неделю (2–6) → недельный план с минутами и ~ккал;
   детерминированные правила, сохранение в `workout_plans`
-- [ ] P0-4 `workoutsHomeCards`: следующая тренировка
+- [x] P0-4 `workoutsHomeCards`: следующая тренировка
 - [ ] P1-5 Плеер тренировки на весь экран: подходы/повторы, таймер, отдых с отсчётом (можно пропустить),
   финал с ~ккал и XP → `workout_sessions`; серия дней по сессиям
 - [ ] P1-6 Генератор учитывает AQI (при AQI > 100 советует «uyda»)
