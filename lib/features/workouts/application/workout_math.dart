@@ -16,8 +16,12 @@ int itemSeconds(PlanItem item, Exercise exercise) {
 double itemKcal(PlanItem item, Exercise exercise) =>
     exercise.kcalPerMin * itemSeconds(item, exercise) / 60;
 
-/// Work minutes and ~kcal of a list of items; unknown exercise ids are
-/// skipped. [restSeconds] between sets adds time but no calories.
+/// Rest between sets is light activity, not zero: ~2 kcal per minute.
+const restKcalPerMin = 2.0;
+
+/// Minutes and ~kcal of a list of items; unknown exercise ids are
+/// skipped. [restSeconds] between sets adds time and
+/// [restKcalPerMin] calories (single-set bouts have no rest).
 ({int minutes, int kcal}) dayEstimate(
   List<PlanItem> items,
   Map<String, Exercise> catalog, {
@@ -28,8 +32,9 @@ double itemKcal(PlanItem item, Exercise exercise) =>
   for (final i in items) {
     final e = catalog[i.exerciseId];
     if (e == null) continue;
-    seconds += itemSeconds(i, e) + restSeconds * i.sets;
-    kcal += itemKcal(i, e);
+    final rest = i.sets > 1 ? restSeconds * i.sets : 0;
+    seconds += itemSeconds(i, e) + rest;
+    kcal += itemKcal(i, e) + restKcalPerMin * rest / 60;
   }
   return (minutes: (seconds / 60).round(), kcal: kcal.round());
 }

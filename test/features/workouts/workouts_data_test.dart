@@ -100,9 +100,10 @@ void main() {
         {'e1': _pushUps, 'e2': _plank},
         restSeconds: 30,
       );
-      // 135 + 120 + 30 × 5 = 405 s ≈ 7 min; 18 + 8 = 26 kcal
+      // 135 + 120 + 30 × 5 = 405 s ≈ 7 min;
+      // work 18 + 8 + rest 150 s × 2 kcal/min = 5 → 31 kcal
       expect(est.minutes, 7);
-      expect(est.kcal, 26);
+      expect(est.kcal, 31);
     });
 
     test('streak counts back from today or yesterday', () {
