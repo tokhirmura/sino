@@ -41,6 +41,10 @@
 - `application/workouts_providers.dart` — `exercisesProvider`, `exercisesByIdProvider`, `latestPlanProvider`,
   `sessionsProvider`, `streakProvider`, `planActionsProvider` (`create(params)`: генерация → `workout_plans`),
   `nextWorkoutProvider`, `sessionActionsProvider` (`save(planDay, kcal)` → `workout_sessions`, обновляет серию)
+- `application/air_quality.dart` — `readTodayAqi` (prefs `weather.today_aqi` от фичи weather, свежее 6 ч),
+  `TodayAqi.isBad` (AQI > 100), `isOutdoor` (бег). Форма генератора: плохой воздух и бег/план по умолчанию → «uyda»
+  с баннером «generator … uyda mashg‘ulotni tanladi»; выбрал бег — предупреждение и кнопка «Uyda». План бега в такой
+  день — карточка-предупреждение «Uyda reja»
 - `application/workout_run.dart` — плеер без Flutter: `buildSteps` (подходы + отдых `params.rest_seconds` между ними,
   после последнего нет), `WorkoutRun` (ready 5 с → work → rest → … → done; `tick` раз в секунду, `completeSet`,
   `skip` (готовность/отдых), `skipSet`, `addRest` +15 с, `togglePause`, `finish`). ~ккал = фактическая работа
@@ -65,4 +69,4 @@
 - [x] P0-4 `workoutsHomeCards`: следующая тренировка
 - [x] P1-5 Плеер тренировки на весь экран: подходы/повторы, таймер, отдых с отсчётом (можно пропустить),
   финал с ~ккал и XP → `workout_sessions`; серия дней по сессиям
-- [ ] P1-6 Генератор учитывает AQI (при AQI > 100 советует «uyda»)
+- [x] P1-6 Генератор учитывает AQI (при AQI > 100 советует «uyda»)

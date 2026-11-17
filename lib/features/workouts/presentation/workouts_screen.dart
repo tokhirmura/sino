@@ -11,6 +11,8 @@ import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/section_title.dart';
+import '../../../core/storage/prefs.dart';
+import '../application/air_quality.dart';
 import '../application/plan_generator.dart';
 import '../application/workouts_providers.dart';
 import '../data/models.dart';
@@ -27,6 +29,11 @@ class WorkoutsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final plan = ref.watch(latestPlanProvider);
     final catalog = ref.watch(exercisesByIdProvider);
+    // Read on every build: the weather feature may have just saved it.
+    final aqi = readTodayAqi(
+      ref.watch(sharedPreferencesProvider),
+      DateTime.now(),
+    );
 
     Future<void> create(PlanParams params, {bool closeSheet = false}) async {
       try {
@@ -67,7 +74,9 @@ class WorkoutsScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     const _Intro(),
                     const SizedBox(height: 12),
-                    AppCard(child: PlanForm(onSubmit: create)),
+                    AppCard(
+                      child: PlanForm(aqi: aqi, onSubmit: create),
+                    ),
                     const _Disclaimer(),
                   ],
                 )
@@ -77,9 +86,11 @@ class WorkoutsScreen extends ConsumerWidget {
                   data: (byId) => _PlanView(
                     plan: p,
                     catalog: byId,
+                    aqi: aqi,
                     onNewPlan: () => _openGenerator(
                       context,
                       PlanParams.fromJson(p.params),
+                      aqi,
                       (params) => create(params, closeSheet: true),
                     ),
                   ),
@@ -92,6 +103,7 @@ class WorkoutsScreen extends ConsumerWidget {
   static Future<void> _openGenerator(
     BuildContext context,
     PlanParams initial,
+    TodayAqi? aqi,
     Future<void> Function(PlanParams) onSubmit,
   ) => showModalBottomSheet<void>(
     context: context,
@@ -107,7 +119,7 @@ class WorkoutsScreen extends ConsumerWidget {
               context.tr(uz: 'Yangi reja', ru: 'Новый план', en: 'New plan'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            PlanForm(initial: initial, onSubmit: onSubmit),
+            PlanForm(initial: initial, aqi: aqi, onSubmit: onSubmit),
           ],
         ),
       ),
@@ -126,21 +138,67 @@ class _PlanView extends StatelessWidget {
     required this.plan,
     required this.catalog,
     required this.onNewPlan,
+    this.aqi,
   });
 
   final WorkoutPlan plan;
   final Map<String, Exercise> catalog;
   final VoidCallback onNewPlan;
+  final TodayAqi? aqi;
 
   @override
   Widget build(BuildContext context) {
     final params = PlanParams.fromJson(plan.params);
     final week = weekTotals(plan.days);
     final text = Theme.of(context).textTheme;
+    final a = aqi;
+    final outdoorWarning = a != null && a.isBad && isOutdoor(params.type);
     return ListView(
       padding: const EdgeInsets.only(bottom: 32),
       children: [
         const SizedBox(height: 8),
+        if (outdoorWarning) ...[
+          AppCard(
+            key: const Key('workouts-plan-air-warning'),
+            elevated: false,
+            color: AppColors.danger.withValues(alpha: 0.12),
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const Text('😷', style: TextStyle(fontSize: 24)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    context.tr(
+                      uz:
+                          'Bugun havo sifati yomon (AQI ${a.aqi}) — '
+                          'yugurish o‘rniga uyda mashq qiling.',
+                      ru:
+                          'Сегодня плохой воздух (AQI ${a.aqi}) — вместо '
+                          'бега потренируйтесь дома.',
+                      en:
+                          'Poor air today (AQI ${a.aqi}) — train at home '
+                          'instead of running.',
+                    ),
+                    style: text.bodyMedium,
+                  ),
+                ),
+                TextButton(
+                  key: const Key('workouts-plan-air-home'),
+                  onPressed: onNewPlan,
+                  child: Text(
+                    context.tr(
+                      uz: 'Uyda reja',
+                      ru: 'План дома',
+                      en: 'Home plan',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
