@@ -22,6 +22,9 @@ abstract class VitalsRepository {
     DateTime? measuredAt,
   });
 
+  /// Saves several measurements at once (one request).
+  Future<void> addAll(List<VitalInput> items);
+
   Future<void> remove(String id);
 }
 
@@ -73,6 +76,26 @@ class SupabaseVitalsRepository implements VitalsRepository {
   }
 
   @override
+  Future<void> addAll(List<VitalInput> items) async {
+    if (items.isEmpty) return;
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) throw StateError('Not signed in');
+    await _client
+        .from('vitals')
+        .insert([
+          for (final i in items)
+            {
+              'user_id': uid,
+              'kind': i.kind.name,
+              'value': i.value,
+              'value2': i.value2,
+              'measured_at': i.measuredAt.toUtc().toIso8601String(),
+            },
+        ])
+        .timeout(_timeout);
+  }
+
+  @override
   Future<void> remove(String id) =>
       _client.from('vitals').delete().eq('id', id).timeout(_timeout);
 }
@@ -117,12 +140,19 @@ class FakeVitalsRepository implements VitalsRepository {
           kind: kind,
           value: (r['value'] as num).toDouble(),
           value2: (r['value2'] as num?)?.toDouble(),
-          measuredAt: morning.subtract(Duration(days: r['days_ago'] as int)),
+          measuredAt: _demoTime(morning, n, r['days_ago'] as int),
         ),
       );
     }
     await _save(list);
     return list;
+  }
+
+  /// 08:00 of the demo day; today before 08:00 — a minute ago (never in
+  /// the future, or a new measurement would not be the latest one).
+  static DateTime _demoTime(DateTime morning, DateTime now, int daysAgo) {
+    final at = DateTime(morning.year, morning.month, morning.day - daysAgo, 8);
+    return at.isAfter(now) ? now.subtract(const Duration(minutes: 1)) : at;
   }
 
   Future<void> _save(List<Vital> list) =>
@@ -157,6 +187,24 @@ class FakeVitalsRepository implements VitalsRepository {
     );
     await _save([...list, v]);
     return v;
+  }
+
+  @override
+  Future<void> addAll(List<VitalInput> items) async {
+    final list = await _all();
+    final at = DateTime.now().microsecondsSinceEpoch;
+    var n = 0;
+    await _save([
+      ...list,
+      for (final i in items)
+        Vital(
+          id: 'fake-vital-$at-${n++}',
+          kind: i.kind,
+          value: i.value,
+          value2: i.value2,
+          measuredAt: i.measuredAt,
+        ),
+    ]);
   }
 
   @override
