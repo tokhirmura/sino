@@ -8,10 +8,12 @@
 
 ## Маршруты
 - `/vitals` (`AppRoutes.vitals`) — полноэкранный
+- `/vitals/breathing` (`vitalsBreathingPath`) — дыхание 4-7-8
 
 ## Home-карточки
 - `vitals`, order 70 — `VitalsHomeCard`: «❤️ 71   🩺 118/76», «Me’yorda · Bugun 08:30» / красным «Me’yordan
   tashqarida»; без пульса и давления — приглашение внести первое измерение
+- `breathing`, order 75 — «🌬️ 4-7-8 nafas mashqi» → `/vitals/breathing`
 
 ## Таблицы БД
 `vitals`
@@ -35,6 +37,11 @@
   зелёная полоса общей нормы
 - `presentation/widgets/add_vital_sheet.dart` — вид, значение(я), проверка диапазона, нижнее давление < верхнего
 - `presentation/widgets/bmi_card.dart` — рост из профиля, вес — последний замер (или из профиля), шкала 15…40
+- `application/breathing.dart` — 4-7-8 без Flutter: `breathStateAt(elapsed, cycles)` → фаза, цикл, секунды (4…1),
+  прогресс, `scale` круга (вдох 0.55→1 ease, задержка 1, выдох 1→0.55); 19 с на цикл, 4 / 6 / 8 циклов
+- `presentation/breathing_screen.dart` — градиентный фон, светящийся круг (`Ticker`, плавно), большое число, фаза и
+  подсказка, точки циклов, пауза / стоп, финал «Barakalla!» и «Yana bir bor», вибро-отклик на смену фазы; круг ≤ 38 %
+  высоты — «Boshlash» видна на маленьком телефоне; вход — карточка на `/vitals` и на главной
 - `presentation/vitals_home_card.dart`, `presentation/labels.dart`
 - Тесты: `test/features/vitals/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
@@ -44,4 +51,4 @@
 - [x] P1-7 `/vitals`: пульс, шаги, сон, вес, давление (value/value2), сахар — записи в `vitals`
 - [x] P1-7 Графики за 7 дней (`fl_chart`), калькулятор ИМТ, общие ориентиры нормы с дисклеймером
 - [x] P1-7 Скрытая кнопка «заполнить тестовой историей» (только режим разработчика)
-- [ ] P2-9 Дыхательное упражнение 4-7-8 с анимацией круга (маршрут внутри фичи)
+- [x] P2-9 Дыхательное упражнение 4-7-8 с анимацией круга (маршрут внутри фичи)
