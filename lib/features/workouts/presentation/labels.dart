@@ -139,6 +139,7 @@ String muscleEmoji(String? muscle) => switch (muscle) {
   'cardio' => '❤️',
   'core' => '🧱',
   'chest' || 'shoulders' || 'arms' => '💪',
-  'back' => '🔙',
+  // Not 🔙 — it renders as an arrow with the English word «BACK».
+  'back' => '🧗',
   _ => '🏅',
 };

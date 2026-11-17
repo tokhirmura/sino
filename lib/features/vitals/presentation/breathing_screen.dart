@@ -92,11 +92,16 @@ class _BreathingScreenState extends State<BreathingScreen>
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
+        // The theme fixes the title colour — white on the dark gradient.
         title: Text(
           context.tr(
             uz: '4-7-8 nafas mashqi',
             ru: 'Дыхание 4-7-8',
             en: '4-7-8 breathing',
+          ),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
