@@ -10,10 +10,11 @@
 
 ## Маршруты
 - `/workouts` (`AppRoutes.workouts`) — вкладка «Sport»
+- `/workouts/play/:day` (`workoutPlayerPath(day)`, `day` = `PlanDay.day`) — плеер на весь экран (`rootNavigatorKey`)
 
 ## Home-карточки
 - `workouts`, order 60 — `WorkoutsHomeCard`: следующая тренировка («Bugun · Dushanba» / «Ertaga · …» / день
-  недели, минуты, ~ккал, число упражнений, иконка вида) и серия 🔥; без плана — приглашение составить план
+  недели, минуты, ~ккал, число упражнений, иконка вида) и серия 🔥, на сегодня — кнопка ▶ (плеер); без плана — приглашение составить план
 
 ## Таблицы БД
 `exercises`, `workout_plans`, `workout_sessions`
@@ -39,7 +40,15 @@
     egiluvchanlik для любого вида — растяжки йоги
 - `application/workouts_providers.dart` — `exercisesProvider`, `exercisesByIdProvider`, `latestPlanProvider`,
   `sessionsProvider`, `streakProvider`, `planActionsProvider` (`create(params)`: генерация → `workout_plans`),
-  `nextWorkoutProvider`
+  `nextWorkoutProvider`, `sessionActionsProvider` (`save(planDay, kcal)` → `workout_sessions`, обновляет серию)
+- `application/workout_run.dart` — плеер без Flutter: `buildSteps` (подходы + отдых `params.rest_seconds` между ними,
+  после последнего нет), `WorkoutRun` (ready 5 с → work → rest → … → done; `tick` раз в секунду, `completeSet`,
+  `skip` (готовность/отдых), `skipSet`, `addRest` +15 с, `togglePause`, `finish`). ~ккал = фактическая работа
+  (подход повторов = повторы × 3 с, таймер — отработанные секунды) + отдых 2 ккал/мин; XP = ккал + 5 за подход +
+  20 за все подходы (не хранится — считается из сессии)
+- `presentation/workout_player_screen.dart` — плеер: кольцо-таймер, «× 12 marta» + «Bajarildi», отдых с «+15 s» и
+  «O‘tkazib yuborish», пауза, «Keyingi», выход с диалогом (продолжить / завершить и сохранить / выйти без сохранения),
+  финал: минуты, ~ккал, XP, «Ketma-ket N kun!» после сохранения (ошибка — «Qayta urinish»)
 - `presentation/workouts_screen.dart` — нет плана: форма генератора; есть — сводка недели и дни, «Yangi reja tuzish»
   (bottom sheet); `labels.dart` — названия видов/целей/уровней/дней недели, дозировка; `widgets/plan_form.dart`,
   `widgets/plan_day_card.dart`, `widgets/workouts_home_card.dart`
@@ -54,6 +63,6 @@
   chidamlilik, egiluvchanlik) × уровень × дней в неделю (2–6) → недельный план с минутами и ~ккал;
   детерминированные правила, сохранение в `workout_plans`
 - [x] P0-4 `workoutsHomeCards`: следующая тренировка
-- [ ] P1-5 Плеер тренировки на весь экран: подходы/повторы, таймер, отдых с отсчётом (можно пропустить),
+- [x] P1-5 Плеер тренировки на весь экран: подходы/повторы, таймер, отдых с отсчётом (можно пропустить),
   финал с ~ккал и XP → `workout_sessions`; серия дней по сессиям
 - [ ] P1-6 Генератор учитывает AQI (при AQI > 100 советует «uyda»)

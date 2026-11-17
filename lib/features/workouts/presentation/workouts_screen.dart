@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
@@ -14,6 +15,7 @@ import '../application/plan_generator.dart';
 import '../application/workouts_providers.dart';
 import '../data/models.dart';
 import 'labels.dart';
+import 'workout_player_screen.dart';
 import 'widgets/plan_day_card.dart';
 import 'widgets/plan_form.dart';
 
@@ -218,7 +220,11 @@ class _PlanView extends StatelessWidget {
           ),
         ),
         for (final d in plan.days) ...[
-          PlanDayCard(day: d, catalog: catalog),
+          PlanDayCard(
+            day: d,
+            catalog: catalog,
+            onStart: () => context.push(workoutPlayerPath(d.day)),
+          ),
           const SizedBox(height: 12),
         ],
         const _Disclaimer(),

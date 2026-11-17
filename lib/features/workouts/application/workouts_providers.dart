@@ -71,3 +71,22 @@ final nextWorkoutProvider =
       if (next == null) return null;
       return (plan: plan, day: next.day, date: next.date);
     });
+
+/// Saves finished workouts to `workout_sessions`.
+class SessionActions {
+  SessionActions(this._ref);
+
+  final Ref _ref;
+
+  /// Saves a session and refreshes the sessions, the streak and the next
+  /// workout.
+  Future<WorkoutSession> save({int? planDay, required double kcal}) async {
+    final s = await _ref
+        .read(workoutsRepositoryProvider)
+        .addSession(planDay: planDay, kcal: kcal);
+    _ref.invalidate(sessionsProvider);
+    return s;
+  }
+}
+
+final sessionActionsProvider = Provider<SessionActions>(SessionActions.new);
