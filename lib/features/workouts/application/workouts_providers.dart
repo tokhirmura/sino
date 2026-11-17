@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/backend/backend.dart';
 import '../data/models.dart';
 import '../data/workouts_repository.dart';
+import 'plan_generator.dart';
 import 'workout_math.dart';
 
 /// Whole exercise catalog.
@@ -35,3 +36,25 @@ final streakProvider = FutureProvider<int>((ref) async {
   final sessions = await ref.watch(sessionsProvider.future);
   return streakDays(sessions, DateTime.now());
 });
+
+/// Builds a plan from [PlanParams] and saves it to `workout_plans`.
+class PlanActions {
+  PlanActions(this._ref);
+
+  final Ref _ref;
+
+  /// Generates the week from the catalog, saves it and refreshes
+  /// [latestPlanProvider]. Throws if the catalog is empty or saving fails.
+  Future<WorkoutPlan> create(PlanParams params) async {
+    final catalog = await _ref.read(exercisesProvider.future);
+    final days = generatePlan(params, catalog);
+    if (days.isEmpty) throw StateError('Exercise catalog is empty');
+    final plan = await _ref
+        .read(workoutsRepositoryProvider)
+        .savePlan(params: params.toJson(), days: days);
+    _ref.invalidate(latestPlanProvider);
+    return plan;
+  }
+}
+
+final planActionsProvider = Provider<PlanActions>(PlanActions.new);
