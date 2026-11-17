@@ -455,18 +455,24 @@ class _Running extends StatelessWidget {
           Row(
             children: [
               Expanded(
+                flex: 2,
                 child: OutlinedButton.icon(
                   key: const Key('player-skip-set'),
                   onPressed: onSkipSet,
                   icon: const Icon(Icons.redo_rounded),
-                  label: Text(
-                    context.tr(uz: 'O‘tkazish', ru: 'Пропуск', en: 'Skip'),
+                  // One line on a small phone — shrink, never break a word.
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      context.tr(uz: 'O‘tkazish', ru: 'Пропуск', en: 'Skip'),
+                      maxLines: 1,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: FilledButton.icon(
                   key: const Key('player-done'),
                   onPressed: onDone,

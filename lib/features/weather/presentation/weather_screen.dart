@@ -514,8 +514,10 @@ class _Hours extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    // Grows with the system text size (112 at 100 %).
+    final height = MediaQuery.textScalerOf(context).scale(112).clamp(112, 220);
     return SizedBox(
-      height: 112,
+      height: height.toDouble(),
       child: ListView.separated(
         key: const Key('weather-hours'),
         scrollDirection: Axis.horizontal,

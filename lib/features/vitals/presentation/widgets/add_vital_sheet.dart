@@ -78,7 +78,8 @@ class _AddVitalSheetState extends State<_AddVitalSheet> {
 
   InputDecoration _decoration(String label) => InputDecoration(
     labelText: label,
-    suffixText: _kind.unitText(context),
+    // Two pressure fields are narrow: their unit is in the hint below.
+    suffixText: _kind.hasSecondValue ? null : _kind.unitText(context),
     border: const OutlineInputBorder(),
   );
 
@@ -89,6 +90,18 @@ class _AddVitalSheetState extends State<_AddVitalSheet> {
       RegExp(_kind.decimal ? r'[0-9.,]' : r'[0-9]'),
     );
     final keyboard = TextInputType.numberWithOptions(decimal: _kind.decimal);
+    // Scrolls when it does not fit (iPhone SE with large text + keyboard).
+    return SingleChildScrollView(
+      child: _content(context, text, formatter, keyboard),
+    );
+  }
+
+  Widget _content(
+    BuildContext context,
+    TextTheme text,
+    TextInputFormatter formatter,
+    TextInputType keyboard,
+  ) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         16,

@@ -195,7 +195,9 @@ class VitalChart extends StatelessWidget {
           ),
           lineTouchData: const LineTouchData(enabled: false),
           lineBarsData: [
-            line((p) => p.value, kind.color),
+            // Pressure: two lines without fill — the systolic fill would
+            // cover the diastolic line.
+            line((p) => p.value, kind.color, area: kind != VitalKind.pressure),
             if (kind == VitalKind.pressure)
               line((p) => p.value2, AppColors.violet, area: false),
           ],

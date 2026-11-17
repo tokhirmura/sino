@@ -485,25 +485,30 @@ class _KindTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: v == null ? '—' : vitalValueText(v),
-                    style: text.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  if (v != null)
+            // Shrinks instead of cutting the unit («121/80 mm sim. ust.» on
+            // an iPhone SE).
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text.rich(
+                TextSpan(
+                  children: [
                     TextSpan(
-                      text: ' ${kind.unitText(context)}',
-                      style: text.bodySmall,
+                      text: v == null ? '—' : vitalValueText(v),
+                      style: text.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                ],
+                    if (v != null)
+                      TextSpan(
+                        text: ' ${kind.unitText(context)}',
+                        style: text.bodySmall,
+                      ),
+                  ],
+                ),
+                key: Key('vitals-tile-value-${kind.name}'),
+                maxLines: 1,
               ),
-              key: Key('vitals-tile-value-${kind.name}'),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
