@@ -11,6 +11,7 @@ import '../../../../core/widgets/pill.dart';
 import '../../application/plan_generator.dart';
 import '../../application/workouts_providers.dart';
 import '../labels.dart';
+import '../workout_player_screen.dart';
 
 /// Home card: the next training of the plan (when, minutes, ~kcal,
 /// exercises) and the streak; without a plan — an invitation to build one.
@@ -128,10 +129,23 @@ class WorkoutsHomeCard extends ConsumerWidget {
               color: AppColors.amber,
             ),
           ],
-          Icon(
-            Icons.chevron_right_rounded,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          if (daysAway == 0) ...[
+            const SizedBox(width: 6),
+            IconButton.filled(
+              key: const Key('workouts-home-start'),
+              tooltip: context.tr(
+                uz: 'Mashg‘ulotni boshlash',
+                ru: 'Начать тренировку',
+                en: 'Start workout',
+              ),
+              onPressed: () => context.push(workoutPlayerPath(n.day.day)),
+              icon: const Icon(Icons.play_arrow_rounded),
+            ),
+          ] else
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
         ],
       ),
     );
