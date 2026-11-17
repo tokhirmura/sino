@@ -58,3 +58,16 @@ class PlanActions {
 }
 
 final planActionsProvider = Provider<PlanActions>(PlanActions.new);
+
+/// Next training of the newest plan (for the home card); `null` = no plan.
+final nextWorkoutProvider =
+    FutureProvider<({WorkoutPlan plan, PlanDay day, DateTime date})?>((
+      ref,
+    ) async {
+      final plan = await ref.watch(latestPlanProvider.future);
+      if (plan == null) return null;
+      final sessions = await ref.watch(sessionsProvider.future);
+      final next = nextWorkout(plan.days, DateTime.now(), sessions);
+      if (next == null) return null;
+      return (plan: plan, day: next.day, date: next.date);
+    });
