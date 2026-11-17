@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -14,6 +15,7 @@ import '../../../core/widgets/section_title.dart';
 import '../application/vitals_math.dart';
 import '../application/vitals_providers.dart';
 import '../data/models.dart';
+import 'breathing_screen.dart';
 import 'labels.dart';
 import 'widgets/add_vital_sheet.dart';
 import 'widgets/bmi_card.dart';
@@ -275,6 +277,23 @@ class _Body extends ConsumerWidget {
           heightCm: user?.heightCm,
           weightKg: latest(VitalKind.weight)?.value ?? user?.weightKg,
         ),
+        const SizedBox(height: 16),
+        ShortcutCard(
+          key: const Key('vitals-breathing'),
+          emoji: '🌬️',
+          title: context.tr(
+            uz: '4-7-8 nafas mashqi',
+            ru: 'Дыхание 4-7-8',
+            en: '4-7-8 breathing',
+          ),
+          subtitle: context.tr(
+            uz: '1 daqiqada tinchlaning — bosim va uyqu uchun foydali',
+            ru: 'Успокойтесь за минуту — полезно для давления и сна',
+            en: 'Calm down in a minute — good for blood pressure and sleep',
+          ),
+          color: AppColors.primary,
+          onTap: () => context.push(vitalsBreathingPath),
+        ),
         if (dev) ...[
           const SizedBox(height: 16),
           AppCard(
@@ -392,15 +411,19 @@ class _SecretHeaderState extends ConsumerState<_SecretHeader> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            Text(
-              context.tr(
-                uz: 'Oxirgi 7 kun',
-                ru: 'Последние 7 дней',
-                en: 'Last 7 days',
+            Expanded(
+              child: Text(
+                context.tr(
+                  uz: 'Oxirgi 7 kun',
+                  ru: 'Последние 7 дней',
+                  en: 'Last 7 days',
+                ),
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             Text('${d(from)} – ${d(n)}', style: text.bodySmall),
           ],
         ),
