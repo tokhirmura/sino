@@ -55,3 +55,44 @@ int streakDays(Iterable<WorkoutSession> sessions, DateTime now) {
   }
   return streak;
 }
+
+/// The next training day of a plan and its date.
+///
+/// Today counts while no session is finished today; otherwise the search
+/// starts tomorrow and wraps into next week. Days without a weekday are
+/// taken in order. `null` for an empty plan.
+({PlanDay day, DateTime date})? nextWorkout(
+  List<PlanDay> days,
+  DateTime now,
+  Iterable<WorkoutSession> sessions,
+) {
+  if (days.isEmpty) return null;
+  final today = DateTime(now.year, now.month, now.day);
+  bool sameDay(DateTime a) =>
+      a.year == today.year && a.month == today.month && a.day == today.day;
+  final doneToday = sessions.any((s) => sameDay(s.finishedAt));
+  final start = doneToday ? 1 : 0;
+
+  final dated = [
+    for (final d in days)
+      if (d.weekday != null) d,
+  ];
+  if (dated.isEmpty) {
+    return (
+      day: days.first,
+      date: DateTime(today.year, today.month, today.day + start),
+    );
+  }
+  for (var offset = start; offset < start + 7; offset++) {
+    final weekday = (today.weekday - 1 + offset) % 7 + 1;
+    for (final d in dated) {
+      if (d.weekday == weekday) {
+        return (
+          day: d,
+          date: DateTime(today.year, today.month, today.day + offset),
+        );
+      }
+    }
+  }
+  return null;
+}

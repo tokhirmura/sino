@@ -111,3 +111,11 @@ class Vital {
     'measured_at': measuredAt.toUtc().toIso8601String(),
   };
 }
+
+/// A measurement to be saved (batch insert).
+typedef VitalInput = ({
+  VitalKind kind,
+  double value,
+  double? value2,
+  DateTime measuredAt,
+});

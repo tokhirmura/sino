@@ -70,22 +70,20 @@ class _AddFoodSheetState extends ConsumerState<_AddFoodSheet> {
             style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final m in Meal.values)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 8),
-                    child: ChoiceChip(
-                      key: Key('nutrition-meal-chip-${m.name}'),
-                      label: Text('${m.emoji} ${m.label(context)}'),
-                      selected: _meal == m,
-                      onSelected: (_) => setState(() => _meal = m),
-                    ),
-                  ),
-              ],
-            ),
+          // Wrap, not a scrolling row: all four meals stay visible on a
+          // small phone.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final m in Meal.values)
+                ChoiceChip(
+                  key: Key('nutrition-meal-chip-${m.name}'),
+                  label: Text('${m.emoji} ${m.label(context)}'),
+                  selected: _meal == m,
+                  onSelected: (_) => setState(() => _meal = m),
+                ),
+            ],
           ),
           const SizedBox(height: 8),
           Row(

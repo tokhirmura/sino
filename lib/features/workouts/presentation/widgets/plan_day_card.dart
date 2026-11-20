@@ -10,10 +10,18 @@ import '../labels.dart';
 
 /// One training day of the plan: weekday, minutes, ~kcal, exercises.
 class PlanDayCard extends StatelessWidget {
-  const PlanDayCard({super.key, required this.day, required this.catalog});
+  const PlanDayCard({
+    super.key,
+    required this.day,
+    required this.catalog,
+    this.onStart,
+  });
 
   final PlanDay day;
   final Map<String, Exercise> catalog;
+
+  /// Opens the player; `null` hides the button.
+  final VoidCallback? onStart;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +103,17 @@ class PlanDayCard extends StatelessWidget {
                   ],
                 ),
               ),
+          if (onStart != null) ...[
+            const SizedBox(height: 8),
+            FilledButton.tonalIcon(
+              key: Key('workouts-start-${day.day}'),
+              onPressed: onStart,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text(
+                context.tr(uz: 'Boshlash', ru: 'Начать', en: 'Start'),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -17,7 +17,8 @@ Fake-режим: пользовательские данные в prefs (`nutrit
 - `/nutrition` (`AppRoutes.nutrition`) — вкладка «Ovqat»
 
 ## Home-карточки
-- `nutrition`, order 50
+- `nutrition`, order 50 — `NutritionHomeCard`: калории сегодня (кольцо, «X / цель kkal», «qoldi/ortiqcha»), вода
+  «N / 8» с кнопкой «+1 stakan»; тап → вкладка на сегодня. Загрузка/ошибка — `ShortcutCard` с подписью
 
 ## Таблицы БД
 `foods`, `food_logs`, `water_logs`
@@ -36,7 +37,8 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   `manualKcalGoalProvider` (prefs `nutrition.kcal_goal`, 800–6000, `null` = из профиля), `kcalGoalProvider`
 - `presentation/nutrition_screen.dart` — экран дня; `labels.dart` — названия приёмов пищи, даты, единицы;
   `widgets/` — `DaySwitcher`, `CalorieSummaryCard` (кольцо, БЖУ, non birligi, диалог цели), `WaterCard`,
-  `MealSection` (порции ±0.5, свайп/корзина — удалить, «Qaytarish»), `add_food_sheet.dart` (поиск, приём, порция)
+  `MealSection` (порции ±0.5, свайп/корзина — удалить, «Qaytarish»), `add_food_sheet.dart` (поиск, приём, порция),
+  `nutrition_home_card.dart` (карточка главной, те же `dayLogsProvider`/`waterProvider`, что и вкладка)
 - `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов
 - Тесты: `test/features/nutrition/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
@@ -49,6 +51,6 @@ Fake-режим: пользовательские данные в prefs (`nutrit
 - [x] P0-2 Кольцо калорий к цели (Миффлин–Сан Жеор из профиля, цель можно поменять вручную), полоски БЖУ,
   «non birligi» (углеводы / 12)
 - [x] P0-2 Вода — 8 стаканов в `water_logs`; простая подсказка по балансу дня
-- [ ] P0-4 `nutritionHomeCards`: калории и вода сегодня
+- [x] P0-4 `nutritionHomeCards`: калории и вода сегодня
 - [ ] P2-8 «Taomni rasmdan aniqlash»: `image_picker` + мок-распознавание (анимация, 3 варианта, «beta»),
   фото в Supabase Storage (bucket и политики — попросить лида миграцией core)
