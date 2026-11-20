@@ -1,0 +1,961 @@
+[
+  {
+    "id": "a1000000-0000-4000-8000-000000000001",
+    "slug": "paracetamol",
+    "name": "Paracetamol 500 mg",
+    "ingredient": "paracetamol",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 4500,
+    "barcode": "4781000000011",
+    "description": {
+      "uz": "Isitma va o‘rtacha og‘riqni (bosh, tish, mushak) pasaytiradi.",
+      "ru": "Снижает температуру и умеренную боль (головную, зубную, мышечную).",
+      "en": "Lowers fever and relieves mild to moderate pain (headache, toothache, muscle pain)."
+    },
+    "warning": {
+      "uz": "Sutkalik dozadan oshirmang (kattalar — 4 g). Jigar kasalligida va spirtli ichimlik bilan birga ichmang.",
+      "ru": "Не превышайте суточную дозу (взрослым — 4 г). Нельзя при болезнях печени и вместе с алкоголем.",
+      "en": "Do not exceed the daily dose (adults: 4 g). Avoid with liver disease or alcohol."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000002",
+      "a1000000-0000-4000-8000-000000000003",
+      "a1000000-0000-4000-8000-000000000004"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000002",
+    "slug": "panadol",
+    "name": "Panadol 500 mg",
+    "ingredient": "paracetamol",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 28000,
+    "barcode": "4781000000028",
+    "description": {
+      "uz": "Isitma va o‘rtacha og‘riqni (bosh, tish, mushak) pasaytiradi.",
+      "ru": "Снижает температуру и умеренную боль (головную, зубную, мышечную).",
+      "en": "Lowers fever and relieves mild to moderate pain (headache, toothache, muscle pain)."
+    },
+    "warning": {
+      "uz": "Sutkalik dozadan oshirmang (kattalar — 4 g). Jigar kasalligida va spirtli ichimlik bilan birga ichmang.",
+      "ru": "Не превышайте суточную дозу (взрослым — 4 г). Нельзя при болезнях печени и вместе с алкоголем.",
+      "en": "Do not exceed the daily dose (adults: 4 g). Avoid with liver disease or alcohol."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000003",
+      "a1000000-0000-4000-8000-000000000004"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000003",
+    "slug": "efferalgan",
+    "name": "Efferalgan 500 mg",
+    "ingredient": "paracetamol",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 39000,
+    "barcode": "4781000000035",
+    "description": {
+      "uz": "Isitma va o‘rtacha og‘riqni (bosh, tish, mushak) pasaytiradi.",
+      "ru": "Снижает температуру и умеренную боль (головную, зубную, мышечную).",
+      "en": "Lowers fever and relieves mild to moderate pain (headache, toothache, muscle pain)."
+    },
+    "warning": {
+      "uz": "Sutkalik dozadan oshirmang (kattalar — 4 g). Jigar kasalligida va spirtli ichimlik bilan birga ichmang.",
+      "ru": "Не превышайте суточную дозу (взрослым — 4 г). Нельзя при болезнях печени и вместе с алкоголем.",
+      "en": "Do not exceed the daily dose (adults: 4 g). Avoid with liver disease or alcohol."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000002",
+      "a1000000-0000-4000-8000-000000000004"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000004",
+    "slug": "paracetamol_syrup",
+    "name": "Paracetamol sirop 120 mg/5 ml",
+    "ingredient": "paracetamol",
+    "form": "syrup",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 12000,
+    "barcode": "4781000000042",
+    "description": {
+      "uz": "Isitma va o‘rtacha og‘riqni (bosh, tish, mushak) pasaytiradi.",
+      "ru": "Снижает температуру и умеренную боль (головную, зубную, мышечную).",
+      "en": "Lowers fever and relieves mild to moderate pain (headache, toothache, muscle pain)."
+    },
+    "warning": {
+      "uz": "Sutkalik dozadan oshirmang (kattalar — 4 g). Jigar kasalligida va spirtli ichimlik bilan birga ichmang.",
+      "ru": "Не превышайте суточную дозу (взрослым — 4 г). Нельзя при болезнях печени и вместе с алкоголем.",
+      "en": "Do not exceed the daily dose (adults: 4 g). Avoid with liver disease or alcohol."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000002",
+      "a1000000-0000-4000-8000-000000000003"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000005",
+    "slug": "ibuprofen",
+    "name": "Ibuprofen 400 mg",
+    "ingredient": "ibuprofen",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 9000,
+    "barcode": "4781000000059",
+    "description": {
+      "uz": "Og‘riq, yallig‘lanish va isitmani kamaytiradi.",
+      "ru": "Уменьшает боль, воспаление и температуру.",
+      "en": "Reduces pain, inflammation and fever."
+    },
+    "warning": {
+      "uz": "Ovqatdan keyin iching. Oshqozon yarasi, buyrak kasalligi va homiladorlikning oxirgi oylarida mumkin emas.",
+      "ru": "Принимать после еды. Нельзя при язве желудка, болезнях почек и в последние месяцы беременности.",
+      "en": "Take after food. Not for stomach ulcers, kidney disease or late pregnancy."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000006",
+      "a1000000-0000-4000-8000-000000000007"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000006",
+    "slug": "nurofen",
+    "name": "Nurofen 200 mg",
+    "ingredient": "ibuprofen",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 35000,
+    "barcode": "4781000000066",
+    "description": {
+      "uz": "Og‘riq, yallig‘lanish va isitmani kamaytiradi.",
+      "ru": "Уменьшает боль, воспаление и температуру.",
+      "en": "Reduces pain, inflammation and fever."
+    },
+    "warning": {
+      "uz": "Ovqatdan keyin iching. Oshqozon yarasi, buyrak kasalligi va homiladorlikning oxirgi oylarida mumkin emas.",
+      "ru": "Принимать после еды. Нельзя при язве желудка, болезнях почек и в последние месяцы беременности.",
+      "en": "Take after food. Not for stomach ulcers, kidney disease or late pregnancy."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000005",
+      "a1000000-0000-4000-8000-000000000007"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000007",
+    "slug": "nurofen_kids",
+    "name": "Nurofen sirop 100 mg/5 ml",
+    "ingredient": "ibuprofen",
+    "form": "syrup",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 48000,
+    "barcode": "4781000000073",
+    "description": {
+      "uz": "Og‘riq, yallig‘lanish va isitmani kamaytiradi.",
+      "ru": "Уменьшает боль, воспаление и температуру.",
+      "en": "Reduces pain, inflammation and fever."
+    },
+    "warning": {
+      "uz": "Ovqatdan keyin iching. Oshqozon yarasi, buyrak kasalligi va homiladorlikning oxirgi oylarida mumkin emas.",
+      "ru": "Принимать после еды. Нельзя при язве желудка, болезнях почек и в последние месяцы беременности.",
+      "en": "Take after food. Not for stomach ulcers, kidney disease or late pregnancy."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000005",
+      "a1000000-0000-4000-8000-000000000006"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000008",
+    "slug": "analgin",
+    "name": "Analgin 500 mg",
+    "ingredient": "metamizole",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 6000,
+    "barcode": "4781000000080",
+    "description": {
+      "uz": "Og‘riq qoldiruvchi va isitma tushiruvchi vosita.",
+      "ru": "Обезболивающее и жаропонижающее средство.",
+      "en": "Pain reliever and fever reducer."
+    },
+    "warning": {
+      "uz": "Uzoq vaqt ichmang — qon tarkibiga ta’sir qilishi mumkin. Bolalarga faqat shifokor tavsiyasi bilan.",
+      "ru": "Не принимать долго — может влиять на состав крови. Детям — только по назначению врача.",
+      "en": "Not for long-term use — may affect blood counts. For children only on a doctor’s advice."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000009",
+    "slug": "citramon",
+    "name": "Sitramon P",
+    "ingredient": "acetylsalicylic acid + paracetamol + caffeine",
+    "form": "tablet",
+    "category": "pain",
+    "rx": false,
+    "price_uzs": 5000,
+    "barcode": "4781000000097",
+    "description": {
+      "uz": "Bosh og‘rig‘i va migrenda yordam beradi.",
+      "ru": "Помогает при головной боли и мигрени.",
+      "en": "Helps with headache and migraine."
+    },
+    "warning": {
+      "uz": "15 yoshgacha, oshqozon yarasi va yuqori qon bosimida mumkin emas.",
+      "ru": "Нельзя до 15 лет, при язве желудка и высоком давлении.",
+      "en": "Not for under 15s, stomach ulcers or high blood pressure."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000010",
+    "slug": "no_shpa",
+    "name": "No-shpa 40 mg",
+    "ingredient": "drotaverine",
+    "form": "tablet",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 32000,
+    "barcode": "4781000000103",
+    "description": {
+      "uz": "Silliq mushaklar spazmini bo‘shatadi: oshqozon, ichak, siydik yo‘llari og‘rig‘ida.",
+      "ru": "Снимает спазм гладких мышц: при болях в желудке, кишечнике, мочевых путях.",
+      "en": "Relaxes smooth muscle spasms: stomach, bowel or urinary tract cramps."
+    },
+    "warning": {
+      "uz": "Kuchli yoki uzoq davom etgan qorin og‘rig‘ida avval shifokorga murojaat qiling.",
+      "ru": "При сильной или долгой боли в животе сначала обратитесь к врачу.",
+      "en": "For severe or lasting abdominal pain, see a doctor first."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000011"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000011",
+    "slug": "drotaverin",
+    "name": "Drotaverin 40 mg",
+    "ingredient": "drotaverine",
+    "form": "tablet",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 8000,
+    "barcode": "4781000000110",
+    "description": {
+      "uz": "Silliq mushaklar spazmini bo‘shatadi: oshqozon, ichak, siydik yo‘llari og‘rig‘ida.",
+      "ru": "Снимает спазм гладких мышц: при болях в желудке, кишечнике, мочевых путях.",
+      "en": "Relaxes smooth muscle spasms: stomach, bowel or urinary tract cramps."
+    },
+    "warning": {
+      "uz": "Kuchli yoki uzoq davom etgan qorin og‘rig‘ida avval shifokorga murojaat qiling.",
+      "ru": "При сильной или долгой боли в животе сначала обратитесь к врачу.",
+      "en": "For severe or lasting abdominal pain, see a doctor first."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000010"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000012",
+    "slug": "aspirin_cardio",
+    "name": "Aspirin Cardio 100 mg",
+    "ingredient": "acetylsalicylic acid",
+    "form": "tablet",
+    "category": "heart",
+    "rx": false,
+    "price_uzs": 42000,
+    "barcode": "4781000000127",
+    "description": {
+      "uz": "Qonni suyultiradi: kichik dozada infarkt va insult profilaktikasi uchun.",
+      "ru": "Разжижает кровь: малые дозы для профилактики инфаркта и инсульта.",
+      "en": "Low-dose blood thinner to prevent heart attack and stroke."
+    },
+    "warning": {
+      "uz": "Uzoq muddat faqat shifokor tavsiyasi bilan ichiladi. Qon ketish xavfini oshiradi.",
+      "ru": "Длительно — только по назначению врача. Повышает риск кровотечений.",
+      "en": "Long-term use only as prescribed. Increases bleeding risk."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000013"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000013",
+    "slug": "acecardol",
+    "name": "Asekardol 100 mg",
+    "ingredient": "acetylsalicylic acid",
+    "form": "tablet",
+    "category": "heart",
+    "rx": false,
+    "price_uzs": 14000,
+    "barcode": "4781000000134",
+    "description": {
+      "uz": "Qonni suyultiradi: kichik dozada infarkt va insult profilaktikasi uchun.",
+      "ru": "Разжижает кровь: малые дозы для профилактики инфаркта и инсульта.",
+      "en": "Low-dose blood thinner to prevent heart attack and stroke."
+    },
+    "warning": {
+      "uz": "Uzoq muddat faqat shifokor tavsiyasi bilan ichiladi. Qon ketish xavfini oshiradi.",
+      "ru": "Длительно — только по назначению врача. Повышает риск кровотечений.",
+      "en": "Long-term use only as prescribed. Increases bleeding risk."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000012"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000014",
+    "slug": "amlodipine",
+    "name": "Amlodipin 5 mg",
+    "ingredient": "amlodipine",
+    "form": "tablet",
+    "category": "heart",
+    "rx": true,
+    "price_uzs": 12000,
+    "barcode": "4781000000141",
+    "description": {
+      "uz": "Qon bosimini pasaytiradi, stenokardiyada qo‘llaniladi.",
+      "ru": "Снижает давление, применяется при стенокардии.",
+      "en": "Lowers blood pressure; used for angina."
+    },
+    "warning": {
+      "uz": "Retsept bo‘yicha. Oyoqlarda shish paydo bo‘lishi mumkin. To‘satdan to‘xtatmang.",
+      "ru": "По рецепту. Возможны отёки ног. Не прекращайте приём резко.",
+      "en": "Prescription only. May cause ankle swelling. Do not stop suddenly."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000015"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000015",
+    "slug": "norvasc",
+    "name": "Norvasc 5 mg",
+    "ingredient": "amlodipine",
+    "form": "tablet",
+    "category": "heart",
+    "rx": true,
+    "price_uzs": 65000,
+    "barcode": "4781000000158",
+    "description": {
+      "uz": "Qon bosimini pasaytiradi, stenokardiyada qo‘llaniladi.",
+      "ru": "Снижает давление, применяется при стенокардии.",
+      "en": "Lowers blood pressure; used for angina."
+    },
+    "warning": {
+      "uz": "Retsept bo‘yicha. Oyoqlarda shish paydo bo‘lishi mumkin. To‘satdan to‘xtatmang.",
+      "ru": "По рецепту. Возможны отёки ног. Не прекращайте приём резко.",
+      "en": "Prescription only. May cause ankle swelling. Do not stop suddenly."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000014"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000016",
+    "slug": "lisinopril",
+    "name": "Lizinopril 10 mg",
+    "ingredient": "lisinopril",
+    "form": "tablet",
+    "category": "heart",
+    "rx": true,
+    "price_uzs": 14000,
+    "barcode": "4781000000165",
+    "description": {
+      "uz": "Qon bosimini pasaytiradi va yurakni himoya qiladi (AAF ingibitori).",
+      "ru": "Снижает давление и защищает сердце (ингибитор АПФ).",
+      "en": "Lowers blood pressure and protects the heart (ACE inhibitor)."
+    },
+    "warning": {
+      "uz": "Retsept bo‘yicha. Quruq yo‘tal paydo bo‘lishi mumkin. Homiladorlikda mumkin emas.",
+      "ru": "По рецепту. Возможен сухой кашель. Нельзя при беременности.",
+      "en": "Prescription only. May cause a dry cough. Not for use in pregnancy."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000017",
+    "slug": "enalapril",
+    "name": "Enalapril 10 mg",
+    "ingredient": "enalapril",
+    "form": "tablet",
+    "category": "heart",
+    "rx": true,
+    "price_uzs": 9000,
+    "barcode": "4781000000172",
+    "description": {
+      "uz": "Qon bosimini pasaytiradi va yurakni himoya qiladi (AAF ingibitori).",
+      "ru": "Снижает давление и защищает сердце (ингибитор АПФ).",
+      "en": "Lowers blood pressure and protects the heart (ACE inhibitor)."
+    },
+    "warning": {
+      "uz": "Retsept bo‘yicha. Quruq yo‘tal paydo bo‘lishi mumkin. Homiladorlikda mumkin emas.",
+      "ru": "По рецепту. Возможен сухой кашель. Нельзя при беременности.",
+      "en": "Prescription only. May cause a dry cough. Not for use in pregnancy."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000018",
+    "slug": "metformin",
+    "name": "Metformin 850 mg",
+    "ingredient": "metformin",
+    "form": "tablet",
+    "category": "diabetes",
+    "rx": true,
+    "price_uzs": 18000,
+    "barcode": "4781000000189",
+    "description": {
+      "uz": "2-tur qandli diabetda qondagi qand miqdorini pasaytiradi.",
+      "ru": "Снижает сахар крови при диабете 2 типа.",
+      "en": "Lowers blood sugar in type 2 diabetes."
+    },
+    "warning": {
+      "uz": "Retsept bo‘yicha, ovqat bilan iching. Buyrak yetishmovchiligida mumkin emas.",
+      "ru": "По рецепту, во время еды. Нельзя при почечной недостаточности.",
+      "en": "Prescription only; take with meals. Not for kidney failure."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000019"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000019",
+    "slug": "siofor",
+    "name": "Siofor 850",
+    "ingredient": "metformin",
+    "form": "tablet",
+    "category": "diabetes",
+    "rx": true,
+    "price_uzs": 45000,
+    "barcode": "4781000000196",
+    "description": {
+      "uz": "2-tur qandli diabetda qondagi qand miqdorini pasaytiradi.",
+      "ru": "Снижает сахар крови при диабете 2 типа.",
+      "en": "Lowers blood sugar in type 2 diabetes."
+    },
+    "warning": {
+      "uz": "Retsept bo‘yicha, ovqat bilan iching. Buyrak yetishmovchiligida mumkin emas.",
+      "ru": "По рецепту, во время еды. Нельзя при почечной недостаточности.",
+      "en": "Prescription only; take with meals. Not for kidney failure."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000018"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000020",
+    "slug": "amoxicillin",
+    "name": "Amoksitsillin 500 mg",
+    "ingredient": "amoxicillin",
+    "form": "capsule",
+    "category": "antibiotic",
+    "rx": true,
+    "price_uzs": 22000,
+    "barcode": "4781000000202",
+    "description": {
+      "uz": "Bakterial infeksiyalarga qarshi antibiotik (tomoq, quloq, nafas yo‘llari).",
+      "ru": "Антибиотик против бактериальных инфекций (горло, уши, дыхательные пути).",
+      "en": "Antibiotic for bacterial infections (throat, ear, airways)."
+    },
+    "warning": {
+      "uz": "Faqat retsept bo‘yicha. Kursni oxirigacha iching. Penitsillinga allergiyada mumkin emas.",
+      "ru": "Только по рецепту. Пропейте курс до конца. Нельзя при аллергии на пенициллин.",
+      "en": "Prescription only. Finish the full course. Not for penicillin allergy."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000021",
+    "slug": "amoxiclav",
+    "name": "Amoksiklav 625 mg",
+    "ingredient": "amoxicillin + clavulanic acid",
+    "form": "tablet",
+    "category": "antibiotic",
+    "rx": true,
+    "price_uzs": 68000,
+    "barcode": "4781000000219",
+    "description": {
+      "uz": "Kengaytirilgan ta’sirli antibiotik: amoksitsillin va klavulan kislota.",
+      "ru": "Антибиотик расширенного действия: амоксициллин с клавулановой кислотой.",
+      "en": "Broad-spectrum antibiotic: amoxicillin with clavulanic acid."
+    },
+    "warning": {
+      "uz": "Faqat retsept bo‘yicha. Kursni oxirigacha iching. Penitsillinga allergiyada mumkin emas.",
+      "ru": "Только по рецепту. Пропейте курс до конца. Нельзя при аллергии на пенициллин.",
+      "en": "Prescription only. Finish the full course. Not for penicillin allergy."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000022",
+    "slug": "azithromycin",
+    "name": "Azitromitsin 500 mg",
+    "ingredient": "azithromycin",
+    "form": "tablet",
+    "category": "antibiotic",
+    "rx": true,
+    "price_uzs": 26000,
+    "barcode": "4781000000226",
+    "description": {
+      "uz": "Antibiotik, odatda 3 kunlik kurs.",
+      "ru": "Антибиотик, обычно курс 3 дня.",
+      "en": "Antibiotic, usually a 3-day course."
+    },
+    "warning": {
+      "uz": "Faqat retsept bo‘yicha. Yurak ritmi buzilishida ehtiyot bo‘ling.",
+      "ru": "Только по рецепту. Осторожно при нарушениях ритма сердца.",
+      "en": "Prescription only. Use with caution in heart rhythm disorders."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000023",
+    "slug": "loratadine",
+    "name": "Loratadin 10 mg",
+    "ingredient": "loratadine",
+    "form": "tablet",
+    "category": "allergy",
+    "rx": false,
+    "price_uzs": 7000,
+    "barcode": "4781000000233",
+    "description": {
+      "uz": "Allergiyaga qarshi: burun oqishi, aksirish, qichishishda. Uyqu keltirmaydi.",
+      "ru": "Против аллергии: насморк, чихание, зуд. Не вызывает сонливости.",
+      "en": "Antihistamine for runny nose, sneezing and itching. Non-drowsy."
+    },
+    "warning": {
+      "uz": "2 yoshgacha bolalarga mumkin emas. Homiladorlikda shifokor bilan maslahatlashing.",
+      "ru": "Нельзя детям до 2 лет. При беременности — после консультации врача.",
+      "en": "Not for children under 2. Ask a doctor if pregnant."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000024"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000024",
+    "slug": "claritin",
+    "name": "Klaritin 10 mg",
+    "ingredient": "loratadine",
+    "form": "tablet",
+    "category": "allergy",
+    "rx": false,
+    "price_uzs": 52000,
+    "barcode": "4781000000240",
+    "description": {
+      "uz": "Allergiyaga qarshi: burun oqishi, aksirish, qichishishda. Uyqu keltirmaydi.",
+      "ru": "Против аллергии: насморк, чихание, зуд. Не вызывает сонливости.",
+      "en": "Antihistamine for runny nose, sneezing and itching. Non-drowsy."
+    },
+    "warning": {
+      "uz": "2 yoshgacha bolalarga mumkin emas. Homiladorlikda shifokor bilan maslahatlashing.",
+      "ru": "Нельзя детям до 2 лет. При беременности — после консультации врача.",
+      "en": "Not for children under 2. Ask a doctor if pregnant."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000023"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000025",
+    "slug": "cetirizine",
+    "name": "Setirizin 10 mg",
+    "ingredient": "cetirizine",
+    "form": "tablet",
+    "category": "allergy",
+    "rx": false,
+    "price_uzs": 9000,
+    "barcode": "4781000000257",
+    "description": {
+      "uz": "Allergiyaga qarshi: burun oqishi, ko‘z yoshlanishi, eshakemda.",
+      "ru": "Против аллергии: насморк, слезотечение, крапивница.",
+      "en": "Antihistamine for runny nose, watery eyes and hives."
+    },
+    "warning": {
+      "uz": "Uyquchanlik bo‘lishi mumkin — mashina haydashda ehtiyot bo‘ling.",
+      "ru": "Может вызывать сонливость — осторожно за рулём.",
+      "en": "May cause drowsiness — take care when driving."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000026"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000026",
+    "slug": "zyrtec",
+    "name": "Zirtek 10 mg",
+    "ingredient": "cetirizine",
+    "form": "tablet",
+    "category": "allergy",
+    "rx": false,
+    "price_uzs": 61000,
+    "barcode": "4781000000264",
+    "description": {
+      "uz": "Allergiyaga qarshi: burun oqishi, ko‘z yoshlanishi, eshakemda.",
+      "ru": "Против аллергии: насморк, слезотечение, крапивница.",
+      "en": "Antihistamine for runny nose, watery eyes and hives."
+    },
+    "warning": {
+      "uz": "Uyquchanlik bo‘lishi mumkin — mashina haydashda ehtiyot bo‘ling.",
+      "ru": "Может вызывать сонливость — осторожно за рулём.",
+      "en": "May cause drowsiness — take care when driving."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000025"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000027",
+    "slug": "suprastin",
+    "name": "Suprastin 25 mg",
+    "ingredient": "chloropyramine",
+    "form": "tablet",
+    "category": "allergy",
+    "rx": false,
+    "price_uzs": 29000,
+    "barcode": "4781000000271",
+    "description": {
+      "uz": "Tez ta’sir qiluvchi allergiyaga qarshi vosita.",
+      "ru": "Быстродействующее противоаллергическое средство.",
+      "en": "Fast-acting antihistamine."
+    },
+    "warning": {
+      "uz": "Uyqu keltiradi. Spirtli ichimlik bilan birga ichmang, mashina haydamang.",
+      "ru": "Вызывает сонливость. Не сочетать с алкоголем, не садиться за руль.",
+      "en": "Causes drowsiness. Avoid alcohol and driving."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000028",
+    "slug": "omeprazole",
+    "name": "Omeprazol 20 mg",
+    "ingredient": "omeprazole",
+    "form": "capsule",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 11000,
+    "barcode": "4781000000288",
+    "description": {
+      "uz": "Oshqozon kislotasini kamaytiradi: jig‘ildon qaynashi va gastritda.",
+      "ru": "Снижает кислотность желудка: при изжоге и гастрите.",
+      "en": "Reduces stomach acid: heartburn and gastritis."
+    },
+    "warning": {
+      "uz": "Ovqatdan oldin iching. 2 haftadan ortiq — faqat shifokor nazoratida.",
+      "ru": "Принимать до еды. Дольше 2 недель — под контролем врача.",
+      "en": "Take before meals. Longer than 2 weeks only under a doctor’s care."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000029"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000029",
+    "slug": "omez",
+    "name": "Omez 20 mg",
+    "ingredient": "omeprazole",
+    "form": "capsule",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 24000,
+    "barcode": "4781000000295",
+    "description": {
+      "uz": "Oshqozon kislotasini kamaytiradi: jig‘ildon qaynashi va gastritda.",
+      "ru": "Снижает кислотность желудка: при изжоге и гастрите.",
+      "en": "Reduces stomach acid: heartburn and gastritis."
+    },
+    "warning": {
+      "uz": "Ovqatdan oldin iching. 2 haftadan ortiq — faqat shifokor nazoratida.",
+      "ru": "Принимать до еды. Дольше 2 недель — под контролем врача.",
+      "en": "Take before meals. Longer than 2 weeks only under a doctor’s care."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000028"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000030",
+    "slug": "smecta",
+    "name": "Smekta 3 g",
+    "ingredient": "diosmectite",
+    "form": "powder",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 36000,
+    "barcode": "4781000000301",
+    "description": {
+      "uz": "Ich ketishda toksinlarni bog‘laydi va ichakni himoya qiladi.",
+      "ru": "При диарее связывает токсины и защищает кишечник.",
+      "en": "Binds toxins and protects the gut in diarrhoea."
+    },
+    "warning": {
+      "uz": "Boshqa dorilardan 2 soat farq bilan iching. Qonli ich ketishida darhol shifokorga.",
+      "ru": "Принимать с интервалом 2 часа от других лекарств. При диарее с кровью — сразу к врачу.",
+      "en": "Take 2 hours apart from other medicines. Bloody diarrhoea — see a doctor at once."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000031",
+    "slug": "mezim",
+    "name": "Mezim forte",
+    "ingredient": "pancreatin",
+    "form": "tablet",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 30000,
+    "barcode": "4781000000318",
+    "description": {
+      "uz": "Ovqat hazm qilishga yordam beruvchi fermentlar.",
+      "ru": "Ферменты, помогающие пищеварению.",
+      "en": "Digestive enzymes that help break down food."
+    },
+    "warning": {
+      "uz": "Ovqat paytida iching. O‘tkir pankreatitda mumkin emas.",
+      "ru": "Принимать во время еды. Нельзя при остром панкреатите.",
+      "en": "Take with meals. Not for acute pancreatitis."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000032",
+    "slug": "regidron",
+    "name": "Regidron",
+    "ingredient": "oral rehydration salts",
+    "form": "powder",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 15000,
+    "barcode": "4781000000325",
+    "description": {
+      "uz": "Ich ketishi va qusishda suv-tuz balansini tiklaydi.",
+      "ru": "Восстанавливает водно-солевой баланс при диарее и рвоте.",
+      "en": "Restores fluids and salts after diarrhoea or vomiting."
+    },
+    "warning": {
+      "uz": "Ko‘rsatmaga ko‘ra suvda eriting. Bolada suvsizlanish belgilari bo‘lsa — shifokorga.",
+      "ru": "Разводите по инструкции. Признаки обезвоживания у ребёнка — к врачу.",
+      "en": "Dissolve exactly as directed. Signs of dehydration in a child — see a doctor."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000033",
+    "slug": "activated_charcoal",
+    "name": "Faollashtirilgan ko‘mir 250 mg",
+    "ingredient": "activated charcoal",
+    "form": "tablet",
+    "category": "stomach",
+    "rx": false,
+    "price_uzs": 3000,
+    "barcode": "4781000000332",
+    "description": {
+      "uz": "Zaharlanish va qorin dam bo‘lishida toksinlarni bog‘laydi.",
+      "ru": "Связывает токсины при отравлении и вздутии.",
+      "en": "Binds toxins in food poisoning and bloating."
+    },
+    "warning": {
+      "uz": "Boshqa dorilardan 2 soat farq bilan iching. Og‘ir zaharlanishda — 103.",
+      "ru": "Принимать через 2 часа после других лекарств. При тяжёлом отравлении — 103.",
+      "en": "Take 2 hours apart from other medicines. Severe poisoning — call 103."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000034",
+    "slug": "ambroxol",
+    "name": "Ambroksol 30 mg",
+    "ingredient": "ambroxol",
+    "form": "tablet",
+    "category": "cold",
+    "rx": false,
+    "price_uzs": 8000,
+    "barcode": "4781000000349",
+    "description": {
+      "uz": "Balg‘amni suyultiradi va yo‘talda ko‘chishini osonlashtiradi.",
+      "ru": "Разжижает мокроту и облегчает её отхождение при кашле.",
+      "en": "Thins mucus and makes coughing it up easier."
+    },
+    "warning": {
+      "uz": "Yo‘talni bosuvchi dorilar bilan birga ichmang. Homiladorlikning 1-uch oyligida mumkin emas.",
+      "ru": "Не сочетать с противокашлевыми средствами. Нельзя в первом триместре беременности.",
+      "en": "Do not combine with cough suppressants. Not in the first trimester of pregnancy."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000035"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000035",
+    "slug": "ambroxol_syrup",
+    "name": "Ambroksol sirop 15 mg/5 ml",
+    "ingredient": "ambroxol",
+    "form": "syrup",
+    "category": "cold",
+    "rx": false,
+    "price_uzs": 16000,
+    "barcode": "4781000000356",
+    "description": {
+      "uz": "Balg‘amni suyultiradi va yo‘talda ko‘chishini osonlashtiradi.",
+      "ru": "Разжижает мокроту и облегчает её отхождение при кашле.",
+      "en": "Thins mucus and makes coughing it up easier."
+    },
+    "warning": {
+      "uz": "Yo‘talni bosuvchi dorilar bilan birga ichmang. Homiladorlikning 1-uch oyligida mumkin emas.",
+      "ru": "Не сочетать с противокашлевыми средствами. Нельзя в первом триместре беременности.",
+      "en": "Do not combine with cough suppressants. Not in the first trimester of pregnancy."
+    },
+    "analogs": [
+      "a1000000-0000-4000-8000-000000000034"
+    ]
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000036",
+    "slug": "xylometazoline",
+    "name": "Ksilometazolin 0.1% sprey",
+    "ingredient": "xylometazoline",
+    "form": "spray",
+    "category": "cold",
+    "rx": false,
+    "price_uzs": 14000,
+    "barcode": "4781000000363",
+    "description": {
+      "uz": "Burun bitishini tez yengillashtiradi.",
+      "ru": "Быстро снимает заложенность носа.",
+      "en": "Quickly relieves a blocked nose."
+    },
+    "warning": {
+      "uz": "5–7 kundan ortiq ishlatmang — o‘rganib qolish mumkin.",
+      "ru": "Не используйте дольше 5–7 дней — возможно привыкание.",
+      "en": "Do not use for more than 5–7 days — may cause dependence."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000037",
+    "slug": "vitamin_d3",
+    "name": "Vitamin D3 2000 ME",
+    "ingredient": "cholecalciferol",
+    "form": "capsule",
+    "category": "vitamins",
+    "rx": false,
+    "price_uzs": 55000,
+    "barcode": "4781000000370",
+    "description": {
+      "uz": "D vitamini: suyaklar va immunitet uchun.",
+      "ru": "Витамин D: для костей и иммунитета.",
+      "en": "Vitamin D for bones and immunity."
+    },
+    "warning": {
+      "uz": "Dozani oshirmang. Uzoq muddat ichishdan oldin qondagi darajasini tekshiring.",
+      "ru": "Не превышайте дозу. Перед длительным приёмом проверьте уровень в крови.",
+      "en": "Do not exceed the dose. Check your blood level before long-term use."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000038",
+    "slug": "ascorbic_acid",
+    "name": "Askorbin kislota 50 mg",
+    "ingredient": "ascorbic acid",
+    "form": "tablet",
+    "category": "vitamins",
+    "rx": false,
+    "price_uzs": 3500,
+    "barcode": "4781000000387",
+    "description": {
+      "uz": "C vitamini: immunitetni qo‘llab-quvvatlaydi.",
+      "ru": "Витамин C: поддерживает иммунитет.",
+      "en": "Vitamin C to support immunity."
+    },
+    "warning": {
+      "uz": "Buyrakda tosh bo‘lsa, katta dozalarda ichmang.",
+      "ru": "При камнях в почках не принимать большие дозы.",
+      "en": "Avoid high doses if you have kidney stones."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000039",
+    "slug": "levomekol",
+    "name": "Levomekol malhami",
+    "ingredient": "chloramphenicol + methyluracil",
+    "form": "ointment",
+    "category": "skin",
+    "rx": false,
+    "price_uzs": 18000,
+    "barcode": "4781000000394",
+    "description": {
+      "uz": "Yiringli yara va kuyishlarni davolash uchun malham.",
+      "ru": "Мазь для лечения гнойных ран и ожогов.",
+      "en": "Ointment for infected wounds and burns."
+    },
+    "warning": {
+      "uz": "Faqat tashqi qo‘llash uchun. Allergiya bo‘lsa, to‘xtating.",
+      "ru": "Только наружно. При аллергии прекратите применение.",
+      "en": "For external use only. Stop if an allergy develops."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000040",
+    "slug": "sulfacetamide",
+    "name": "Sulfatsetamid 20% ko‘z tomchisi",
+    "ingredient": "sulfacetamide",
+    "form": "drops",
+    "category": "eye",
+    "rx": false,
+    "price_uzs": 9000,
+    "barcode": "4781000000400",
+    "description": {
+      "uz": "Ko‘zning bakterial yallig‘lanishida (kon’yunktivit) tomchi.",
+      "ru": "Капли при бактериальном воспалении глаз (конъюнктивите).",
+      "en": "Eye drops for bacterial conjunctivitis."
+    },
+    "warning": {
+      "uz": "Tomizganda achishishi mumkin. 2–3 kunda yaxshilanmasa — ko‘z shifokoriga.",
+      "ru": "Может щипать при закапывании. Нет улучшения за 2–3 дня — к окулисту.",
+      "en": "May sting. No improvement in 2–3 days — see an eye doctor."
+    },
+    "analogs": []
+  },
+  {
+    "id": "a1000000-0000-4000-8000-000000000041",
+    "slug": "valerian",
+    "name": "Valeriana 20 mg",
+    "ingredient": "valerian",
+    "form": "tablet",
+    "category": "nerves",
+    "rx": false,
+    "price_uzs": 6000,
+    "barcode": "4781000000417",
+    "description": {
+      "uz": "Yengil tinchlantiruvchi: asabiylik va uyqusizlikda.",
+      "ru": "Мягкое успокоительное: при нервозности и бессоннице.",
+      "en": "Mild sedative for nervousness and trouble sleeping."
+    },
+    "warning": {
+      "uz": "Uyquchanlik keltirishi mumkin. Spirtli ichimlik bilan birga ichmang.",
+      "ru": "Может вызывать сонливость. Не сочетать с алкоголем.",
+      "en": "May cause drowsiness. Avoid alcohol."
+    },
+    "analogs": []
+  }
+]

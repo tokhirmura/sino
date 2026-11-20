@@ -1,0 +1,123 @@
+[
+  {
+    "id": "a2000000-0000-4000-8000-000000000001",
+    "slug": "shifo",
+    "name": "Shifo dorixonasi",
+    "address": "Chilonzor t., Bunyodkor shoh ko‘chasi, 15",
+    "lat": 41.2756,
+    "lng": 69.2034,
+    "hours": "24/7",
+    "open24": true,
+    "rating": 4.7
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000002",
+    "slug": "malham",
+    "name": "Malham",
+    "address": "Yunusobod t., Amir Temur shoh ko‘chasi, 108",
+    "lat": 41.364,
+    "lng": 69.287,
+    "hours": "08:00–22:00",
+    "open24": false,
+    "rating": 4.5
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000003",
+    "slug": "salomat",
+    "name": "Salomat",
+    "address": "Mirzo Ulug‘bek t., Buyuk Ipak Yo‘li ko‘chasi, 63",
+    "lat": 41.338,
+    "lng": 69.335,
+    "hours": "08:00–23:00",
+    "open24": false,
+    "rating": 4.6
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000004",
+    "slug": "soglom_oila",
+    "name": "Sog‘lom oila",
+    "address": "Shayxontohur t., Navoiy ko‘chasi, 30",
+    "lat": 41.323,
+    "lng": 69.234,
+    "hours": "24/7",
+    "open24": true,
+    "rating": 4.8
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000005",
+    "slug": "hayot",
+    "name": "Hayot dorixonasi",
+    "address": "Yakkasaroy t., Shota Rustaveli ko‘chasi, 41",
+    "lat": 41.29,
+    "lng": 69.26,
+    "hours": "09:00–21:00",
+    "open24": false,
+    "rating": 4.3
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000006",
+    "slug": "davo_plyus",
+    "name": "Davo plyus",
+    "address": "Mirobod t., Oybek ko‘chasi, 18",
+    "lat": 41.295,
+    "lng": 69.28,
+    "hours": "08:00–22:00",
+    "open24": false,
+    "rating": 4.4
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000007",
+    "slug": "nur",
+    "name": "Nur dorixona",
+    "address": "Olmazor t., Qorasaroy ko‘chasi, 245",
+    "lat": 41.35,
+    "lng": 69.22,
+    "hours": "24/7",
+    "open24": true,
+    "rating": 4.2
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000008",
+    "slug": "bahor",
+    "name": "Bahor",
+    "address": "Sergeli t., Yangi Sergeli ko‘chasi, 7",
+    "lat": 41.224,
+    "lng": 69.22,
+    "hours": "08:00–21:00",
+    "open24": false,
+    "rating": 4.1
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000009",
+    "slug": "oydin",
+    "name": "Oydin",
+    "address": "Yashnobod t., Mahtumquli ko‘chasi, 90",
+    "lat": 41.29,
+    "lng": 69.34,
+    "hours": "08:00–22:00",
+    "open24": false,
+    "rating": 4.5
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000010",
+    "slug": "yashil_barg",
+    "name": "Yashil barg",
+    "address": "Uchtepa t., Lutfiy ko‘chasi, 12",
+    "lat": 41.295,
+    "lng": 69.18,
+    "hours": "09:00–22:00",
+    "open24": false,
+    "rating": 4.6
+  },
+  {
+    "id": "a2000000-0000-4000-8000-000000000011",
+    "slug": "malika",
+    "name": "Malika dorixonasi",
+    "address": "Bektemir t., Husayn Boyqaro ko‘chasi, 3",
+    "lat": 41.21,
+    "lng": 69.33,
+    "hours": "08:00–20:00",
+    "open24": false,
+    "rating": 4.0
+  }
+]
