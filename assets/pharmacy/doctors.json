@@ -1,0 +1,178 @@
+[
+  {
+    "id": "a4000000-0000-4000-8000-000000000001",
+    "slug": "karimova",
+    "name": "Dilnoza Karimova",
+    "specialty": "terapevt",
+    "years": 12,
+    "rating": 4.8,
+    "price_uzs": 150000,
+    "clinic": "Shifo-Med klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000002",
+    "slug": "aliyev",
+    "name": "Rustam Aliyev",
+    "specialty": "terapevt",
+    "years": 20,
+    "rating": 4.6,
+    "price_uzs": 0,
+    "clinic": "12-son oilaviy poliklinika",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000003",
+    "slug": "hamidov",
+    "name": "Zafar Hamidov",
+    "specialty": "terapevt",
+    "years": 6,
+    "rating": 4.4,
+    "price_uzs": 120000,
+    "clinic": "Hayot klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000004",
+    "slug": "yusupova",
+    "name": "Nodira Yusupova",
+    "specialty": "pediatr",
+    "years": 15,
+    "rating": 4.9,
+    "price_uzs": 180000,
+    "clinic": "Bolajon bolalar klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000005",
+    "slug": "rahimov",
+    "name": "Sherzod Rahimov",
+    "specialty": "pediatr",
+    "years": 8,
+    "rating": 4.5,
+    "price_uzs": 0,
+    "clinic": "12-son oilaviy poliklinika",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000006",
+    "slug": "tursunov",
+    "name": "Akmal Tursunov",
+    "specialty": "kardiolog",
+    "years": 22,
+    "rating": 4.9,
+    "price_uzs": 250000,
+    "clinic": "Salomat yurak klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000007",
+    "slug": "saidova",
+    "name": "Gulnora Saidova",
+    "specialty": "kardiolog",
+    "years": 14,
+    "rating": 4.7,
+    "price_uzs": 220000,
+    "clinic": "Shifo-Med klinikasi",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000008",
+    "slug": "ergashev",
+    "name": "Bobur Ergashev",
+    "specialty": "nevrolog",
+    "years": 11,
+    "rating": 4.6,
+    "price_uzs": 200000,
+    "clinic": "Neyron klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000009",
+    "slug": "xolmatova",
+    "name": "Madina Xolmatova",
+    "specialty": "dermatolog",
+    "years": 9,
+    "rating": 4.7,
+    "price_uzs": 170000,
+    "clinic": "Derma Plus klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000010",
+    "slug": "abdullayeva",
+    "name": "Shahnoza Abdullayeva",
+    "specialty": "ginekolog",
+    "years": 18,
+    "rating": 4.8,
+    "price_uzs": 220000,
+    "clinic": "Ona va bola klinikasi",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000011",
+    "slug": "nazarov",
+    "name": "Jasur Nazarov",
+    "specialty": "lor",
+    "years": 13,
+    "rating": 4.6,
+    "price_uzs": 160000,
+    "clinic": "Shifo-Med klinikasi",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000012",
+    "slug": "mirzayeva",
+    "name": "Feruza Mirzayeva",
+    "specialty": "oftalmolog",
+    "years": 16,
+    "rating": 4.8,
+    "price_uzs": 190000,
+    "clinic": "Ko‘z nuri klinikasi",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000013",
+    "slug": "qodirov",
+    "name": "Otabek Qodirov",
+    "specialty": "stomatolog",
+    "years": 10,
+    "rating": 4.7,
+    "price_uzs": 150000,
+    "clinic": "Tabassum stomatologiyasi",
+    "online": false
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000014",
+    "slug": "ismoilova",
+    "name": "Lola Ismoilova",
+    "specialty": "endokrinolog",
+    "years": 17,
+    "rating": 4.8,
+    "price_uzs": 230000,
+    "clinic": "Shifo-Med klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000015",
+    "slug": "usmonov",
+    "name": "Anvar Usmonov",
+    "specialty": "gastroenterolog",
+    "years": 19,
+    "rating": 4.7,
+    "price_uzs": 210000,
+    "clinic": "Hayot klinikasi",
+    "online": true
+  },
+  {
+    "id": "a4000000-0000-4000-8000-000000000016",
+    "slug": "raximova",
+    "name": "Kamola Raximova",
+    "specialty": "psixolog",
+    "years": 7,
+    "rating": 4.9,
+    "price_uzs": 200000,
+    "clinic": "Tinchlik markazi",
+    "online": true
+  }
+]

@@ -1,0 +1,96 @@
+{
+  "reservations": [
+    {
+      "medicine": "ibuprofen",
+      "pharmacy": "shifo",
+      "status": "ready",
+      "minutes_ago": 90,
+      "rx_attached": false,
+      "for_member": null
+    },
+    {
+      "medicine": "amlodipine",
+      "pharmacy": "malham",
+      "status": "picked",
+      "minutes_ago": 8640,
+      "rx_attached": true,
+      "for_member": "fake-father"
+    }
+  ],
+  "reminders": [
+    {
+      "key": "amlodipine",
+      "name": "Amlodipin",
+      "dose": "5 mg, 1 tabletka",
+      "time": "08:00",
+      "days": [1, 2, 3, 4, 5, 6, 7],
+      "active": true,
+      "member": "fake-father"
+    },
+    {
+      "key": "vitamin_d3",
+      "name": "Vitamin D3",
+      "dose": "1 kapsula, nonushtadan keyin",
+      "time": "09:00",
+      "days": [1, 2, 3, 4, 5, 6, 7],
+      "active": true,
+      "member": null
+    },
+    {
+      "key": "omeprazole",
+      "name": "Omeprazol",
+      "dose": "20 mg, ovqatdan oldin",
+      "time": "07:30",
+      "days": [1, 2, 3, 4, 5],
+      "active": false,
+      "member": null
+    },
+    {
+      "key": "nurofen_kids",
+      "name": "Nurofen sirop",
+      "dose": "5 ml",
+      "time": "20:00",
+      "days": [1, 2, 3, 4, 5, 6, 7],
+      "active": true,
+      "member": "fake-daughter"
+    }
+  ],
+  "reminder_logs": [
+    { "reminder": "amlodipine", "days_ago": 1, "time": "08:04" },
+    { "reminder": "amlodipine", "days_ago": 2, "time": "08:15" },
+    { "reminder": "amlodipine", "days_ago": 3, "time": "08:01" },
+    { "reminder": "amlodipine", "days_ago": 5, "time": "09:20" },
+    { "reminder": "amlodipine", "days_ago": 6, "time": "08:02" },
+    { "reminder": "vitamin_d3", "days_ago": 1, "time": "09:10" },
+    { "reminder": "vitamin_d3", "days_ago": 2, "time": "09:05" },
+    { "reminder": "vitamin_d3", "days_ago": 4, "time": "10:30" },
+    { "reminder": "nurofen_kids", "days_ago": 1, "time": "20:05" },
+    { "reminder": "nurofen_kids", "days_ago": 2, "time": "20:20" }
+  ],
+  "appointments": [
+    {
+      "doctor": "karimova",
+      "days_from_now": 2,
+      "time": "10:30",
+      "online": false,
+      "status": "booked",
+      "member": null
+    },
+    {
+      "doctor": "tursunov",
+      "days_from_now": 5,
+      "time": "15:00",
+      "online": true,
+      "status": "booked",
+      "member": "fake-father"
+    },
+    {
+      "doctor": "yusupova",
+      "days_from_now": -10,
+      "time": "11:00",
+      "online": false,
+      "status": "done",
+      "member": "fake-daughter"
+    }
+  ]
+}
