@@ -7,13 +7,19 @@ import 'package:sino/features/doctors/presentation/doctors_screen.dart';
 import '../../helpers/test_app.dart';
 
 void main() {
-  test('doctors exposes its root route', () {
-    final paths = [for (final r in doctorsRoutes.whereType<GoRoute>()) r.path];
-    expect(paths, contains(AppRoutes.doctors));
+  test('doctors exposes its root route and sub-routes', () {
+    final root = doctorsRoutes.whereType<GoRoute>().single;
+    expect(root.path, AppRoutes.doctors);
+    expect(
+      [for (final r in root.routes.whereType<GoRoute>()) r.path],
+      ['appointments', ':id'],
+    );
   });
 
-  testWidgets('doctors screen renders stub (fake mode)', (tester) async {
+  testWidgets('doctors screen lists the catalog (fake mode)', (tester) async {
     await pumpScreen(tester, const DoctorsScreen());
-    expect(find.text('Shifokorlar — tez orada'), findsOneWidget);
+    expect(find.text('Shifokorlar: 16'), findsOneWidget);
+    expect(find.text('Shifokor maslahatini almashtirmaydi'), findsNothing);
+    expect(find.textContaining('Terapevt'), findsWidgets);
   });
 }
