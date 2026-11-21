@@ -199,7 +199,10 @@ class _NextAppointmentBanner extends ConsumerWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          const Icon(Icons.event_available_rounded, color: AppColors.primary),
+          Icon(
+            Icons.event_available_rounded,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -215,7 +218,11 @@ class _NextAppointmentBanner extends ConsumerWidget {
                 ),
                 Text(
                   [
-                    appointmentWhen(context, next.startsAt, DateTime.now()),
+                    appointmentWhen(
+                      context,
+                      next.startsAt,
+                      ref.watch(doctorsClockProvider)(),
+                    ),
                     if (d != null) d.name,
                   ].join(' · '),
                   style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700),

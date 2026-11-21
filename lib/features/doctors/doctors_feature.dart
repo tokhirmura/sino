@@ -54,7 +54,11 @@ final List<HomeCardSpec> doctorsHomeCards = [
                   en: 'Book an appointment',
                 )
               : [
-                  appointmentWhen(context, next.startsAt, DateTime.now()),
+                  appointmentWhen(
+                    context,
+                    next.startsAt,
+                    ref.watch(doctorsClockProvider)(),
+                  ),
                   if (doctor != null) specialtyLabel(context, doctor.specialty),
                 ].join(' · '),
           color: AppColors.sky,

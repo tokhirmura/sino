@@ -62,10 +62,11 @@ class _Booking extends ConsumerStatefulWidget {
 }
 
 class _BookingState extends ConsumerState<_Booking> {
-  late final List<DateTime> _days = bookingDays(DateTime.now());
+  DateTime _now() => ref.read(doctorsClockProvider)();
+  late final List<DateTime> _days = bookingDays(_now());
   // Today only while it still has slots ahead (evening → tomorrow).
   late DateTime? _day = _days
-      .where((d) => daySlotTimes(d).any((t) => t.isAfter(DateTime.now())))
+      .where((d) => daySlotTimes(d).any((t) => t.isAfter(_now())))
       .followedBy(_days)
       .firstOrNull;
   DateTime? _slot;
@@ -86,7 +87,7 @@ class _BookingState extends ConsumerState<_Booking> {
         _saving = false;
         _slot = null;
       });
-      final now = DateTime.now();
+      final now = _now();
       showDoctorsSnack(
         context,
         context.tr(
@@ -115,7 +116,7 @@ class _BookingState extends ConsumerState<_Booking> {
     final text = theme.textTheme;
     final d = widget.doctor;
     final members = ref.watch(familyMembersProvider).value ?? const [];
-    final now = DateTime.now();
+    final now = ref.watch(doctorsClockProvider)();
     final day = _day;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -303,7 +304,9 @@ class _Header extends StatelessWidget {
                 ),
                 Text(
                   specialtyLabel(context, d.specialty),
-                  style: text.titleSmall?.copyWith(color: AppColors.primary),
+                  style: text.titleSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 if (d.clinic != null)
                   Text(

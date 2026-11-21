@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/backend.dart';
 import '../data/doctors_repository.dart';
+
+export '../data/doctors_repository.dart' show doctorsClockProvider;
 import '../data/models.dart';
 import 'doctor_slots.dart';
 import 'write_queue.dart';
@@ -89,7 +91,7 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
       throw const AppointmentException(AppointmentProblem.onlineNotSupported);
     }
     await _ready();
-    final now = DateTime.now();
+    final now = ref.read(doctorsClockProvider)();
     final slot = slotsFor(
       doctor,
       startsAt,
@@ -175,7 +177,7 @@ final appointmentsProvider =
 final upcomingAppointmentsProvider = Provider<AsyncValue<List<Appointment>>>((
   ref,
 ) {
-  final now = DateTime.now();
+  final now = ref.watch(doctorsClockProvider)();
   return ref
       .watch(appointmentsProvider)
       .whenData(
@@ -188,7 +190,7 @@ final upcomingAppointmentsProvider = Provider<AsyncValue<List<Appointment>>>((
 
 /// Past and cancelled appointments, newest first.
 final pastAppointmentsProvider = Provider<AsyncValue<List<Appointment>>>((ref) {
-  final now = DateTime.now();
+  final now = ref.watch(doctorsClockProvider)();
   return ref
       .watch(appointmentsProvider)
       .whenData(
@@ -223,7 +225,7 @@ final doctorSlotsProvider = Provider.family<AsyncValue<List<Slot>>, SlotsKey>((
       doctor,
       key.day,
       appts.requireValue,
-      DateTime.now(),
+      ref.watch(doctorsClockProvider)(),
       memberId: key.memberId,
     ),
   );

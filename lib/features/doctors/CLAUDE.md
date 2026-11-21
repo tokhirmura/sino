@@ -57,12 +57,14 @@
 - `application/doctors_providers.dart` — `doctorsCatalogProvider`, `doctorsByIdProvider`, `specialtiesProvider`,
   `appointmentsProvider` (`AppointmentsNotifier`: оптимистичные `book(doctor, at, memberId:, online:)` /
   `cancel(id)`, слот перепроверяется перед записью, ошибки — `AppointmentException`),
-  `upcomingAppointmentsProvider`, `pastAppointmentsProvider`, `doctorSlotsProvider((doctorId:, day:, memberId:))`
+  `upcomingAppointmentsProvider`, `pastAppointmentsProvider`, `doctorSlotsProvider((doctorId:, day:, memberId:))`,
+  `doctorsClockProvider` (часы фичи: слоты, «сегодня», предстоящие; в тестах — фиксированное время)
 - `application/write_queue.dart` — очередь записей и `pending-…` id
 - `presentation/` — `doctors_screen.dart`, `doctor_screen.dart`, `appointments_screen.dart`, `labels.dart`,
   `widgets.dart` (`DoctorTile`, `AppointmentCard`, `DoctorPrice`, `DoctorsDisclaimer`, `Tag`, тексты ошибок)
 - Тесты: `test/features/doctors/` — `doctors_screens_test.dart`: фильтры и переводы, поиск + онлайн, запись для
-  члена семьи и онлайн, записи и отмена, home-карточка, каждый экран в uz/ru/en × светлая/тёмная на 360×640
+  члена семьи и онлайн, записи и отмена, home-карточка, каждый экран + home-карточка в uz/ru/en × светлая/тёмная на 320×568 с шрифтом ×1.3;
+  часы зафиксированы `doctorsClockProvider` (утро вторника; отдельный тест — поздний вечер субботы)
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
 ## Нужно от лида
@@ -75,4 +77,4 @@
 - [x] Карточка врача → выбор дня и слота, для себя / члена семьи, очно / онлайн → запись
 - [x] «Mening yozuvlarim»: предстоящие и прошедшие, отмена
 - [x] `doctorsHomeCards`: ближайшая запись
-- [x] Тёмная тема и uz/ru/en (3 языка × 2 темы, 360×640 в тестах)
+- [x] Тёмная тема и uz/ru/en (3 языка × 2 темы, 320×568 и шрифт ×1.3 в тестах)
