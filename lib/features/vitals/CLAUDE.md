@@ -53,19 +53,23 @@
 - Шаги (S2-3):
   - `data/step_sensor.dart` — `StepSensor` (`counts()` — накопленные шаги с перезагрузки, `openSettings()`),
     `PedometerStepSensor` (`pedometer`; одинаково в fake и Supabase — это железо), `FakeStepSensor` для тестов,
-    `StepSensorUnavailable` (нет датчика / эмулятор). iOS сам спрашивает Motion (`NSMotionUsageDescription` есть).
-    **Android 10+**: `ACTIVITY_RECOGNITION` в манифесте есть, но запросить его из Dart без `permission_handler` нельзя
-    (пакета нет в pubspec — попросили лида). Пока: без разрешения Android молчит → через 5 с статус `silent` и кнопка
-    «Ruxsat berish» → `Geolocator.openAppSettings()`; при возврате в приложение — `restart()`
+    `StepSensorUnavailable` (нет датчика / эмулятор). Разрешение — `permission({request})` через `permission_handler`:
+    Android — `Permission.activityRecognition` (10+; раньше выдаётся при установке), iOS — `Permission.sensors` (Motion,
+    `NSMotionUsageDescription`) → `StepPermission` granted / denied (можно спросить) / blocked (только настройки);
+    `openSettings()` — `openAppSettings()`
   - `application/steps.dart` — без Flutter: `StepsDay` (день, baseline, last, carried; JSON в prefs), `applyStepCount`
     (первое чтение дня = 0, перезагрузка телефона — сумма сохраняется, новый день — вчера `finished`), `shouldSaveSteps`
     (раз в 5 мин или +500 шагов), `stepsGoal` = 8000, ~км (0.75 м/шаг), ~ккал (0.04/шаг)
   - `application/steps_providers.dart` — `stepsProvider` (`StepsNotifier` → `StepsView` starting / counting / silent /
-    unavailable + шаги): prefs `vitals.steps_day`; итог дня → `vitals` kind `steps`, **одна строка на день**,
+    unavailable / denied / blocked + шаги). Сначала проверка разрешения (без окна), granted → слушает датчик, иначе
+    `denied` / `blocked`; `allow()` — системное окно (blocked → настройки); `askOnce()` — карточка на `/vitals` один раз
+    спрашивает сама (prefs `vitals.steps_asked`; на главной — нет); `restart()` при возврате — снова проверка.
+    `silent` — разрешение есть, но 5 с нет данных («biroz yuring»). prefs `vitals.steps_day`; итог дня → `vitals` kind `steps`, **одна строка на день**,
     обновляется на месте (`VitalsRepository.update`; удалена пользователем — новая), prefs `vitals.steps_row`;
     закончившийся день — `measured_at` 23:59; офлайн / не вошёл — тихо пропускает; `flush()` при уходе в фон
   - `presentation/widgets/steps_card.dart` — `StepsCard` (вверху `/vitals`: `AnimatedProgressRing` с плавным числом,
-    ~км/~ккал, «Maqsadgacha N qadam» / «Maqsad bajarildi! 🎉», подсказки silent/unavailable) и `StepsHomeCard`;
+    ~км/~ккал, «Maqsadgacha N qadam» / «Maqsad bajarildi! 🎉», подсказки silent/unavailable/denied/blocked; кнопки `vitals-steps-allow` «Ruxsat berish»
+    (denied) и `vitals-steps-settings` «Sozlamalarni ochish» (blocked, silent)) и `StepsHomeCard`;
     оба слушают жизненный цикл (фон → `flush`, возврат → `restart`)
 - Давление и сахар 2.0 (S2-6):
   - `application/vitals_report.dart` — без Flutter: `reportDays` = 30, `reportStart`, `reportRows` (вид, окно, новые
@@ -105,5 +109,7 @@
 - [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
 - [x] S2-3 Шаги: `pedometer` — реальные шаги за сегодня, цель 8000, кольцо; итог дня → `vitals` (kind = 'steps',
   лид берёт в индекс Sino); запрос разрешения, понятный текст при отказе; проверить на телефоне (эмулятор не считает)
+- [x] S2-3 (доработка) Разрешение «Физическая активность» запрашивается из приложения через `permission_handler`
+  (добавил лид, #43): окно при первом показе карточки, кнопка «Ruxsat berish», при окончательном отказе — настройки
 - [x] S2-6 Давление и сахар 2.0: цветные зоны на графике, последние 30 дней, «Shifokorga yuborish» — скриншот графика
   и таблицы через `share_plus`, дисклеймер «Shifokor maslahatini almashtirmaydi»

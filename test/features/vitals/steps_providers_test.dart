@@ -32,10 +32,11 @@ void main() {
 
     Future<ProviderContainer> start([
       Map<String, Object> extra = const {},
+      StepPermission perm = StepPermission.granted,
     ]) async {
       SharedPreferences.setMockInitialValues({..._emptyStore, ...extra});
       prefs = await SharedPreferences.getInstance();
-      sensor = FakeStepSensor();
+      sensor = FakeStepSensor(perm: perm);
       c = ProviderContainer(
         overrides: [
           useFakeProvider.overrideWithValue(true),
@@ -45,6 +46,8 @@ void main() {
       );
       addTearDown(c.dispose);
       c.listen(stepsProvider, (_, _) {});
+      // The permission check runs first, then listening starts.
+      await Future<void>.delayed(Duration.zero);
       return c;
     }
 
@@ -141,26 +144,78 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(c.read(stepsProvider).status, StepsStatus.unavailable);
       c.read(stepsProvider.notifier).restart();
+      await Future<void>.delayed(Duration.zero);
       expect(sensor.listens, 2);
       expect(c.read(stepsProvider).status, StepsStatus.starting);
       await emit(10);
       expect(c.read(stepsProvider).status, StepsStatus.counting);
       // Already counting — nothing to restart.
       c.read(stepsProvider.notifier).restart();
+      await Future<void>.delayed(Duration.zero);
       expect(sensor.listens, 2);
+    });
+
+    test('no permission → denied; «Ruxsat berish» asks and listens', () async {
+      await start(const {}, StepPermission.denied);
+      expect(c.read(stepsProvider).status, StepsStatus.denied);
+      expect(sensor.listens, 0);
+      expect(sensor.requests, 0); // the check alone never prompts
+
+      await c.read(stepsProvider.notifier).allow();
+      expect(sensor.requests, 1);
+      expect(sensor.listens, 1);
+      expect(c.read(stepsProvider).status, StepsStatus.starting);
+      await emit(10);
+      expect(c.read(stepsProvider).status, StepsStatus.counting);
+    });
+
+    test('denied twice → blocked; the button opens the settings', () async {
+      await start(const {}, StepPermission.denied);
+      sensor.answer = StepPermission.blocked;
+      await c.read(stepsProvider.notifier).allow();
+      expect(c.read(stepsProvider).status, StepsStatus.blocked);
+      await c.read(stepsProvider.notifier).allow();
+      expect(sensor.requests, 1);
+      expect(sensor.settingsOpened, 1);
+
+      // Allowed in the settings: back in the app it listens.
+      sensor.perm = StepPermission.granted;
+      c.read(stepsProvider.notifier).restart();
+      await Future<void>.delayed(Duration.zero);
+      expect(sensor.listens, 1);
+    });
+
+    test('askOnce: the prompt only the first time, never if granted', () async {
+      await start(const {}, StepPermission.denied);
+      sensor.answer = StepPermission.denied;
+      final n = c.read(stepsProvider.notifier);
+      await n.askOnce();
+      await n.askOnce();
+      expect(sensor.requests, 1);
+      expect(c.read(stepsProvider).status, StepsStatus.denied);
+
+      await start();
+      await c.read(stepsProvider.notifier).askOnce();
+      expect(sensor.requests, 0);
+      expect(sensor.listens, 1);
     });
   });
 
   group('StepsCard', () {
     late FakeStepSensor sensor;
 
-    Future<void> pump(WidgetTester tester, Widget child) async {
+    Future<void> pump(
+      WidgetTester tester,
+      Widget child, {
+      StepPermission perm = StepPermission.granted,
+      StepPermission answer = StepPermission.granted,
+    }) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
       SharedPreferences.setMockInitialValues(_emptyStore);
       final prefs = await SharedPreferences.getInstance();
-      sensor = FakeStepSensor();
+      sensor = FakeStepSensor(perm: perm)..answer = answer;
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -190,13 +245,14 @@ void main() {
       expect(find.byKey(const Key('vitals-steps-settings')), findsNothing);
 
       await tester.pump(stepsSilenceLimit);
-      expect(status(tester), contains('Jismoniy faollik'));
+      expect(status(tester), contains('biroz yuring'));
       await tester.tap(find.byKey(const Key('vitals-steps-settings')));
       await tester.pump();
       expect(sensor.settingsOpened, 1);
 
       // Back from the settings with the permission: listens again.
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
       await tester.pump();
       expect(sensor.listens, 2);
       sensor.emit(1000);
@@ -221,6 +277,42 @@ void main() {
       );
       expect(find.text('Maqsad bajarildi! 🎉'), findsOneWidget);
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('no permission: asked once by itself, then the button', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        const StepsCard(),
+        perm: StepPermission.denied,
+        answer: StepPermission.denied,
+      );
+      await tester.pump();
+      // The card asked once on its own; the user said «no».
+      expect(sensor.requests, 1);
+      expect(status(tester), contains('«Jismoniy faollik» ruxsati kerak'));
+
+      sensor.answer = StepPermission.granted;
+      await tester.tap(find.byKey(const Key('vitals-steps-allow')));
+      await tester.pump();
+      expect(sensor.requests, 2);
+      expect(sensor.listens, 1);
+      expect(status(tester), 'Qadam sensori ulanmoqda…');
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('blocked: a clear message and the settings button', (
+      tester,
+    ) async {
+      await pump(tester, const StepsCard(), perm: StepPermission.blocked);
+      await tester.pump();
+      expect(status(tester), contains('Ruxsat berilmagan'));
+      expect(find.byKey(const Key('vitals-steps-allow')), findsNothing);
+      await tester.tap(find.byKey(const Key('vitals-steps-settings')));
+      await tester.pump();
+      expect(sensor.settingsOpened, 1);
       await tester.pumpWidget(const SizedBox());
     });
 

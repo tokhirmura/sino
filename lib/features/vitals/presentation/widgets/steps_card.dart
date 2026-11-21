@@ -20,7 +20,12 @@ class StepsCard extends ConsumerWidget {
     final v = ref.watch(stepsProvider);
     final text = Theme.of(context).textTheme;
     final steps = v.steps;
+    final warn = switch (v.status) {
+      StepsStatus.silent || StepsStatus.denied || StepsStatus.blocked => true,
+      _ => false,
+    };
     return _StepsLifecycle(
+      askOnce: true,
       child: AppCard(
         key: const Key('vitals-steps'),
         animate: false,
@@ -64,7 +69,7 @@ class StepsCard extends ConsumerWidget {
                     _statusText(context, v),
                     key: const Key('vitals-steps-status'),
                     style: text.bodyMedium?.copyWith(
-                      color: v.status == StepsStatus.silent
+                      color: warn
                           ? AppColors.readable(
                               AppColors.saffron,
                               Theme.of(context).brightness,
@@ -72,7 +77,26 @@ class StepsCard extends ConsumerWidget {
                           : null,
                     ),
                   ),
-                  if (v.status == StepsStatus.silent) ...[
+                  if (v.status == StepsStatus.denied) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    FilledButton.tonalIcon(
+                      key: const Key('vitals-steps-allow'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                      ),
+                      onPressed: () => ref.read(stepsProvider.notifier).allow(),
+                      icon: const Icon(Icons.directions_walk_rounded, size: 18),
+                      label: Text(
+                        context.tr(
+                          uz: 'Ruxsat berish',
+                          ru: 'Разрешить',
+                          en: 'Allow',
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (v.status == StepsStatus.blocked ||
+                      v.status == StepsStatus.silent) ...[
                     const SizedBox(height: AppSpacing.xs),
                     OutlinedButton.icon(
                       key: const Key('vitals-steps-settings'),
@@ -84,9 +108,9 @@ class StepsCard extends ConsumerWidget {
                       icon: const Icon(Icons.settings_rounded, size: 18),
                       label: Text(
                         context.tr(
-                          uz: 'Ruxsat berish',
-                          ru: 'Дать доступ',
-                          en: 'Allow access',
+                          uz: 'Sozlamalarni ochish',
+                          ru: 'Открыть настройки',
+                          en: 'Open settings',
                         ),
                       ),
                     ),
@@ -160,14 +184,36 @@ String _statusText(BuildContext context, StepsView v) {
     ),
     StepsStatus.silent => context.tr(
       uz:
-          'Qadamlar kelmayapti. Sino’ga «Jismoniy faollik» ruxsatini bering: '
-          'Ruxsatlar → Jismoniy faollik → Ruxsat berish.',
+          'Qadamlar hali kelmadi — biroz yuring. Hisoblanmasa, sozlamalarda '
+          '«Jismoniy faollik» ruxsatini tekshiring.',
       ru:
-          'Шаги не поступают. Дайте Sino доступ к «Физической активности»: '
-          'Разрешения → Физическая активность → Разрешить.',
+          'Шагов пока нет — пройдитесь немного. Если не считает, проверьте '
+          'в настройках разрешение «Физическая активность».',
       en:
-          'No steps are coming in. Allow Sino «Physical activity»: '
-          'Permissions → Physical activity → Allow.',
+          'No steps yet — take a short walk. If nothing counts, check the '
+          '«Physical activity» permission in Settings.',
+    ),
+    StepsStatus.denied => context.tr(
+      uz:
+          'Qadamlarni sanash uchun «Jismoniy faollik» ruxsati kerak. '
+          'Ma’lumot faqat telefoningizda hisoblanadi.',
+      ru:
+          'Чтобы считать шаги, нужно разрешение «Физическая активность». '
+          'Шаги считаются только на вашем телефоне.',
+      en:
+          'Counting steps needs the «Physical activity» permission. '
+          'Steps are counted on your phone only.',
+    ),
+    StepsStatus.blocked => context.tr(
+      uz:
+          'Ruxsat berilmagan. Sozlamalar → Ruxsatlar → «Jismoniy faollik» '
+          '(iPhone’da «Harakat va fitnes») → Ruxsat berish.',
+      ru:
+          'Доступ запрещён. Настройки → Разрешения → «Физическая активность» '
+          '(на iPhone — «Движение и фитнес») → Разрешить.',
+      en:
+          'Access denied. Settings → Permissions → «Physical activity» '
+          '(on iPhone — «Motion & Fitness») → Allow.',
     ),
     StepsStatus.starting => context.tr(
       uz: 'Qadam sensori ulanmoqda…',
@@ -232,9 +278,13 @@ class _Ring extends StatelessWidget {
 /// Saves the total when the app leaves the foreground and listens again
 /// on return (the user may have just allowed the permission).
 class _StepsLifecycle extends ConsumerStatefulWidget {
-  const _StepsLifecycle({required this.child});
+  const _StepsLifecycle({required this.child, this.askOnce = false});
 
   final Widget child;
+
+  /// The vitals screen card asks for the permission once by itself (the
+  /// home card only shows the state).
+  final bool askOnce;
 
   @override
   ConsumerState<_StepsLifecycle> createState() => _StepsLifecycleState();
@@ -246,6 +296,11 @@ class _StepsLifecycleState extends ConsumerState<_StepsLifecycle>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (widget.askOnce) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(stepsProvider.notifier).askOnce();
+      });
+    }
   }
 
   @override
