@@ -10,6 +10,7 @@ import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/widgets.dart';
+import '../application/air_notify.dart';
 import '../application/weather_logic.dart';
 import '../application/weather_providers.dart';
 import '../data/models.dart';
@@ -40,6 +41,16 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _startTimer();
+    // The morning air alert is on by default: ask for notifications once.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(
+        ref
+            .read(airNotifyProvider.notifier)
+            .askOnce(ref.read(weatherReportProvider).value)
+            .catchError((Object _) {}),
+      );
+    });
   }
 
   @override
@@ -533,6 +544,7 @@ class _ReportView extends StatelessWidget {
           _AirCard(air: r.air!),
           const SizedBox(height: 12),
         ],
+        _AirNotifyTile(report: r),
         SectionTitle(
           context.tr(
             uz: 'Sayr va mashg‘ulot uchun',
@@ -598,6 +610,113 @@ class _ReportView extends StatelessWidget {
           style: text.bodySmall,
         ),
       ],
+    );
+  }
+}
+
+/// «Morning air alert» switch (S2-7): at 07:30 when the morning AQI
+/// forecast is above 100.
+class _AirNotifyTile extends ConsumerWidget {
+  const _AirNotifyTile({required this.report});
+
+  final WeatherReport report;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(airNotifyProvider);
+    final text = Theme.of(context).textTheme;
+    Future<void> toggle(bool v) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final msg = (
+        on: context.tr(
+          uz: 'Yoqildi: havo iflos bo‘lsa, ertalab 7:30 da xabar beramiz',
+          ru: 'Включено: при грязном воздухе сообщим утром в 7:30',
+          en: 'On: we’ll tell you at 7:30 when the air is bad',
+        ),
+        off: context.tr(
+          uz: 'Ertalabki ogohlantirish o‘chirildi',
+          ru: 'Утреннее предупреждение выключено',
+          en: 'Morning alert turned off',
+        ),
+        denied: context.tr(
+          uz:
+              'Bildirishnomalarga ruxsat yo‘q — telefon sozlamalarida '
+              'Sino uchun yoqing',
+          ru: 'Уведомления запрещены — включите их для Sino в настройках',
+          en: 'Notifications are off — allow them for Sino in Settings',
+        ),
+      );
+      final granted = await ref
+          .read(airNotifyProvider.notifier)
+          .setEnabled(v, report);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              !v
+                  ? msg.off
+                  : granted
+                  ? msg.on
+                  : msg.denied,
+            ),
+          ),
+        );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AppCard(
+        animate: false,
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        onTap: () => toggle(!on),
+        child: Row(
+          children: [
+            Icon(
+              on
+                  ? Icons.notifications_active_rounded
+                  : Icons.notifications_off_rounded,
+              color: on
+                  ? AppColors.readable(
+                      AppColors.primary,
+                      Theme.of(context).brightness,
+                    )
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr(
+                      uz: 'Ertalabki havo ogohlantirishi',
+                      ru: 'Утреннее предупреждение о воздухе',
+                      en: 'Morning air alert',
+                    ),
+                    style: text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    context.tr(
+                      uz: 'Soat 7:30 da, agar AQI 100 dan oshsa',
+                      ru: 'В 7:30, если AQI выше 100',
+                      en: 'At 7:30 if AQI is above 100',
+                    ),
+                    style: text.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              key: const Key('weather-air-notify'),
+              value: on,
+              onChanged: toggle,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

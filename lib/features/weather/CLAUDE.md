@@ -49,6 +49,16 @@
   загрузка — `SkeletonLoader`; ниже — чипы «Joylashuvim» + города, баннер «Internet yo‘q — oxirgi saqlangan prognoz
   (N soat oldin)», AQI, советы, 24 часа, 7 дней,
   дисклеймер; `weather_home_card.dart`; `labels.dart`
+- Утреннее уведомление (S2-7): air-quality запрос берёт ещё `hourly=us_aqi` на 2 дня → `WeatherReport.airHours`
+  (`AqiHour`; кэш — `air_hourly`; fake — AQI города на 48 ч). `morningAirAlert(hours, now)` в `weather_logic.dart`:
+  ближайшие 07:30 (сегодня, если ещё впереди, иначе завтра), худший AQI прогноза 07:00–10:00; > 100 → уведомление.
+  `application/air_notify.dart` — `airNotifyProvider` (prefs `weather.air_notify`, по умолчанию вкл.;
+  `weather.air_notify_asked` — разрешение спрошено один раз при первом открытии экрана; `weather.air_notify_last` —
+  что запланировано, ежеминутное обновление плагин не трогает), `sync(report)` вызывается после каждого отчёта
+  (`WeatherReportNotifier._load`), текст `airNotificationText` («Havo ifloslangan (AQI 156)» / «Toshkent: bugun uyda
+  mashq qiling»). `data/air_notifications.dart` — `LocalAirNotifications` (flutter_local_notifications, id
+  2100000001, payload `wellness:air`, канал `sino_wellness`, inexact; зона — flutter_timezone), Noop вне Android/iOS
+  и в тестах. На экране — карточка-переключатель `weather-air-notify` «Ertalabki havo ogohlantirishi» под AQI
 - Тесты: `test/features/weather/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
@@ -66,4 +76,4 @@
 - [x] S2-2 Дизайн 2.0: фон по времени суток (tong, kun, kech, tun), крупная температура, при AQI > 100 — сверху
   красно-жёлтый баннер
 - [x] Доработка после проверки на телефоне: автообновление раз в минуту без запросов, ручное обновление
-- [ ] S2-7 (если останется время) Утреннее уведомление при высоком AQI, выключается в настройках
+- [x] S2-7 Утреннее уведомление при высоком AQI, выключается в настройках

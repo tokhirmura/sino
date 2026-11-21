@@ -83,7 +83,10 @@ class OpenMeteoWeatherRepository implements WeatherRepository {
         'latitude': p.lat.toStringAsFixed(4),
         'longitude': p.lng.toStringAsFixed(4),
         'current': 'us_aqi,pm2_5,pm10',
+        // Tomorrow morning's AQI for the morning alert (S2-7).
+        'hourly': 'us_aqi',
         'timezone': 'auto',
+        'forecast_days': '2',
       });
 
   Future<Map<String, dynamic>> _get(Uri uri) async {
@@ -197,7 +200,17 @@ class FakeWeatherRepository implements WeatherRepository {
           'uv_index_max': [for (final d in days) d['uv']],
         },
       },
-      air: {'current': demo['air']},
+      air: {
+        'current': demo['air'],
+        // The demo AQI holds for the next 48 hours (morning alert).
+        if (demo['air'] case {'us_aqi': final num aqi})
+          'hourly': {
+            'time': [
+              for (var i = 0; i < 48; i++) naive(hour.add(Duration(hours: i))),
+            ],
+            'us_aqi': List.filled(48, aqi),
+          },
+      },
     );
   }
 }
