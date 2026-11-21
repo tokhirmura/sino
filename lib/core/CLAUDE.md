@@ -16,8 +16,8 @@
   `GradientHeader`/`GradientBackdrop`, `StatTile`, `AnimatedProgressRing`, `AchievementBadge`, `SkeletonLoader`,
   `PrimaryButton`, `CascadeIn`/`Pressable` (`widgets/motion.dart`), `EmptyState(actionLabel:, onAction:)`,
   плавающая нижняя панель (`lib/app/shell_scaffold.dart`), `widgets/widgets.dart` — общий импорт.
-  Пакеты для всех: flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer, flutter_timezone
-  (+ ACTIVITY_RECOGNITION / NSMotionUsageDescription, TTS_SERVICE в queries). Иконка и сплэш —
+  Пакеты для всех: flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer, flutter_timezone,
+  permission_handler (+ ACTIVITY_RECOGNITION / POST_NOTIFICATIONS / NSMotionUsageDescription, TTS_SERVICE в queries). Иконка и сплэш —
   `tool/core/gen_icon.dart` → `assets/branding/`. Тесты — `test/core/design_v2_test.dart`.
 - [x] S2-3 Достижения: `data/achievements.dart` — `Achievement` (8 кодов, emoji, uz/ru/en названия и подсказки),
   `AchievementsRepository` (Supabase `achievements` + Fake в prefs `core.fake_achievements`), `achievementsProvider`;
@@ -31,6 +31,12 @@
   миграция `20261121160000_core_family_phone.sql`
 - [x] Общий сервис уведомлений `notifications/local_notifications.dart` (раздел ниже; тест —
   `test/core/local_notifications_test.dart`)
+- [x] `permission_handler` (для шагов vitals: ACTIVITY_RECOGNITION на Android 10+). iOS собирается через Swift Package
+  Manager (Podfile нет): макросы `PERMISSION_*` пакет выставляет сам по ключам `NS*UsageDescription` в
+  `ios/Runner/Info.plist` (у нас: камера, фото, микрофон, датчики движения, геолокация; уведомления — всегда).
+  Новое разрешение на iOS = новый ключ с текстом в Info.plist (просить лида). Если проект переведут на CocoaPods —
+  в `post_install` Podfile нужны `GCC_PREPROCESSOR_DEFINITIONS`: `PERMISSION_SENSORS=1`, `PERMISSION_NOTIFICATIONS=1`
+  (+ CAMERA, PHOTOS, MICROPHONE, LOCATION_WHENINUSE).
 
 ## Уведомления (`notifications/local_notifications.dart`)
 Один сервис `flutter_local_notifications` на всё приложение: `ref.read(appNotificationsProvider)` —
