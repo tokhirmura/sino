@@ -5,6 +5,9 @@
 ## Что делает
 Вкладка «Profil» сверху вниз:
 - **Карточка пользователя** (имя, возраст, рост, вес, группа крови, аллергии) → тап — редактирование `profiles`.
+- **Yutuqlar:** карточка «Yutuqlar N / 8» с полоской всех значков → `/profile/achievements`
+  (`presentation/achievements_screen.dart`): кольцо прогресса, 8 `AchievementBadge` (открытые — сверху, новые первыми,
+  с датой; закрытые — серые), тап → лист «как получить». Данные — core `achievementsProvider`; открывает значки home.
 - **Tibbiy karta:** электронная медкарта (лента `medical_records`, новые сверху, метка Davlat/Xususiy, фильтр
   «Hammasi / Men / член семьи»), анализы (`lab_results` со шкалой нормы и сводкой «N из M вне нормы»),
   QR для врача.
@@ -29,12 +32,13 @@ core `fakeFamilyProvider` (изменения сохраняются в prefs).
 - `/profile` (`AppRoutes.profile`) — вкладка «Profil»
 - подэкраны поверх NavigationBar (`presentation/profile_paths.dart`): `/profile/edit`, `/profile/records`,
   `/profile/labs`, `/profile/qr`, `/profile/family/new`, `/profile/family/:id`
+- `/profile/achievements` (`AppRoutes.achievements` — открывается и с главной)
 
 ## Home-карточки
 — нет
 
 ## Таблицы БД
-`profiles`, `family_members`, `medical_records`, `lab_results`
+`profiles`, `family_members`, `medical_records`, `lab_results`, `achievements` (чтение, через core)
 
 ## Файлы
 - `profile_feature.dart` — единственный публичный файл (`profileRoutes`, `profileHomeCards`)
@@ -55,4 +59,4 @@ core `fakeFamilyProvider` (изменения сохраняются в prefs).
 - [x] P1-6 Тёмная тема и uz/ru/en (проверяет `test/module_a_screens_test.dart`: 3 языка × 2 темы, 360×640)
 
 ## Спринт 2.0 (план — в `home/CLAUDE.md`)
-- [ ] S2-3 Экран достижений в профиле: 8 значков `AchievementBadge`, новое — с confetti; таблица `achievements`
+- [x] S2-3 Экран достижений в профиле: 8 значков `AchievementBadge`, новое — с confetti; таблица `achievements`

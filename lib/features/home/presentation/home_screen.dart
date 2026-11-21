@@ -11,8 +11,11 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/section_title.dart';
+import '../../../core/data/achievements.dart';
+import '../application/achievements_check.dart';
 import '../application/home_today.dart';
 import '../application/sino_index.dart';
+import 'widgets/achievement_celebration.dart';
 import 'widgets/home_header.dart';
 import 'widgets/quote_card.dart';
 import 'widgets/services_grid.dart';
@@ -34,7 +37,8 @@ String capitalize(String s) =>
 /// day → quick services → every feature's home card (`homeCardsProvider`).
 ///
 /// Data is reloaded when the user comes back to this tab (after logging
-/// water, food, medicines elsewhere) and on pull-to-refresh.
+/// water, food, medicines elsewhere) and on pull-to-refresh. Each reload
+/// checks the badges; new ones are saved and celebrated with confetti.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -45,6 +49,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   GoRouter? _router;
   String? _lastPath;
+  final _celebrated = <Achievement>{};
 
   @override
   void didChangeDependencies() {
@@ -73,8 +78,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  void _onNewAchievements(
+    AsyncValue<List<Achievement>>? _,
+    AsyncValue<List<Achievement>> next,
+  ) {
+    if (next.isLoading || !next.hasValue) return;
+    final fresh = next.requireValue.where(_celebrated.add).toList();
+    if (fresh.isEmpty || !ref.read(achievementCelebrationProvider)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) showAchievementCelebration(context, fresh);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(newAchievementsProvider, _onNewAchievements);
     final cards = ref.watch(homeCardsProvider);
     final lang = ref.watch(appLangProvider);
     final today = ref.watch(sinoTodayProvider);

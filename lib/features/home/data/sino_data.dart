@@ -93,6 +93,10 @@ int minutesOf(String time) {
 abstract class SinoDataRepository {
   /// All rows for the local days [from]..[to] (inclusive).
   Future<SinoRaw> load({required DateTime from, required DateTime to});
+
+  /// Has the user ever reserved a medicine (`reservations`, own rows)?
+  /// For the «Birinchi bron» badge.
+  Future<bool> hasReservation();
 }
 
 class SupabaseSinoDataRepository implements SinoDataRepository {
@@ -154,6 +158,18 @@ class SupabaseSinoDataRepository implements SinoDataRepository {
       sessions: rows[4],
       vitals: rows[5],
     );
+  }
+
+  @override
+  Future<bool> hasReservation() async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return false;
+    final rows = await _client
+        .from('reservations')
+        .select('id')
+        .eq('user_id', uid)
+        .limit(1);
+    return rows.isNotEmpty;
   }
 }
 
@@ -230,6 +246,15 @@ class FakeSinoDataRepository implements SinoDataRepository {
       await _bundle.loadString('assets/core/sino_week.json', cache: false),
     ) as Map<String, dynamic>;
     return buildFakeSinoRaw(json, now: _clock(), from: from, to: to);
+  }
+
+  /// `reservations` in the JSON (Aziz hasn't reserved anything yet).
+  @override
+  Future<bool> hasReservation() async {
+    final json = jsonDecode(
+      await _bundle.loadString('assets/core/sino_week.json', cache: false),
+    ) as Map<String, dynamic>;
+    return ((json['reservations'] as num?) ?? 0) > 0;
   }
 }
 

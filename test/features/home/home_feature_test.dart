@@ -45,6 +45,11 @@ class _CountingRepo implements SinoDataRepository {
         ? Future.value(const SinoRaw())
         : FakeSinoDataRepository(clock: () => _now).load(from: from, to: to);
   }
+
+  bool reserved = false;
+
+  @override
+  Future<bool> hasReservation() async => reserved;
 }
 
 List<Override> _sino(_CountingRepo repo) => [
