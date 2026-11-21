@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,20 +17,89 @@ import 'labels.dart';
 
 /// Weather and air quality of the selected city or of «my location», with
 /// advice for walks and outdoor workouts. Offline — the last saved forecast.
-class WeatherScreen extends ConsumerWidget {
+///
+/// While open it refreshes itself every [weatherAutoRefresh] without any
+/// prompt (paused in the background, refreshed at once on return); pull
+/// down or the refresh button fetch right away.
+class WeatherScreen extends ConsumerStatefulWidget {
   const WeatherScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WeatherScreen> createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends ConsumerState<WeatherScreen>
+    with WidgetsBindingObserver {
+  Timer? _timer;
+
+  /// A refresh the user asked for is running (spinner on the button).
+  bool _refreshing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(weatherAutoRefresh, (_) => _silentRefresh());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _silentRefresh();
+      _startTimer();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
+
+  /// Background refresh: no permission prompt, failures keep the old data.
+  void _silentRefresh() {
+    final report = ref.read(weatherReportProvider);
+    // First load still running or nothing to keep — leave it to the user.
+    if (report.isLoading || !report.hasValue) return;
+    unawaited(ref.read(weatherReportProvider.notifier).refresh(silent: true));
+  }
+
+  /// Pull-to-refresh, the refresh button and «Retry».
+  Future<void> _refresh() async {
+    if (_refreshing) return;
+    setState(() => _refreshing = true);
+    final hadReport = ref.read(weatherReportProvider).hasValue;
+    try {
+      await ref.read(weatherReportProvider.notifier).refresh();
+    } catch (e) {
+      // With a report on screen the error would be invisible otherwise.
+      if (hadReport && mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(errorMessage(context, e))));
+      }
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+    // A manual refresh restarts the minute countdown.
+    _startTimer();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final report = ref.watch(weatherReportProvider);
     final placeId = ref.watch(weatherPlaceProvider);
-
-    Future<void> refresh() async {
-      ref.invalidate(weatherReportProvider);
-      await ref
-          .read(weatherReportProvider.future)
-          .then<void>((_) {}, onError: (Object _) {});
-    }
+    final refresh = _refresh;
 
     return Scaffold(
       body: RefreshIndicator(
@@ -38,7 +109,7 @@ class WeatherScreen extends ConsumerWidget {
           children: [
             _Hero(
               report: report.value,
-              loading: report.isLoading,
+              loading: report.isLoading || _refreshing,
               onRefresh: refresh,
             ),
             Padding(

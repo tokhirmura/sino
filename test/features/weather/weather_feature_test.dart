@@ -205,5 +205,5 @@ void main() {
 
 class _NoLocation implements WeatherLocator {
   @override
-  Future<({double lat, double lng})?> current() async => null;
+  Future<({double lat, double lng})?> current({bool ask = true}) async => null;
 }

@@ -35,11 +35,15 @@
   при AQI > 100, `severe` > 150 — для баннера, карточки и утреннего уведомления; текст — `airAlertText` в `labels.dart`
   («Havo ifloslangan (AQI 156) — bugun uyda mashq qiling», тот же у workouts)
 - `application/weather_providers.dart` — `weatherPlaceProvider` (по умолчанию Toshkent — без запроса геолокации),
-  `weatherReportProvider` (без авто-retry: иначе повторный запрос разрешения; `gps` без координат → кэш `gps` или
-  `LocationUnavailableException`), `todayAqiKey`
+  `weatherReportProvider` — `WeatherReportNotifier` (без авто-retry при ошибке: иначе повторный запрос разрешения;
+  `gps` без координат → кэш `gps` или `LocationUnavailableException`); `refresh({silent})` — заново без состояния
+  загрузки: `silent` (таймер) **не спрашивает разрешение геолокации** (`WeatherLocator.current(ask: false)`) и при
+  ошибке оставляет старый отчёт; ручной — пробрасывает ошибку (экран — SnackBar). `weatherAutoRefresh` = 1 мин,
+  `todayAqiKey`
 - `application/weather_logic.dart` (ещё) — `DayPart` / `dayPartOf(time)` (S2-2): tong 05–10, kun 10–17, kech 17–21, tun
   21–05 по местному времени места; `labels.dart` — `dayPartGradient`, `dayPartText`; цвета AQI — только `AppColors`
-- `presentation/weather_screen.dart` — дизайн 2.0: сверху `_Hero` на `GradientBackdrop` с градиентом по времени суток
+- `presentation/weather_screen.dart` — открытый экран сам обновляется раз в минуту (`Timer.periodic`, в фоне —
+  пауза, при возврате — сразу), «потянуть вниз» / кнопка — сразу и перезапускают отсчёт; дизайн 2.0: сверху `_Hero` на `GradientBackdrop` с градиентом по времени суток
   (метка «Kech», назад, обновить), крупная температура 88, небо, ощущается, влажность/ветер/мин–макс; при AQI > 100
   сразу под ним — красно-шафрановый баннер `weather-air-alert` (`airAlertText`) с кнопкой «Uyda» → вкладка Sport;
   загрузка — `SkeletonLoader`; ниже — чипы «Joylashuvim» + города, баннер «Internet yo‘q — oxirgi saqlangan prognoz
@@ -61,4 +65,5 @@
   bugun uyda mashq qiling» (uz/ru/en), тесты
 - [x] S2-2 Дизайн 2.0: фон по времени суток (tong, kun, kech, tun), крупная температура, при AQI > 100 — сверху
   красно-жёлтый баннер
+- [x] Доработка после проверки на телефоне: автообновление раз в минуту без запросов, ручное обновление
 - [ ] S2-7 (если останется время) Утреннее уведомление при высоком AQI, выключается в настройках
