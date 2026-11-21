@@ -96,7 +96,7 @@ class ServicesGrid extends StatelessWidget {
       padding: EdgeInsets.zero,
       mainAxisSpacing: 10,
       crossAxisSpacing: 10,
-      childAspectRatio: 1.15,
+      childAspectRatio: 1.1,
       children: [for (final s in _services) _ServiceTile(service: s)],
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sino/app/feature_registry.dart';
@@ -52,9 +54,16 @@ void main() {
     expect(allRoutes, hasLength(13));
   });
 
-  test('text on brand buttons is white in both themes', () {
+  test('text on brand buttons is readable in both themes (WCAG AA)', () {
+    double contrast(Color a, Color b) {
+      final l1 = a.computeLuminance(), l2 = b.computeLuminance();
+      return (math.max(l1, l2) + 0.05) / (math.min(l1, l2) + 0.05);
+    }
+
     for (final theme in [AppTheme.light, AppTheme.dark]) {
-      expect(theme.colorScheme.onPrimary, Colors.white);
+      final s = theme.colorScheme;
+      expect(contrast(s.primary, s.onPrimary), greaterThanOrEqualTo(4.5));
+      expect(contrast(s.error, s.onError), greaterThanOrEqualTo(3));
     }
   });
 

@@ -109,7 +109,7 @@ void main() {
   });
 
   group('AsyncValueView', () {
-    testWidgets('loading → spinner', (tester) async {
+    testWidgets('loading → skeleton', (tester) async {
       await _pump(
         tester,
         AsyncValueView<int>(
