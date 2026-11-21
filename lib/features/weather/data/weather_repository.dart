@@ -83,7 +83,10 @@ class OpenMeteoWeatherRepository implements WeatherRepository {
         'latitude': p.lat.toStringAsFixed(4),
         'longitude': p.lng.toStringAsFixed(4),
         'current': 'us_aqi,pm2_5,pm10',
+        // Tomorrow morning's AQI for the morning alert (S2-7).
+        'hourly': 'us_aqi',
         'timezone': 'auto',
+        'forecast_days': '2',
       });
 
   Future<Map<String, dynamic>> _get(Uri uri) async {
@@ -197,25 +200,37 @@ class FakeWeatherRepository implements WeatherRepository {
           'uv_index_max': [for (final d in days) d['uv']],
         },
       },
-      air: {'current': demo['air']},
+      air: {
+        'current': demo['air'],
+        // The demo AQI holds for the next 48 hours (morning alert).
+        if (demo['air'] case {'us_aqi': final num aqi})
+          'hourly': {
+            'time': [
+              for (var i = 0; i < 48; i++) naive(hour.add(Duration(hours: i))),
+            ],
+            'us_aqi': List.filled(48, aqi),
+          },
+      },
     );
   }
 }
 
 /// Where the user is: `null` when location is off, denied or too slow.
 abstract class WeatherLocator {
-  Future<({double lat, double lng})?> current();
+  /// Current position or `null`. [ask] = false never shows the permission
+  /// prompt (background refresh): without a granted permission → `null`.
+  Future<({double lat, double lng})?> current({bool ask = true});
 }
 
 class GeolocatorWeatherLocator implements WeatherLocator {
   static const timeout = Duration(seconds: 8);
 
   @override
-  Future<({double lat, double lng})?> current() async {
+  Future<({double lat, double lng})?> current({bool ask = true}) async {
     try {
       if (!await Geolocator.isLocationServiceEnabled()) return null;
       var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
+      if (permission == LocationPermission.denied && ask) {
         permission = await Geolocator.requestPermission();
       }
       if (permission == LocationPermission.denied ||
@@ -245,7 +260,7 @@ class GeolocatorWeatherLocator implements WeatherLocator {
 /// Offline: Amir Temur square, Tashkent.
 class FakeWeatherLocator implements WeatherLocator {
   @override
-  Future<({double lat, double lng})?> current() async =>
+  Future<({double lat, double lng})?> current({bool ask = true}) async =>
       (lat: 41.31108, lng: 69.27976);
 }
 

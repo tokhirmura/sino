@@ -1,16 +1,16 @@
 {
   "items": [
-    {"slug": "palov", "food_id": "f0000000-0000-4000-8000-000000000001", "measures": [{"unit": "likopcha", "grams": 300}, {"unit": "kosa", "grams": 250}]},
-    {"slug": "non", "food_id": "f0000000-0000-4000-8000-000000000009", "measures": [{"unit": "dona", "grams": 250}]},
-    {"slug": "kok_choy", "food_id": "f0000000-0000-4000-8000-000000000033", "measures": [{"unit": "piyola", "grams": 150}]},
-    {"slug": "shorva", "food_id": "f0000000-0000-4000-8000-000000000005", "measures": [{"unit": "kosa", "grams": 400}]},
-    {"slug": "lagmon", "food_id": "f0000000-0000-4000-8000-000000000002", "measures": [{"unit": "kosa", "grams": 400}, {"unit": "likopcha", "grams": 350}]},
-    {"slug": "somsa", "food_id": "f0000000-0000-4000-8000-000000000003", "measures": [{"unit": "dona", "grams": 120}]},
-    {"slug": "manti", "food_id": "f0000000-0000-4000-8000-000000000004", "measures": [{"unit": "dona", "grams": 62.5}, {"unit": "likopcha", "grams": 250}]},
-    {"slug": "mastava", "food_id": "f0000000-0000-4000-8000-000000000006", "measures": [{"unit": "kosa", "grams": 400}]},
-    {"slug": "chuchvara", "food_id": "f0000000-0000-4000-8000-000000000008", "measures": [{"unit": "kosa", "grams": 300}, {"unit": "likopcha", "grams": 250}]},
-    {"slug": "shashlik", "food_id": "f0000000-0000-4000-8000-000000000011", "measures": [{"unit": "dona", "grams": 75}]},
-    {"slug": "dimlama", "food_id": "f0000000-0000-4000-8000-000000000007", "measures": [{"unit": "likopcha", "grams": 350}, {"unit": "kosa", "grams": 300}]},
-    {"slug": "qatiq", "food_id": "f0000000-0000-4000-8000-000000000016", "measures": [{"unit": "piyola", "grams": 200}, {"unit": "kosa", "grams": 350}, {"unit": "choy_qoshiq", "grams": 7}]}
+    {"slug": "palov", "food_id": "f0000000-0000-4000-8000-000000000001", "label": {"uz": "Palov", "ru": "Плов", "en": "Plov"}, "measures": [{"unit": "likopcha", "grams": 300}, {"unit": "kosa", "grams": 250}]},
+    {"slug": "non", "food_id": "f0000000-0000-4000-8000-000000000009", "label": {"uz": "Non", "ru": "Лепёшка", "en": "Bread"}, "measures": [{"unit": "dona", "grams": 250}]},
+    {"slug": "kok_choy", "food_id": "f0000000-0000-4000-8000-000000000033", "label": {"uz": "Ko‘k choy", "ru": "Зелёный чай", "en": "Green tea"}, "measures": [{"unit": "piyola", "grams": 150}]},
+    {"slug": "shorva", "food_id": "f0000000-0000-4000-8000-000000000005", "label": {"uz": "Sho‘rva", "ru": "Шурпа", "en": "Shurpa"}, "measures": [{"unit": "kosa", "grams": 400}]},
+    {"slug": "lagmon", "food_id": "f0000000-0000-4000-8000-000000000002", "label": {"uz": "Lag‘mon", "ru": "Лагман", "en": "Lagman"}, "measures": [{"unit": "kosa", "grams": 400}, {"unit": "likopcha", "grams": 350}]},
+    {"slug": "somsa", "food_id": "f0000000-0000-4000-8000-000000000003", "label": {"uz": "Somsa", "ru": "Самса", "en": "Samsa"}, "measures": [{"unit": "dona", "grams": 120}]},
+    {"slug": "manti", "food_id": "f0000000-0000-4000-8000-000000000004", "label": {"uz": "Manti", "ru": "Манты", "en": "Manti"}, "measures": [{"unit": "dona", "grams": 62.5}, {"unit": "likopcha", "grams": 250}]},
+    {"slug": "mastava", "food_id": "f0000000-0000-4000-8000-000000000006", "label": {"uz": "Mastava", "ru": "Мастава", "en": "Mastava"}, "measures": [{"unit": "kosa", "grams": 400}]},
+    {"slug": "chuchvara", "food_id": "f0000000-0000-4000-8000-000000000008", "label": {"uz": "Chuchvara", "ru": "Чучвара", "en": "Chuchvara"}, "measures": [{"unit": "kosa", "grams": 300}, {"unit": "likopcha", "grams": 250}]},
+    {"slug": "shashlik", "food_id": "f0000000-0000-4000-8000-000000000011", "label": {"uz": "Shashlik", "ru": "Шашлык", "en": "Shashlik"}, "measures": [{"unit": "dona", "grams": 75}]},
+    {"slug": "dimlama", "food_id": "f0000000-0000-4000-8000-000000000007", "label": {"uz": "Dimlama", "ru": "Димлама", "en": "Dimlama"}, "measures": [{"unit": "likopcha", "grams": 350}, {"unit": "kosa", "grams": 300}]},
+    {"slug": "qatiq", "food_id": "f0000000-0000-4000-8000-000000000016", "label": {"uz": "Qatiq", "ru": "Катык", "en": "Katyk"}, "measures": [{"unit": "piyola", "grams": 200}, {"unit": "kosa", "grams": 350}, {"unit": "choy_qoshiq", "grams": 7}]}
   ]
 }

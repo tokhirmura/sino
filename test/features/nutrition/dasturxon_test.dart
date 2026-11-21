@@ -44,6 +44,9 @@ void main() {
         expect(food, isNotNull, reason: i.slug);
         expect(food!.slug, i.slug);
         expect(food.portionGrams, isNotNull, reason: i.slug);
+        for (final l in ['uz', 'ru', 'en']) {
+          expect((i.label[l] as String?)?.trim(), isNotEmpty, reason: i.slug);
+        }
       }
     });
 
