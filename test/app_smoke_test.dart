@@ -31,7 +31,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Salom, Aziz'), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'^Xayrli (tong|kun|kech), Aziz$')),
+      findsOneWidget,
+    );
     expect(find.text('Dorixona'), findsWidgets);
   });
 

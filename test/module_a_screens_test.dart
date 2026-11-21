@@ -93,7 +93,10 @@ void main() {
           if (lang != AppLang.uz && !data) {
             final uzbek = [
               for (final t in tester.widgetList<Text>(find.byType(Text)))
-                if (_uzbek.hasMatch(t.data ?? t.textSpan?.toPlainText() ?? ''))
+                // The proverb of the day is shown in Uzbek on purpose (with a
+                // translation under it).
+                if (t.key != const ValueKey('quote-uz') &&
+                    _uzbek.hasMatch(t.data ?? t.textSpan?.toPlainText() ?? ''))
                   t.data ?? t.textSpan!.toPlainText(),
             ];
             expect(uzbek, isEmpty, reason: '$label: untranslated');
