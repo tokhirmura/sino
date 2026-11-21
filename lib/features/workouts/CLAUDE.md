@@ -54,6 +54,20 @@
 - `presentation/workout_player_screen.dart` — плеер: кольцо-таймер, «× 12 marta» + «Bajarildi», отдых с «+15 s» и
   «O‘tkazib yuborish», пауза, «Keyingi», выход с диалогом (продолжить / завершить и сохранить / выйти без сохранения),
   финал: минуты, ~ккал, XP, «Ketma-ket N kun!» после сохранения (ошибка — «Qayta urinish»)
+- Плеер 2.0 (S2-4):
+  - `application/voice_coach.dart` — без Flutter: `VoiceLang` uz/ru/en, `VoiceChoice` auto/uz/ru/en/off, `resolveVoice`
+    (auto = язык приложения; нет голоса → uz→ru→en, ru↔en; нет ничего → молчит), `numberWord` 1…99 (uz «bir, o'n bir»,
+    ru «раз… двадцать один», en «forty-two»), `startCue`, `cues(before, after, lang)`: готовность/отдых/таймер —
+    «uch, ikki, bir» в конце, таймер ≥ 20 с — «Yarmi o'tdi», вход в подход — «Planka. 20 soniya. Boshladik!» /
+    «12 marta», отдых — «Dam oling. Keyingisi: …», повторы — счёт темпом 3 с/повтор, потом «Ofarin! «Bajarildi»ni
+    bosing», финал — «Mashg'ulot tugadi! Barakalla!»; на паузе — тишина
+  - `data/voice.dart` — `Speaker` (`available`, `say`, `stop`): `FlutterTtsSpeaker` (isLanguageAvailable / getLanguages;
+    iOS — playback + duckOthers/mixWithOthers поверх музыки; ошибки TTS глотает), `FakeSpeaker` для тестов
+  - `application/voice_providers.dart` — `voiceChoiceProvider` (prefs `workouts.voice`), `voiceLangsProvider`,
+    `activeVoiceProvider`
+  - экран: кнопка 🔊 `player-voice` → лист «Ovozli murabbiy» (Avtomatik «Hozir: Русский», языки без голоса —
+    «Telefonda bu ovoz yo‘q», O‘chirilgan); финал — `confetti` в цветах бренда (4 с, потом уходит из дерева; при
+    «уменьшить движение» — нет), XP считает вверх на шафрановой карточке
 - `presentation/workouts_screen.dart` — дизайн 2.0: `GradientHeader` (с планом — `StatTile` серия / минут в неделю /
   ~ккал, появление `flutter_animate`), `SkeletonLoader`, нет плана — `EmptyState` + форма (`PrimaryButton`
   «Reja tuzish»); нет плана: форма генератора; есть — сводка недели и дни, «Yangi reja tuzish»
@@ -80,5 +94,5 @@
 - [x] S2-1 Воздух: AQI > 100 → состояние-предупреждение «Havo ifloslangan (AQI 156) — bugun uyda mashq qiling»
   (uz/ru/en), выбор «uyda» генератором — чистая функция `adjustForAir`, тесты
 - [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
-- [ ] S2-4 Плеер 2.0: голосовой счёт `flutter_tts` («Bir, ikki, uch…», «Dam oling»); нет узбекского голоса — русский,
+- [x] S2-4 Плеер 2.0: голосовой счёт `flutter_tts` («Bir, ikki, uch…», «Dam oling»); нет узбекского голоса — русский,
   выбор в настройках; в конце — confetti и XP
