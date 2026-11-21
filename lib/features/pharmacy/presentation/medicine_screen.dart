@@ -14,6 +14,7 @@ import '../../../core/widgets/money.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/models.dart';
+import 'home_meds_screen.dart';
 import 'labels.dart';
 import 'pharmacy_paths.dart';
 import 'widgets/common.dart';
@@ -152,6 +153,22 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
               // Prescription status — big and first thing the eye catches.
               RxBadge(rx: m.rx),
             ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          key: const ValueKey('add-to-home-meds'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(44),
+          ),
+          onPressed: () => showHomeMedSheet(context, medicine: m),
+          icon: const Icon(Icons.home_rounded),
+          label: Text(
+            context.tr(
+              uz: 'Uy dorixonasiga qo‘shish',
+              ru: 'В домашнюю аптечку',
+              en: 'Add to home cabinet',
+            ),
           ),
         ),
         const SizedBox(height: 12),

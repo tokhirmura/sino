@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_lang.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/widgets.dart';
+import '../application/home_meds_providers.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/models.dart';
 import '../data/pharmacy_repository.dart';
@@ -264,6 +266,7 @@ class _PharmacyScreenState extends ConsumerState<PharmacyScreen> {
       children: [
         if (!searching) ...[
           const _ActiveReservationsBanner(),
+          const _HomeMedsEntry(),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -368,6 +371,92 @@ class _ReservationsAction extends ConsumerWidget {
         isLabelVisible: active > 0,
         label: Text('$active'),
         child: const Icon(Icons.receipt_long_outlined),
+      ),
+    );
+  }
+}
+
+/// «Uy dorixonasi» shortcut: count and the 30-day warning.
+class _HomeMedsEntry extends ConsumerWidget {
+  const _HomeMedsEntry();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(homeMedsSummaryProvider).value;
+    final theme = Theme.of(context);
+    final text = theme.textTheme;
+    final warn = (s?.soon ?? 0) + (s?.expired ?? 0);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AppCard(
+        key: const ValueKey('home-meds-entry'),
+        onTap: () => context.push(PharmacyPaths.homeMeds),
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            const EmojiBox(emoji: '🏠', color: AppColors.violet, size: 44),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr(
+                      uz: 'Uy dorixonasi',
+                      ru: 'Домашняя аптечка',
+                      en: 'Home medicine cabinet',
+                    ),
+                    style: text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    s == null || s.total == 0
+                        ? context.tr(
+                            uz: 'Uydagi dorilar va ularning muddati',
+                            ru: 'Лекарства дома и их сроки годности',
+                            en: 'Medicines at home and their expiry',
+                          )
+                        : warn > 0
+                        ? context.tr(
+                            uz: '${s.total} ta dori · $warn tasining muddati tugayapti',
+                            ru: 'Лекарств: ${s.total} · истекает срок: $warn',
+                            en: '${s.total} medicines · $warn expiring',
+                          )
+                        : context.tr(
+                            uz: '${s.total} ta dori · hammasi yaroqli',
+                            ru: 'Лекарств: ${s.total} · все годны',
+                            en: '${s.total} medicines · all valid',
+                          ),
+                    style: text.bodySmall?.copyWith(
+                      color: warn > 0
+                          ? AppColors.readable(
+                              AppColors.saffron,
+                              theme.brightness,
+                            )
+                          : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: warn > 0 ? FontWeight.w700 : null,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (warn > 0)
+              Badge(
+                label: Text('$warn'),
+                backgroundColor: AppColors.readable(
+                  AppColors.garnet,
+                  Brightness.light,
+                ),
+              ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -10,7 +10,7 @@
 assets, Fake и Supabase: `a1000000-…` лекарства, `a2000000-…` аптеки, `a3000000-…` остатки, `a4000000-…` врачи.
 После правки JSON: `dart run tool/pharmacy/gen_seed.dart` → перегенерирует
 `supabase/migrations/20261117120000_pharmacy_seed.sql` (тест сверяет файл с assets). Миграции пушит лид.
-Fake-режим: пользовательские данные в prefs (`pharmacy.fake_reservations`, `reminders.fake_*`,
+Fake-режим: пользовательские данные в prefs (`pharmacy.fake_reservations`, `pharmacy.fake_home_meds`, `reminders.fake_*`,
 `doctors.fake_appointments`), при первом чтении — демо из `assets/pharmacy/fake_pharmacy.json` (даты относительно
 сегодня, члены семьи — id из core `FamilyMember.fakes`: `fake-mother`, `fake-father`, `fake-daughter`).
 
@@ -57,6 +57,13 @@ Fake-режим: пользовательские данные в prefs (`pharma
   шапке лекарства, `compact` — в строках списка.
 - **Карта:** пины `PharmacyPin` (градиент бренда, 24/7 — зелёные, выбранный крупнее с шафрановой обводкой);
   тап → карточка аптеки выезжает снизу (`AnimatedSwitcher` + `SlideTransition`), тап по карте / ✕ — закрыть.
+- **Uy dorixonasi** (`/pharmacy/home-meds`, вход — карточка на вкладке и «Uy dorixonasiga qo‘shish» на лекарстве):
+  домашние лекарства со сроком годности, отсортированы по сроку. Бейдж `ExpiryBadge`: истёк / ≤ 30 дней
+  (`expiryWarningDays`) — сплошной гранат/шафран, белый текст ≥ 4.5:1; иначе «Yaroqli» / «Muddati kiritilmagan».
+  Добавление (`HomeMedSheet`): из каталога (подсказки), по штрих-коду (`homeMedsScannerProvider` → `/pharmacy/scan`)
+  или вручную; срок, количество 0–999, заметка; правка и удаление с «Qaytarish». «Buyurtma berish» (истёк / скоро /
+  0 шт.) и «Qayta buyurtma» → `context.go(AppRoutes.pharmacySearch(name))`. Дни считаются по датам в UTC
+  (без сдвига DST); часы — `homeMedsClockProvider` (в тестах фиксируется).
 - **Поиск** (вкладка): поле с поиском по мере ввода (250 мс), очистка, сканер; без запроса — баннер активных броней,
   чипы категорий, весь каталог. Новый `?q=` при уже открытой вкладке заменяет запрос (`didUpdateWidget`).
   Штрих-код: найден → карточка лекарства, нет → запрос = код + сообщение.
@@ -78,13 +85,16 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - Контракт: `/pharmacy?q=<запрос>` → `PharmacyScreen(initialQuery: q)` — поиск с готовым запросом
   (ассистент шлёт `ibuprofen`, `paracetamol` — тест проверяет, что они находятся)
 - Подэкраны поверх NavigationBar (`presentation/pharmacy_paths.dart`): `/pharmacy/medicine/:id`,
-  `/pharmacy/pharmacies`, `/pharmacy/reservations`, `/pharmacy/scan` (возвращает код через `pop`)
+  `/pharmacy/pharmacies`, `/pharmacy/reservations`, `/pharmacy/scan` (возвращает код через `pop`),
+  `/pharmacy/home-meds`
 
 ## Home-карточки
 - `pharmacy`, order 40
 
 ## Таблицы БД
-`medicines`, `pharmacies`, `pharmacy_stock`, `reservations` (realtime)
+`medicines`, `pharmacies`, `pharmacy_stock`, `reservations` (realtime), `home_meds`
+(`20261121160000_pharmacy_home_meds.sql`: RLS `user_id = auth.uid()`, GRANT authenticated + service_role;
+`medicine_id` → `medicines` `on delete set null`, вручную — только `name`)
 
 ## Файлы
 - `pharmacy_feature.dart` — единственный публичный файл (`pharmacyRoutes`, `pharmacyHomeCards`)
@@ -99,12 +109,15 @@ Fake-режим: пользовательские данные в prefs (`pharma
   `reservationsProvider` (`ReservationsNotifier`, `StreamNotifier`: оптимистичные `reserve(offer)` / `cancel(id)`,
   откат и rethrow; правила — `ReservationException`: `rxRequired`, `outOfStock`, `alreadyActive`, `notCancellable`),
   `activeReservationsProvider`
+- `data/home_meds_repository.dart` — `HomeMed`, `HomeMedsRepository` + Supabase + Fake, `homeMedsClockProvider`
+- `application/home_meds_providers.dart` — `homeMedsProvider` (оптимистичные add / edit / remove, `HomeMedException`),
+  `homeMedsSummaryProvider`, `expiryState`, `daysUntilExpiry`, `sortHomeMeds`
 - `data/rx_photo.dart` — `RxPhotoPicker` (`image_picker`), `rxPhotosProvider` (локальные фото рецептов)
 - `data/external_launcher.dart` — `pharmacyLauncherProvider` (карты через `url_launcher`), `pharmacyMapsUri`,
   `pharmacyMapTilesProvider` (в тестах `false`)
 - `presentation/` — `pharmacy_screen.dart`, `medicine_screen.dart`, `reservations_screen.dart`,
   `pharmacies_screen.dart`, `scan_screen.dart`, `labels.dart` (форма, категория, статус, расстояние, часы),
-  `widgets/common.dart` (`MedicalDisclaimer`, `Tag` — как core `Pill`, но с многоточием, `RxPill`, `MedicineTile`, `OfferTile`, тексты ошибок брони),
+  `home_meds_screen.dart`, `widgets/common.dart` (`MedicalDisclaimer`, `Tag` — как core `Pill`, но с многоточием, `RxBadge`, `MedicineTile`, `OfferTile`, тексты ошибок брони),
   `widgets/reserve_sheet.dart` (`showReserveSheet`, `RxThumbnail`)
 - `application/write_queue.dart` — очередь записей и `pending-…` id (копия есть в reminders и doctors — фичи не
   импортируют друг друга)
@@ -120,6 +133,7 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
 ## Нужно от лида
+- `supabase db push` для `supabase/migrations/20261121160000_pharmacy_home_meds.sql` (таблица `home_meds`).
 - `supabase db push` для `supabase/migrations/20261117120000_pharmacy_seed.sql` (каталоги модуля B: лекарства,
   аптеки, остатки, врачи).
 
@@ -132,4 +146,6 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - [x] Бронь: для себя / члена семьи, фото рецепта для `rx` (`image_picker`), список броней со статусом вживую
 - [x] `pharmacyHomeCards`: активные брони
 - [x] Тёмная тема и uz/ru/en (проверяет `pharmacy_screens_test.dart`: 3 языка × 2 темы, 320×568, шрифт ×1.3)
+- [x] Uy dorixonasi: `home_meds` (миграция, Supabase + Fake), срок с предупреждением за 30 дней, каталог/штрих-код,
+  «Qayta buyurtma» → `/pharmacy?q=` (`test/features/pharmacy/home_meds_test.dart`)
 - Текст цветом бренда — `colorScheme.primary` или `AppColors.readable(...)`, не голый `AppColors.primary`.

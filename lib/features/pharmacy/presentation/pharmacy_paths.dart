@@ -7,4 +7,5 @@ abstract final class PharmacyPaths {
   static const pharmacies = '${AppRoutes.pharmacy}/pharmacies';
   static const reservations = '${AppRoutes.pharmacy}/reservations';
   static const scan = '${AppRoutes.pharmacy}/scan';
+  static const homeMeds = '${AppRoutes.pharmacy}/home-meds';
 }

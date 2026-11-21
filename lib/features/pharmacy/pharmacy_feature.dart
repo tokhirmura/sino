@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/routing/app_routes.dart';
 import 'application/pharmacy_providers.dart';
+import 'presentation/home_meds_screen.dart';
 import 'presentation/medicine_screen.dart';
 import 'presentation/pharmacies_screen.dart';
 import 'presentation/pharmacy_paths.dart';
@@ -38,6 +39,11 @@ final List<RouteBase> pharmacyRoutes = [
         path: 'reservations',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const ReservationsScreen(),
+      ),
+      GoRoute(
+        path: 'home-meds',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const HomeMedsScreen(),
       ),
       GoRoute(
         path: 'scan',
