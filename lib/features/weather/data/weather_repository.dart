@@ -204,18 +204,20 @@ class FakeWeatherRepository implements WeatherRepository {
 
 /// Where the user is: `null` when location is off, denied or too slow.
 abstract class WeatherLocator {
-  Future<({double lat, double lng})?> current();
+  /// Current position or `null`. [ask] = false never shows the permission
+  /// prompt (background refresh): without a granted permission → `null`.
+  Future<({double lat, double lng})?> current({bool ask = true});
 }
 
 class GeolocatorWeatherLocator implements WeatherLocator {
   static const timeout = Duration(seconds: 8);
 
   @override
-  Future<({double lat, double lng})?> current() async {
+  Future<({double lat, double lng})?> current({bool ask = true}) async {
     try {
       if (!await Geolocator.isLocationServiceEnabled()) return null;
       var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
+      if (permission == LocationPermission.denied && ask) {
         permission = await Geolocator.requestPermission();
       }
       if (permission == LocationPermission.denied ||
@@ -245,7 +247,7 @@ class GeolocatorWeatherLocator implements WeatherLocator {
 /// Offline: Amir Temur square, Tashkent.
 class FakeWeatherLocator implements WeatherLocator {
   @override
-  Future<({double lat, double lng})?> current() async =>
+  Future<({double lat, double lng})?> current({bool ask = true}) async =>
       (lat: 41.31108, lng: 69.27976);
 }
 
