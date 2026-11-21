@@ -11,7 +11,7 @@ Sino — одно приложение для здоровой жизни (ха�
 - Бэкенд: Supabase (`supabase_flutter`), схема в `supabase/migrations/`
 - Ещё: shared_preferences, http, flutter_map + latlong2, geolocator, mobile_scanner, image_picker,
   fl_chart, flutter_local_notifications + timezone, intl, url_launcher, qr_flutter,
-  flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer
+  flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer, flutter_timezone
   (dev: flutter_launcher_icons, flutter_native_splash) — **пакеты уже добавлены, pubspec.yaml не трогать**
 - Шрифт Inter в `assets/fonts` (офлайн; есть ʻ U+02BB и кириллица Ўў Ққ Ғғ Ҳҳ)
 - **Без** build_runner / freezed / json_serializable — модели пишем руками (`fromMap`).

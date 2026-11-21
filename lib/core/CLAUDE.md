@@ -16,6 +16,6 @@
   `GradientHeader`/`GradientBackdrop`, `StatTile`, `AnimatedProgressRing`, `AchievementBadge`, `SkeletonLoader`,
   `PrimaryButton`, `CascadeIn`/`Pressable` (`widgets/motion.dart`), `EmptyState(actionLabel:, onAction:)`,
   плавающая нижняя панель (`lib/app/shell_scaffold.dart`), `widgets/widgets.dart` — общий импорт.
-  Пакеты для всех: flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer
+  Пакеты для всех: flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer, flutter_timezone
   (+ ACTIVITY_RECOGNITION / NSMotionUsageDescription, TTS_SERVICE в queries). Иконка и сплэш —
   `tool/core/gen_icon.dart` → `assets/branding/`. Тесты — `test/core/design_v2_test.dart`.
