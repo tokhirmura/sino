@@ -22,8 +22,18 @@ void main() {
     await tester.tap(find.text('Mehmon sifatida davom etish'));
     await tester.pumpAndSettle();
 
-    // First run: empty profile → questionnaire.
+    // First run: empty profile → main goal → questionnaire.
     expect(find.text('Profilingiz'), findsOneWidget);
+    expect(find.text('Asosiy maqsadingiz nima?'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('goal-energy')));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Davom etish'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Davom etish'));
+    await tester.pumpAndSettle();
     final field = find.byType(TextFormField);
     await tester.enterText(field.at(0), 'Aziz');
     await tester.enterText(field.at(1), '1997');

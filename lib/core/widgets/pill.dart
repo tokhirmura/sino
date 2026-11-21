@@ -12,11 +12,16 @@ class Pill extends StatelessWidget {
     super.key,
     this.color = AppColors.primary,
     this.icon,
+    this.wrap = false,
   });
 
   final String label;
   final Color color;
   final IconData? icon;
+
+  /// Let a long label wrap onto more lines. Only where the width is
+  /// bounded (not inside a bare `Row`).
+  final bool wrap;
 
   @override
   Widget build(BuildContext context) {
@@ -36,17 +41,19 @@ class Pill extends StatelessWidget {
             Icon(icon, size: 14, color: ink),
             const SizedBox(width: 4),
           ],
-          Text(
-            label,
-            style: TextStyle(
-              color: ink,
-              fontSize: 12,
-              height: 1.3,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          if (wrap) Flexible(child: _text(ink)) else _text(ink),
         ],
       ),
     );
   }
+
+  Widget _text(Color ink) => Text(
+    label,
+    style: TextStyle(
+      color: ink,
+      fontSize: 12,
+      height: 1.3,
+      fontWeight: FontWeight.w700,
+    ),
+  );
 }

@@ -83,7 +83,7 @@ final medicinesRepositoryProvider = Provider<MedicinesRepository>((ref) =>
 ```
 
 ## Схема БД (`supabase/migrations/20261111120000_core_schema.sql`)
-- **core:** `profiles` (id = auth.users.id, создаётся триггером при регистрации), `family_members`,
+- **core:** `profiles` (id = auth.users.id, создаётся триггером при регистрации; `goal` — главная цель), `family_members`,
   `medical_records` (source `davlat|xususiy`), `lab_results`, `achievements` (unique user_id+code,
   `20261121120000_core_achievements.sql`)
 - **B:** `medicines` (description/warning jsonb `{uz,ru,en}`, analogs text[]), `pharmacies`, `pharmacy_stock`

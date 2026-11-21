@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/emoji_box.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/widgets/gradient_header.dart';
+import '../../../../core/widgets/primary_button.dart';
 import 'common.dart';
 
 class _Slide {
   const _Slide(this.emoji, this.color, this.title, this.body);
   final String emoji;
+
+  /// Start of the slide's gradient (ends in lapis).
   final Color color;
   final String title;
   final String body;
 }
 
 /// Three slides about the app → [onDone].
+///
+/// Design 2.0: each slide is a gradient «sky» with the girih ornament and
+/// a glowing glass circle with the emoji, the text below; language switch
+/// and «O‘tkazib yuborish» float over the gradient. Fills the screen edge
+/// to edge (the parent leaves the top unpadded).
 class IntroSlides extends StatefulWidget {
   const IntroSlides({super.key, required this.onDone});
 
@@ -98,108 +108,223 @@ class _IntroSlidesState extends State<IntroSlides> {
     if (_page == count - 1) {
       widget.onDone();
     } else {
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      _controller.nextPage(duration: AppMotion.medium, curve: Curves.easeOut);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final slides = _slides(context);
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
     final isLast = _page == slides.length - 1;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+    final dot = AppColors.readable(AppColors.primary, theme.brightness);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
       child: Column(
         children: [
-          Row(
-            children: [
-              const LangSwitcher(),
-              const SizedBox(width: 8),
-              if (!isLast)
-                Expanded(
-                  child: Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: TextButton(
-                      onPressed: widget.onDone,
-                      child: Text(
-                        context.tr(
-                          uz: 'O‘tkazib yuborish',
-                          ru: 'Пропустить',
-                          en: 'Skip',
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
           Expanded(
-            child: PageView(
-              controller: _controller,
-              onPageChanged: (i) => setState(() => _page = i),
+            child: Stack(
               children: [
-                for (final s in slides)
-                  Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                PageView(
+                  controller: _controller,
+                  onPageChanged: (i) => setState(() => _page = i),
+                  children: [
+                    for (final (i, s) in slides.indexed)
+                      _SlidePage(slide: s, active: i == _page),
+                  ],
+                ),
+                // Language + skip float over the gradient.
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+                      child: Row(
                         children: [
-                          EmojiBox(emoji: s.emoji, color: s.color, size: 120),
-                          const SizedBox(height: 32),
-                          Text(
-                            s.title,
-                            textAlign: TextAlign.center,
-                            style: text.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
+                          const LangSwitcher(onDark: true),
+                          const SizedBox(width: 8),
+                          if (!isLast)
+                            Expanded(
+                              child: Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  onPressed: widget.onDone,
+                                  child: Text(
+                                    context.tr(
+                                      uz: 'O‘tkazib yuborish',
+                                      ru: 'Пропустить',
+                                      en: 'Skip',
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            s.body,
-                            textAlign: TextAlign.center,
-                            style: text.bodyLarge,
-                          ),
                         ],
                       ),
                     ),
                   ),
+                ),
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (var i = 0; i < slides.length; i++)
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: i == _page ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: i == _page
-                        ? AppColors.primary
-                        : AppColors.primary.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var i = 0; i < slides.length; i++)
+                      AnimatedContainer(
+                        duration: AppMotion.medium,
+                        curve: Curves.easeOut,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: i == _page ? 28 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: i == _page ? dot : dot.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: () => _next(slides.length),
-            child: Text(
-              isLast
-                  ? context.tr(uz: 'Boshlash', ru: 'Начать', en: 'Get started')
-                  : context.tr(uz: 'Keyingi', ru: 'Далее', en: 'Next'),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: isLast
+                      ? context.tr(
+                          uz: 'Boshlash',
+                          ru: 'Начать',
+                          en: 'Get started',
+                        )
+                      : context.tr(uz: 'Keyingi', ru: 'Далее', en: 'Next'),
+                  icon: isLast
+                      ? Icons.rocket_launch_rounded
+                      : Icons.arrow_forward_rounded,
+                  onPressed: () => _next(slides.length),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SlidePage extends StatelessWidget {
+  const _SlidePage({required this.slide, required this.active});
+
+  final _Slide slide;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return Column(
+      children: [
+        Expanded(
+          flex: 11,
+          child: GradientBackdrop(
+            bottomRadius: 40,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [slide.color, AppColors.secondary],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Center(
+                child: Padding(
+                  // Room for the language row above.
+                  padding: const EdgeInsets.only(top: 48, bottom: 12),
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      final size = (c.maxHeight * 0.8).clamp(96.0, 184.0);
+                      return AnimatedScale(
+                        scale: active || reduceMotion ? 1 : 0.7,
+                        duration: AppMotion.slow,
+                        curve: AppMotion.spring,
+                        child: _GlassCircle(emoji: slide.emoji, size: size),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 7,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
+            child: Column(
+              children: [
+                Text(
+                  slide.title,
+                  textAlign: TextAlign.center,
+                  style: text.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  slide.body,
+                  textAlign: TextAlign.center,
+                  style: text.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Frosted circle with a soft white glow and the emoji.
+class _GlassCircle extends StatelessWidget {
+  const _GlassCircle({required this.emoji, required this.size});
+
+  final String emoji;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.38),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.22),
+            blurRadius: size * 0.35,
+            spreadRadius: size * 0.02,
+          ),
+        ],
+      ),
+      child: Text(
+        emoji,
+        style: TextStyle(fontSize: size * 0.46, height: 1.1),
+        textScaler: TextScaler.noScaling,
       ),
     );
   }

@@ -15,7 +15,11 @@
   Тап по карточке или «Hisobot ›» → недельный отчёт `/report`.
 - `QuoteCard` — «Kun hikmati»: 20 поговорок и изречений о здоровье в `assets/core/quotes.json` (uz + ru/en),
   одна на день (номер дня в году % 20); оригинал всегда на узбекском, в ru/en под ним перевод.
-- «Xizmatlar» 3×3 и «Siz uchun» — карточки всех фич из `homeCardsProvider` (сортировка по `order`).
+- «Xizmatlar» 3×3 и «Siz uchun» — карточки всех фич из `homeCardsProvider` (сортировка по `order`). Если у профиля
+  есть цель (`profiles.goal`), под «Siz uchun» — плашка цели, а `orderCardsForGoal` (`application/goal_order.dart`)
+  ставит SOS первой, затем карточки цели (`goalCardPriority` по id: похудеть — nutrition, workouts, vitals; энергия —
+  workouts, breathing, nutrition, weather; давление/сахар — vitals, reminders, nutrition, doctors; семья — reminders,
+  doctors, pharmacy), остальные — как были.
 
 **Достижения** (`application/achievements_check.dart`): при каждой загрузке истории `earnedAchievements` проверяет
 8 значков core `Achievement` по 30 дням — первая тренировка, 7 дней подряд по 8 стаканов, 3 дня подряд все дозы приняты,
@@ -85,6 +89,6 @@
   новое достижение — confetti; экран достижений в профиле (см. `profile/CLAUDE.md`)
 - [x] S2-4 Недельный отчёт `/report` (`AppRoutes.report`): индекс по дням на fl_chart, лучший день, вода,
   тренировки, лекарства; «Ulashish» — карточка-картинка через screenshot + share_plus
-- [ ] S2-5 Онбординг 2.0: после входа — главная цель (похудеть / больше энергии / давление или сахар / забота о
+- [x] S2-5 Онбординг 2.0: после входа — главная цель (похудеть / больше энергии / давление или сахар / забота о
   семье) → `profiles` (новой миграцией) → порядок карточек на главной; слайды в дизайне 2.0 (см. `onboarding/CLAUDE.md`)
 - Проверка каждой задачи: эмулятор в обоих режимах (`env.json` и `USE_FAKE=true`)

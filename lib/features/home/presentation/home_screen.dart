@@ -10,9 +10,11 @@ import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../core/data/achievements.dart';
 import '../application/achievements_check.dart';
+import '../application/goal_order.dart';
 import '../application/home_today.dart';
 import '../application/sino_index.dart';
 import 'widgets/achievement_celebration.dart';
@@ -93,7 +95,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(newAchievementsProvider, _onNewAchievements);
-    final cards = ref.watch(homeCardsProvider);
+    final goal = ref.watch(currentUserProvider).value?.goal;
+    final cards = orderCardsForGoal(ref.watch(homeCardsProvider), goal);
     final lang = ref.watch(appLangProvider);
     final today = ref.watch(sinoTodayProvider);
     final week = ref.watch(sinoWeekProvider);
@@ -156,6 +159,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           en: 'For you',
                         ),
                       ),
+                      if (goal != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Pill(
+                              '${goal.emoji} ${goal.title(lang)}',
+                              key: const ValueKey('home-goal'),
+                              wrap: true,
+                            ),
+                          ),
+                        ),
                       for (final card in cards)
                         Padding(
                           key: ValueKey('home-card-${card.id}'),

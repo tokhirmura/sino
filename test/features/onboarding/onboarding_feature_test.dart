@@ -60,6 +60,14 @@ Future<ProviderContainer> _pumpSignedOut(
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {
+  // Lazy lists build only what's on screen.
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
   await tester.tap(finder);
@@ -143,6 +151,7 @@ void main() {
 
     expect(container.read(fakeAuthProvider), isTrue);
     expect(find.text('Profilingiz'), findsOneWidget);
+    expect(find.text('Asosiy maqsadingiz nima?'), findsOneWidget);
   });
 
   testWidgets('email: validation, then sign in → questionnaire', (
@@ -244,6 +253,7 @@ void main() {
 
     expect(container.read(fakeAuthProvider), isTrue);
     expect(find.text('Profilingiz'), findsOneWidget);
+    await _tap(tester, find.text('Keyinroq'));
     // Name and birth year come from OneID.
     expect(find.text('Ism va tug‘ilgan yil OneID’dan olindi'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Aziz Karimov'), findsOneWidget);

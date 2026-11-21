@@ -6,6 +6,7 @@ import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/goal_picker.dart';
 import 'labels.dart';
 import 'widgets/form_fields.dart';
 
@@ -61,6 +62,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     text: widget.profile.allergies.join(', '),
   );
   late String? _bloodType = widget.profile.bloodType;
+  late HealthGoal? _goal = widget.profile.goal;
   bool _saving = false;
   Object? _error;
 
@@ -91,6 +93,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
       bloodType: _bloodType,
       allergies: parseAllergies(_allergies.text),
       lang: p.lang,
+      goal: _goal,
     );
     try {
       await ref.read(profileRepositoryProvider).save(updated);
@@ -182,6 +185,30 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           ),
           gap,
           AllergiesField(controller: _allergies),
+          const SizedBox(height: 20),
+          Text(
+            context.tr(
+              uz: 'Asosiy maqsad',
+              ru: 'Главная цель',
+              en: 'Main goal',
+            ),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.tr(
+              uz: 'Bosh sahifadagi kartalar tartibi shunga moslashadi',
+              ru: 'Под неё подстраивается порядок карточек на главной',
+              en: 'Home cards are ordered for it',
+            ),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 10),
+          GoalPicker(
+            value: _goal,
+            enabled: !_saving,
+            onChanged: (g) => setState(() => _goal = g),
+          ),
           if (_error != null) FormError(saveErrorText(context, _error!)),
           const SizedBox(height: 20),
           FilledButton(

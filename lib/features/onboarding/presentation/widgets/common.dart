@@ -6,14 +6,30 @@ import '../../../../core/theme/app_colors.dart';
 
 /// UZ / RU / EN switch shown before sign-in.
 class LangSwitcher extends ConsumerWidget {
-  const LangSwitcher({super.key});
+  const LangSwitcher({super.key, this.onDark = false});
+
+  /// White version for a gradient background.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lang = ref.watch(appLangProvider);
+    const compact = ButtonStyle(visualDensity: VisualDensity.compact);
     return SegmentedButton<AppLang>(
       showSelectedIcon: false,
-      style: const ButtonStyle(visualDensity: VisualDensity.compact),
+      style: onDark
+          ? compact.copyWith(
+              foregroundColor: const WidgetStatePropertyAll(Colors.white),
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (s) => s.contains(WidgetState.selected)
+                    ? Colors.white.withValues(alpha: 0.28)
+                    : Colors.white.withValues(alpha: 0.06),
+              ),
+              side: WidgetStatePropertyAll(
+                BorderSide(color: Colors.white.withValues(alpha: 0.45)),
+              ),
+            )
+          : compact,
       segments: [
         for (final l in AppLang.values)
           ButtonSegment(value: l, label: Text(l.name.toUpperCase())),

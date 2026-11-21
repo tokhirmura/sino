@@ -60,6 +60,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       },
       child: Scaffold(
         body: SafeArea(
+          // Slides paint their gradient under the status bar themselves.
+          top: _step != _Step.intro,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             child: KeyedSubtree(

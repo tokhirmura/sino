@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sino/app/app.dart';
 import 'package:sino/core/backend/backend.dart';
 import 'package:sino/core/data/user.dart';
+import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/storage/prefs.dart';
 import 'package:sino/features/onboarding/application/onboarding_prefs.dart';
 import 'package:sino/features/onboarding/application/setup_prefill.dart';
@@ -43,10 +44,24 @@ Map<String, Object> _emptyProfileSession({SetupPrefill? prefill}) => {
 Finder _field(String label) => find.widgetWithText(TextFormField, label);
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {
+  // Lazy lists build only what's on screen.
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
+}
+
+/// Step 1 of the questionnaire: skip the goal.
+Future<void> _skipGoal(WidgetTester tester) async {
+  expect(find.text('Asosiy maqsadingiz nima?'), findsOneWidget);
+  await _tap(tester, find.text('Keyinroq'));
 }
 
 void main() {
@@ -87,6 +102,7 @@ void main() {
 
   testWidgets('questionnaire: validation errors', (tester) async {
     await _pumpApp(tester, _emptyProfileSession());
+    await _skipGoal(tester);
     await _tap(tester, find.widgetWithText(FilledButton, 'Saqlash'));
 
     expect(find.text('Ismingizni kiriting'), findsOneWidget);
@@ -105,6 +121,19 @@ void main() {
   ) async {
     final container = await _pumpApp(tester, _emptyProfileSession());
 
+    // Step 1: the goal button is disabled until a goal is chosen.
+    final next = find.byKey(const ValueKey('goal-next'));
+    await _tap(tester, next);
+    expect(find.byKey(const ValueKey('goal-step')), findsOneWidget);
+    await _tap(tester, find.byKey(const ValueKey('goal-pressure_sugar')));
+    await _tap(tester, next);
+    expect(find.byKey(const ValueKey('chosen-goal')), findsOneWidget);
+    // «O‘zgartirish» goes back with the choice kept.
+    await _tap(tester, find.text('O‘zgartirish'));
+    await _tap(tester, find.byKey(const ValueKey('goal-family')));
+    await _tap(tester, next);
+    expect(find.text('👨‍👩‍👧 Oila salomatligi'), findsOneWidget);
+
     await tester.enterText(_field('Ism'), 'Madina');
     await tester.enterText(_field('Tug‘ilgan yil'), '1999');
     await tester.enterText(_field('Bo‘y'), '165');
@@ -122,11 +151,20 @@ void main() {
     expect(saved.birthYear, 1999);
     expect(saved.heightCm, 165);
     expect(saved.weightKg, 58.5);
+    expect(saved.goal, HealthGoal.family);
     expect(saved.isComplete, isTrue);
     final raw = container
         .read(sharedPreferencesProvider)
         .getString(PrefKeys.fakeProfile);
     expect(raw, contains('Madina'));
+    expect(raw, contains('"goal":"family"'));
+    // Home shows the goal next to «Siz uchun».
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('home-goal')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('👨‍👩‍👧 Oila salomatligi'), findsOneWidget);
   });
 
   testWidgets('questionnaire: prefill shown, cleared after save', (
@@ -138,6 +176,7 @@ void main() {
         prefill: const SetupPrefill(fullName: 'Aziz Karimov', birthYear: 1997),
       ),
     );
+    await _skipGoal(tester);
     expect(_field('Aziz Karimov'), findsOneWidget);
     expect(_field('1997'), findsOneWidget);
 
@@ -151,6 +190,24 @@ void main() {
     ); // first name only
     expect(container.read(setupPrefillProvider), isNull);
   });
+
+  for (final lang in AppLang.values) {
+    testWidgets('goal step and chosen goal fit 360 px (${lang.name})', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pumpApp(tester, {
+        ..._emptyProfileSession(),
+        PrefKeys.lang: lang.name,
+      });
+      await _tap(tester, find.byKey(const ValueKey('goal-pressure_sugar')));
+      await _tap(tester, find.byKey(const ValueKey('goal-next')));
+      expect(find.byKey(const ValueKey('chosen-goal')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('questionnaire: sign out → onboarding', (tester) async {
     final container = await _pumpApp(tester, _emptyProfileSession());
