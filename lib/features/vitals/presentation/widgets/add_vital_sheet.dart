@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/l10n/app_lang.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../../application/vitals_math.dart';
 import '../../data/models.dart';
 import '../labels.dart';
@@ -209,12 +210,11 @@ class _AddVitalSheetState extends State<_AddVitalSheet> {
               ),
             ],
             const SizedBox(height: 16),
-            FilledButton(
+            PrimaryButton(
               key: const Key('vitals-add-save'),
               onPressed: _save,
-              child: Text(
-                context.tr(uz: 'Saqlash', ru: 'Сохранить', en: 'Save'),
-              ),
+              icon: Icons.check_rounded,
+              label: context.tr(uz: 'Saqlash', ru: 'Сохранить', en: 'Save'),
             ),
           ],
         ),

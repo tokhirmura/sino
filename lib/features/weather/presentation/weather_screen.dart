@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/loading_view.dart';
-import '../../../core/widgets/section_title.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/widgets.dart';
 import '../application/weather_logic.dart';
 import '../application/weather_providers.dart';
 import '../data/models.dart';
@@ -33,60 +30,323 @@ class WeatherScreen extends ConsumerWidget {
           .then<void>((_) {}, onError: (Object _) {});
     }
 
-    return AppScaffold(
-      title: context.tr(uz: 'Ob-havo', ru: 'Погода', en: 'Weather'),
-      actions: [
-        IconButton(
-          key: const Key('weather-refresh'),
-          tooltip: context.tr(uz: 'Yangilash', ru: 'Обновить', en: 'Refresh'),
-          onPressed: report.isLoading ? null : refresh,
-          icon: const Icon(Icons.refresh_rounded),
-        ),
-      ],
+    return Scaffold(
       body: RefreshIndicator(
         onRefresh: refresh,
         child: ListView(
-          padding: const EdgeInsets.only(bottom: 32),
+          padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
           children: [
-            _PlacePicker(selected: placeId),
-            const SizedBox(height: 12),
-            report.when(
-              loading: () => const SkeletonList(count: 3, itemHeight: 140),
-              error: (e, _) => e is LocationUnavailableException
-                  ? EmptyState(
-                      emoji: '📍',
-                      title: context.tr(
-                        uz: 'Joylashuv aniqlanmadi',
-                        ru: 'Не удалось определить местоположение',
-                        en: 'Couldn’t get your location',
-                      ),
-                      message: context.tr(
-                        uz:
-                            'Geolokatsiyani yoqing va ruxsat bering yoki '
-                            'yuqoridan shaharni tanlang.',
-                        ru:
-                            'Включите геолокацию и дайте доступ или выберите '
-                            'город выше.',
-                        en:
-                            'Turn on location and allow access, or pick a city '
-                            'above.',
-                      ),
-                      action: FilledButton(
-                        onPressed: refresh,
-                        child: Text(
-                          context.tr(
-                            uz: 'Qayta urinish',
-                            ru: 'Повторить',
-                            en: 'Retry',
-                          ),
-                        ),
-                      ),
-                    )
-                  : ErrorView(error: e, onRetry: refresh),
-              data: (r) => _ReportView(report: r, selectedId: placeId),
+            _Hero(
+              report: report.value,
+              loading: report.isLoading,
+              onRefresh: refresh,
+            ),
+            Padding(
+              padding: AppSpacing.screen,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (report.value case final r?)
+                    if (reportAirAlert(r) case final alert?) ...[
+                      const SizedBox(height: AppSpacing.cardGap),
+                      _AirAlertBanner(alert: alert),
+                    ],
+                  const SizedBox(height: AppSpacing.sm),
+                  _PlacePicker(selected: placeId),
+                  const SizedBox(height: AppSpacing.sm),
+                  report.when(
+                    skipLoadingOnReload: true,
+                    loading: () =>
+                        const SkeletonLoader(count: 3, kind: SkeletonKind.card),
+                    error: (e, _) => e is LocationUnavailableException
+                        ? EmptyState(
+                            emoji: '📍',
+                            title: context.tr(
+                              uz: 'Joylashuv aniqlanmadi',
+                              ru: 'Не удалось определить местоположение',
+                              en: 'Couldn’t get your location',
+                            ),
+                            message: context.tr(
+                              uz:
+                                  'Geolokatsiyani yoqing va ruxsat bering yoki '
+                                  'yuqoridan shaharni tanlang.',
+                              ru:
+                                  'Включите геолокацию и дайте доступ или '
+                                  'выберите город выше.',
+                              en:
+                                  'Turn on location and allow access, or pick '
+                                  'a city above.',
+                            ),
+                            actionLabel: context.tr(
+                              uz: 'Qayta urinish',
+                              ru: 'Повторить',
+                              en: 'Retry',
+                            ),
+                            actionIcon: Icons.refresh_rounded,
+                            onAction: refresh,
+                          )
+                        : ErrorView(error: e, onRetry: refresh),
+                    data: (r) => _ReportView(report: r, selectedId: placeId),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Top of the screen: a gradient by the time of day at the place, big
+/// temperature, sky and wind. While nothing is loaded — just the title.
+class _Hero extends StatelessWidget {
+  const _Hero({
+    required this.report,
+    required this.loading,
+    required this.onRefresh,
+  });
+
+  final WeatherReport? report;
+  final bool loading;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = report;
+    final text = Theme.of(context).textTheme;
+    const white = Colors.white;
+    final part = dayPartOf(r?.current.time ?? DateTime.now());
+    final partText = dayPartText(context, part);
+    final canPop = Navigator.of(context).canPop();
+    return GradientBackdrop(
+      key: const Key('weather-now'),
+      gradient: dayPartGradient(part),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xs,
+            AppSpacing.xxs,
+            AppSpacing.xs,
+            AppSpacing.xl,
+          ),
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(color: white),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    if (canPop)
+                      const BackButton(color: white)
+                    else
+                      const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        context.tr(uz: 'Ob-havo', ru: 'Погода', en: 'Weather'),
+                        style: text.headlineSmall?.copyWith(
+                          color: white,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ),
+                    DecoratedBox(
+                      key: const Key('weather-daypart'),
+                      decoration: BoxDecoration(
+                        color: white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(AppRadius.chip),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
+                        ),
+                        child: Text(
+                          '${partText.emoji} ${partText.text}',
+                          style: text.labelLarge?.copyWith(
+                            color: white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('weather-refresh'),
+                      tooltip: context.tr(
+                        uz: 'Yangilash',
+                        ru: 'Обновить',
+                        en: 'Refresh',
+                      ),
+                      color: white,
+                      onPressed: loading ? null : onRefresh,
+                      icon: const Icon(Icons.refresh_rounded),
+                    ),
+                  ],
+                ),
+                if (r != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
+                    child: _HeroBody(report: r),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroBody extends StatelessWidget {
+  const _HeroBody({required this.report});
+
+  final WeatherReport report;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = report.current;
+    final text = Theme.of(context).textTheme;
+    const white = Colors.white;
+    final soft = white.withValues(alpha: 0.85);
+    final place = context.trMap(report.place.name);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.xs),
+        Row(
+          children: [
+            if (report.place.isGps) ...[
+              const Icon(Icons.my_location_rounded, color: white, size: 16),
+              const SizedBox(width: AppSpacing.xxs),
+            ],
+            Expanded(
+              child: Text(
+                report.place.isGps
+                    ? context.tr(
+                        uz: 'Joylashuvim · $place',
+                        ru: 'Где я · $place',
+                        en: 'My location · $place',
+                      )
+                    : place,
+                key: const Key('weather-place'),
+                style: text.titleMedium?.copyWith(
+                  color: white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Text(
+              '${context.tr(uz: 'Yangilandi', ru: 'Обновлено', en: 'Updated')} '
+              '${agoText(context, report.fetchedAt, DateTime.now())}',
+              style: text.bodySmall?.copyWith(color: soft),
+            ),
+          ],
+        ),
+        Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      deg(c.temp),
+                      key: const Key('weather-temp'),
+                      style: text.displayLarge?.copyWith(
+                        color: white,
+                        fontSize: 88,
+                        fontWeight: FontWeight.w800,
+                        height: 1.05,
+                      ),
+                    ),
+                  ),
+                ),
+                Text(
+                  skyEmoji(c.code, isDay: c.isDay),
+                  style: const TextStyle(fontSize: 64),
+                ),
+              ],
+            )
+            .animate(key: ValueKey(report.place.id))
+            .fadeIn(duration: AppMotion.medium)
+            .slideY(begin: 0.12, curve: AppMotion.enter),
+        Text(
+          '${skyText(context, c.code)} · ${context.tr(uz: 'Seziladi ${deg(c.feelsLike)}', ru: 'Ощущается ${deg(c.feelsLike)}', en: 'Feels like ${deg(c.feelsLike)}')}',
+          style: text.titleSmall?.copyWith(color: white),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.xxs,
+          children: [
+            _Stat(icon: Icons.water_drop_outlined, value: '${c.humidity}%'),
+            _Stat(
+              icon: Icons.air_rounded,
+              value:
+                  '${c.wind.round()} ${context.tr(uz: 'km/soat', ru: 'км/ч', en: 'km/h')}',
+            ),
+            if (report.days.isNotEmpty)
+              _Stat(
+                icon: Icons.thermostat_rounded,
+                value:
+                    '${deg(report.days.first.min)} … ${deg(report.days.first.max)}',
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// AQI > 100: red → saffron banner at the top with a way to a home workout.
+class _AirAlertBanner extends StatelessWidget {
+  const _AirAlertBanner({required this.alert});
+
+  final AirAlert alert;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    const white = Colors.white;
+    return AppCard(
+      key: const Key('weather-air-alert'),
+      gradient: const LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [AppColors.garnet, AppColors.saffron],
+      ),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Row(
+        children: [
+          const Text('😷', style: TextStyle(fontSize: 28)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              airAlertText(context, alert),
+              key: const Key('weather-air-alert-text'),
+              style: text.titleSmall?.copyWith(
+                color: white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          FilledButton.tonalIcon(
+            key: const Key('weather-home-workout'),
+            style: FilledButton.styleFrom(
+              backgroundColor: white,
+              foregroundColor: AppColors.garnet,
+              // The theme stretches buttons to full width; not in a row.
+              minimumSize: const Size(0, 44),
+            ),
+            onPressed: () => context.go(AppRoutes.workouts),
+            icon: const Icon(Icons.home_rounded),
+            label: Text(context.tr(uz: 'Uyda', ru: 'Дома', en: 'At home')),
+          ),
+        ],
       ),
     );
   }
@@ -198,8 +458,6 @@ class _ReportView extends StatelessWidget {
               ),
             ),
           ),
-        _NowCard(report: r),
-        const SizedBox(height: 12),
         if (r.air != null) ...[
           _AirCard(air: r.air!),
           const SizedBox(height: 12),
@@ -273,127 +531,6 @@ class _ReportView extends StatelessWidget {
   }
 }
 
-class _NowCard extends StatelessWidget {
-  const _NowCard({required this.report});
-
-  final WeatherReport report;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = report.current;
-    final text = Theme.of(context).textTheme;
-    const white = Colors.white;
-    final night = !c.isDay;
-    final place = context.trMap(report.place.name);
-    return AppCard(
-      key: const Key('weather-now'),
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: night
-            ? const [Color(0xFF1E3A8A), Color(0xFF6D28D9)]
-            : const [AppColors.sky, Color(0xFF6366F1)],
-      ),
-      child: DefaultTextStyle.merge(
-        style: const TextStyle(color: white),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (report.place.isGps) ...[
-                  const Icon(Icons.my_location_rounded, color: white, size: 16),
-                  const SizedBox(width: 4),
-                ],
-                Expanded(
-                  child: Text(
-                    report.place.isGps
-                        ? context.tr(
-                            uz: 'Joylashuvim · $place',
-                            ru: 'Где я · $place',
-                            en: 'My location · $place',
-                          )
-                        : place,
-                    key: const Key('weather-place'),
-                    style: text.titleMedium?.copyWith(
-                      color: white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${context.tr(uz: 'Yangilandi', ru: 'Обновлено', en: 'Updated')} '
-                  '${agoText(context, report.fetchedAt, DateTime.now())}',
-                  style: text.bodySmall?.copyWith(
-                    color: white.withValues(alpha: 0.85),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  skyEmoji(c.code, isDay: c.isDay),
-                  style: const TextStyle(fontSize: 56),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  deg(c.temp),
-                  key: const Key('weather-temp'),
-                  style: text.displayMedium?.copyWith(
-                    color: white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        skyText(context, c.code),
-                        style: text.titleSmall?.copyWith(color: white),
-                      ),
-                      Text(
-                        context.tr(
-                          uz: 'Seziladi ${deg(c.feelsLike)}',
-                          ru: 'Ощущается ${deg(c.feelsLike)}',
-                          en: 'Feels like ${deg(c.feelsLike)}',
-                        ),
-                        style: text.bodySmall?.copyWith(color: white),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 16,
-              runSpacing: 4,
-              children: [
-                _Stat(icon: Icons.water_drop_outlined, value: '${c.humidity}%'),
-                _Stat(
-                  icon: Icons.air_rounded,
-                  value:
-                      '${c.wind.round()} ${context.tr(uz: 'km/soat', ru: 'км/ч', en: 'km/h')}',
-                ),
-                if (report.days.isNotEmpty)
-                  _Stat(
-                    icon: Icons.thermostat_rounded,
-                    value:
-                        '${deg(report.days.first.min)} … ${deg(report.days.first.max)}',
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _Stat extends StatelessWidget {
   const _Stat({required this.icon, required this.value});
 
@@ -425,7 +562,6 @@ class _AirCard extends StatelessWidget {
     final level = AqiLevel.of(air.aqi);
     final color = aqiColor(level);
     final text = Theme.of(context).textTheme;
-    final bad = air.aqi > outdoorAqiLimit;
     return AppCard(
       key: const Key('weather-air'),
       child: Column(
@@ -485,21 +621,6 @@ class _AirCard extends StatelessWidget {
               ),
             ],
           ),
-          if (bad) ...[
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              key: const Key('weather-home-workout'),
-              onPressed: () => context.go(AppRoutes.workouts),
-              icon: const Icon(Icons.home_rounded),
-              label: Text(
-                context.tr(
-                  uz: 'Uyda mashg‘ulot',
-                  ru: 'Тренировка дома',
-                  en: 'Work out at home',
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

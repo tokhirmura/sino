@@ -31,11 +31,43 @@ String airAlertText(BuildContext context, AirAlert a) => context.tr(
 Color aqiColor(AqiLevel l) => switch (l) {
   AqiLevel.good => AppColors.good,
   AqiLevel.moderate => AppColors.amber,
-  AqiLevel.sensitive => const Color(0xFFF97316),
+  AqiLevel.sensitive => AppColors.coral,
   AqiLevel.unhealthy => AppColors.danger,
-  AqiLevel.veryUnhealthy => const Color(0xFF9333EA),
-  AqiLevel.hazardous => const Color(0xFF7F1D1D),
+  AqiLevel.veryUnhealthy => AppColors.violet,
+  AqiLevel.hazardous => Color.lerp(AppColors.garnet, AppColors.ink, 0.45)!,
 };
+
+/// Background of the weather hero by the time of day.
+LinearGradient dayPartGradient(DayPart p) => LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: switch (p) {
+    DayPart.morning => const [AppColors.coral, AppColors.sky],
+    DayPart.day => const [AppColors.primary, AppColors.secondary],
+    DayPart.evening => const [AppColors.coral, AppColors.violet],
+    DayPart.night => const [AppColors.secondary, AppColors.backgroundDark],
+  },
+);
+
+({String emoji, String text}) dayPartText(BuildContext context, DayPart p) =>
+    switch (p) {
+      DayPart.morning => (
+        emoji: '🌅',
+        text: context.tr(uz: 'Tong', ru: 'Утро', en: 'Morning'),
+      ),
+      DayPart.day => (
+        emoji: '☀️',
+        text: context.tr(uz: 'Kun', ru: 'День', en: 'Day'),
+      ),
+      DayPart.evening => (
+        emoji: '🌇',
+        text: context.tr(uz: 'Kech', ru: 'Вечер', en: 'Evening'),
+      ),
+      DayPart.night => (
+        emoji: '🌙',
+        text: context.tr(uz: 'Tun', ru: 'Ночь', en: 'Night'),
+      ),
+    };
 
 String aqiText(BuildContext context, AqiLevel l) => switch (l) {
   AqiLevel.good => context.tr(uz: 'Yaxshi', ru: 'Хорошее', en: 'Good'),
