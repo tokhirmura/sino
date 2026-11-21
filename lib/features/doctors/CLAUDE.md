@@ -26,6 +26,9 @@
   Если понадобится — лиду миграция с частичным уникальным индексом `where status = 'booked'`.
 
 ## Экраны
+- **Design 2.0:** `/doctors` — `GradientHeader` (назад, поиск, `StatTile` «Shifokorlar» / «Yozuvlarim» с переходом),
+  `SkeletonLoader`, `EmptyState` с «Filtrni tozalash», каскад карточек (`presentation/motion.dart`,
+  `DoctorTile(index:)`), запись — `PrimaryButton` (`ValueKey('book-appointment')`).
 - **`/doctors`**: поиск (имя, специальность, клиника), чипы «Onlayn» и специальностей (подписи uz/ru/en —
   `presentation/labels.dart`: `specialtyLabel`, `specialtyEmoji`, `specialtyColor`), счётчик, карточки врачей
   (стаж, рейтинг, онлайн, цена / «Bepul»); баннер ближайшей записи; в app bar — «Mening yozuvlarim» с бейджем.

@@ -10,6 +10,7 @@ import '../../../core/widgets/money.dart';
 import '../application/doctors_providers.dart';
 import '../data/models.dart';
 import 'labels.dart';
+import 'motion.dart';
 
 /// Required on every medical screen.
 class DoctorsDisclaimer extends StatelessWidget {
@@ -132,10 +133,18 @@ class DoctorPrice extends StatelessWidget {
 
 /// A catalog row: specialty emoji, name, specialty, clinic, rating, price.
 class DoctorTile extends StatelessWidget {
-  const DoctorTile({super.key, required this.doctor, required this.onTap});
+  const DoctorTile({
+    super.key,
+    required this.doctor,
+    required this.onTap,
+    this.index,
+  });
 
   final Doctor doctor;
   final VoidCallback onTap;
+
+  /// Position in a list → staggered entrance.
+  final int? index;
 
   @override
   Widget build(BuildContext context) {
@@ -147,9 +156,10 @@ class DoctorTile extends StatelessWidget {
       specialtyLabel(context, d.specialty),
       if (d.years != null) yearsLabel(context, d.years!),
     ].join(' · ');
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AppCard(
+        animate: index == null,
         onTap: onTap,
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -219,6 +229,7 @@ class DoctorTile extends StatelessWidget {
         ),
       ),
     );
+    return index == null ? tile : tile.staggerIn(index!);
   }
 }
 

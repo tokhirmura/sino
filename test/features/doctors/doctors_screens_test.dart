@@ -9,6 +9,7 @@ import 'package:sino/app/app.dart';
 import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/routing/app_routes.dart';
 import 'package:sino/core/theme/app_theme.dart';
+import 'package:sino/core/widgets/primary_button.dart';
 import 'package:sino/features/doctors/application/doctors_providers.dart';
 import 'package:sino/features/doctors/data/models.dart';
 import 'package:sino/features/doctors/doctors_feature.dart';
@@ -147,12 +148,10 @@ void main() {
       final h = await _pumpRouter(tester, DoctorsPaths.doctor(_aliyev));
       // Offline doctor: no visit type switch.
       expect(find.text('Qabul turi'), findsNothing);
-      final confirm = find.ancestor(
-        of: find.text('Vaqtni tanlang'),
-        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
-      );
+      final confirm = find.byKey(const ValueKey('book-appointment'));
       await _scrollTo(tester, confirm);
-      expect(tester.widget<ButtonStyleButton>(confirm).onPressed, isNull);
+      expect(find.text('Vaqtni tanlang'), findsOneWidget);
+      expect(tester.widget<PrimaryButton>(confirm).onPressed, isNull);
 
       await _scrollTo(tester, find.widgetWithText(ChoiceChip, 'Malika'));
       await tester.tap(find.widgetWithText(ChoiceChip, 'Malika'));

@@ -10,6 +10,7 @@ import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/emoji_box.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/doctor_slots.dart';
 import '../application/doctors_providers.dart';
@@ -223,28 +224,22 @@ class _BookingState extends ConsumerState<_Booking> {
         const SizedBox(height: 8),
         const _SlotLegend(),
         const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: _slot == null || _saving ? null : _book,
-          icon: _saving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+        PrimaryButton(
+          key: const ValueKey('book-appointment'),
+          onPressed: _slot == null ? null : _book,
+          loading: _saving,
+          icon: Icons.event_available_rounded,
+          label: _slot == null
+              ? context.tr(
+                  uz: 'Vaqtni tanlang',
+                  ru: 'Выберите время',
+                  en: 'Pick a time',
                 )
-              : const Icon(Icons.event_available_rounded),
-          label: Text(
-            _slot == null
-                ? context.tr(
-                    uz: 'Vaqtni tanlang',
-                    ru: 'Выберите время',
-                    en: 'Pick a time',
-                  )
-                : context.tr(
-                    uz: 'Yozilish · ${appointmentWhen(context, _slot!, now)}',
-                    ru: 'Записаться · ${appointmentWhen(context, _slot!, now)}',
-                    en: 'Book · ${appointmentWhen(context, _slot!, now)}',
-                  ),
-          ),
+              : context.tr(
+                  uz: 'Yozilish · ${appointmentWhen(context, _slot!, now)}',
+                  ru: 'Записаться · ${appointmentWhen(context, _slot!, now)}',
+                  en: 'Book · ${appointmentWhen(context, _slot!, now)}',
+                ),
         ),
         if (_slot != null && !d.isFree && d.priceUzs != null) ...[
           const SizedBox(height: 6),
