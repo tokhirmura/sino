@@ -9,6 +9,7 @@
 ## Маршруты
 - `/vitals` (`AppRoutes.vitals`) — полноэкранный
 - `/vitals/breathing` (`vitalsBreathingPath`) — дыхание 4-7-8
+- `/vitals/report/:kind` (`vitalsReportPath(kind)`, `pressure` | `glucose`) — отчёт за 30 дней и «Shifokorga yuborish»
 
 ## Home-карточки
 - `vitals`, order 70 — `VitalsHomeCard`: «❤️ 71   🩺 118/76», «Me’yorda · Bugun 08:30» / красным «Me’yordan
@@ -66,6 +67,24 @@
   - `presentation/widgets/steps_card.dart` — `StepsCard` (вверху `/vitals`: `AnimatedProgressRing` с плавным числом,
     ~км/~ккал, «Maqsadgacha N qadam» / «Maqsad bajarildi! 🎉», подсказки silent/unavailable) и `StepsHomeCard`;
     оба слушают жизненный цикл (фон → `flush`, возврат → `restart`)
+- Давление и сахар 2.0 (S2-6):
+  - `application/vitals_report.dart` — без Flutter: `reportDays` = 30, `reportStart`, `reportRows` (вид, окно, новые
+    сверху), `reportX` (день + доля суток), `summarize` → `ReportSummary` (количество, по зонам, среднее, ср. нижнее,
+    мин/макс, доля «me’yor»); `hasReport(kind)`
+  - `vitalsReportProvider(kind)` — 30 дней одним запросом; `VitalsActions` инвалидирует и его
+  - `presentation/widgets/zone_chart.dart` — `ZoneChart` (fl_chart: каждая точка — день+время, полосы зон
+    `zoneColor` 16 %), **давление — два графика** (верхнее по `systolicBands`, нижнее по `diastolicBands`: на одном
+    нормальное нижнее 76 попало бы в «Past» верхнего), `ZoneLegend` («Yuqori me’yor 130–139»), `bandText`
+  - `presentation/vitals_report_screen.dart` — `VitalsReportScreen`: `ReportBody` (StatTile среднее / % в норме /
+    «Baland», графики с легендой, таблица дата · значение · зона-пилюля, `zoneDisclaimer`), `PrimaryButton`
+    «Shifokorga yuborish»; пусто — `EmptyState`. `reportShareText` — сводка для текста сообщения
+  - `presentation/widgets/report_share.dart` — `captureReport`: тот же `ReportBody(forImage: true)` (заголовок
+    «Sino · Qon bosimi», ФИО, период) рисуется **вне экрана целиком** (`screenshot.captureFromLongWidget`, 420 px ×2.5,
+    `disableAnimations` — иначе CascadeIn снимается прозрачным), `shareReport` — `share_plus` (PNG + текст,
+    `sharePositionOrigin` для iPad); оба через провайдеры (`reportCaptureProvider`, `reportShareProvider`) — тесты
+    подменяют
+  - экран `/vitals`: у давления/сахара под графиком — «30 kun · Shifokorga yuborish»; в списке измерений — пилюля
+    зоны; на 7-дневном графике сахара — цветные зоны (давление — прежние нейтральные полосы)
 - `data/vitals_repository.dart` (ещё) — `update(id, value:, measuredAt:)` → `false`, если строки нет
 - `presentation/vitals_home_card.dart`, `presentation/labels.dart`
 - Тесты: `test/features/vitals/`
@@ -86,5 +105,5 @@
 - [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
 - [x] S2-3 Шаги: `pedometer` — реальные шаги за сегодня, цель 8000, кольцо; итог дня → `vitals` (kind = 'steps',
   лид берёт в индекс Sino); запрос разрешения, понятный текст при отказе; проверить на телефоне (эмулятор не считает)
-- [ ] S2-6 Давление и сахар 2.0: цветные зоны на графике, последние 30 дней, «Shifokorga yuborish» — скриншот графика
+- [x] S2-6 Давление и сахар 2.0: цветные зоны на графике, последние 30 дней, «Shifokorga yuborish» — скриншот графика
   и таблицы через `share_plus`, дисклеймер «Shifokor maslahatini almashtirmaydi»

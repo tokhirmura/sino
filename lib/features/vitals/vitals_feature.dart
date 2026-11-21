@@ -6,8 +6,10 @@ import '../../core/l10n/app_lang.dart';
 import '../../core/routing/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_card.dart';
+import 'data/models.dart';
 import 'presentation/breathing_screen.dart';
 import 'presentation/vitals_home_card.dart';
+import 'presentation/vitals_report_screen.dart';
 import 'presentation/vitals_screen.dart';
 import 'presentation/widgets/steps_card.dart';
 
@@ -20,6 +22,15 @@ final List<RouteBase> vitalsRoutes = [
       GoRoute(
         path: 'breathing',
         builder: (context, state) => const BreathingScreen(),
+      ),
+      GoRoute(
+        path: 'report/:kind',
+        builder: (context, state) => VitalsReportScreen(
+          kind: switch (state.pathParameters['kind']) {
+            'glucose' => VitalKind.glucose,
+            _ => VitalKind.pressure,
+          },
+        ),
       ),
     ],
   ),
