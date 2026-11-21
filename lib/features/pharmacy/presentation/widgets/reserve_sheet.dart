@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/data/user.dart';
 import '../../../../core/l10n/app_lang.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/money.dart';
@@ -193,7 +194,12 @@ class _ReserveSheetState extends ConsumerState<ReserveSheet> {
                       ru: 'Рецепт прикреплён',
                       en: 'Prescription attached',
                     ),
-                    style: text.bodyMedium?.copyWith(color: AppColors.good),
+                    style: text.bodyMedium?.copyWith(
+                      color: AppColors.readable(
+                        AppColors.good,
+                        Theme.of(context).brightness,
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(
@@ -235,7 +241,9 @@ class _ReserveSheetState extends ConsumerState<ReserveSheet> {
             const SizedBox(height: 12),
             Text(
               _error!,
-              style: text.bodyMedium?.copyWith(color: AppColors.danger),
+              style: text.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ],
           const SizedBox(height: 16),
@@ -254,23 +262,16 @@ class _ReserveSheetState extends ConsumerState<ReserveSheet> {
             style: text.bodySmall,
           ),
           const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _saving || needsPhoto ? null : _confirm,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(50),
+          PrimaryButton(
+            key: const ValueKey('reserve-confirm'),
+            onPressed: needsPhoto ? null : _confirm,
+            loading: _saving,
+            icon: Icons.shopping_bag_rounded,
+            label: context.tr(
+              uz: 'Bron qilish · ${formatMoney(_offer.priceUzs)}',
+              ru: 'Забронировать · ${formatMoney(_offer.priceUzs)}',
+              en: 'Reserve · ${formatMoney(_offer.priceUzs)}',
             ),
-            child: _saving
-                ? const SizedBox.square(
-                    dimension: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  )
-                : Text(
-                    context.tr(
-                      uz: 'Bron qilish · ${formatMoney(_offer.priceUzs)}',
-                      ru: 'Забронировать · ${formatMoney(_offer.priceUzs)}',
-                      en: 'Reserve · ${formatMoney(_offer.priceUzs)}',
-                    ),
-                  ),
           ),
         ],
       ),
@@ -293,7 +294,13 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary),
+          Icon(
+            icon,
+            color: AppColors.readable(
+              AppColors.primary,
+              Theme.of(context).brightness,
+            ),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

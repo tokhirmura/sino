@@ -1,4 +1,11 @@
 {
+  "home_meds": [
+    { "medicine": "paracetamol", "expires_in_days": 140, "quantity": 2, "notes": "Isitma va og‘riqda" },
+    { "medicine": "ibuprofen", "expires_in_days": 18, "quantity": 1, "notes": null },
+    { "medicine": "smecta", "expires_in_days": -6, "quantity": 3, "notes": null },
+    { "medicine": "vitamin_d3", "expires_in_days": 300, "quantity": 1, "notes": "Kuniga 1 kapsula" },
+    { "medicine": null, "name": "Yod eritmasi 5%", "expires_in_days": 60, "quantity": 1, "notes": null }
+  ],
   "reservations": [
     {
       "medicine": "ibuprofen",

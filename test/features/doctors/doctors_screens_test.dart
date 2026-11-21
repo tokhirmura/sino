@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sino/app/app.dart';
 import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/routing/app_routes.dart';
 import 'package:sino/core/theme/app_theme.dart';
+import 'package:sino/core/widgets/primary_button.dart';
 import 'package:sino/features/doctors/application/doctors_providers.dart';
 import 'package:sino/features/doctors/data/models.dart';
 import 'package:sino/features/doctors/doctors_feature.dart';
@@ -20,6 +23,18 @@ import '../../helpers/test_app.dart';
 const _karimova = 'a4000000-0000-4000-8000-000000000001';
 const _aliyev = 'a4000000-0000-4000-8000-000000000002'; // offline, terapevt
 
+/// Fixed clock: Tuesday morning — today still has free slots, so results
+/// don't depend on when the suite runs.
+final _morning = DateTime(2026, 11, 24, 8, 15);
+
+/// Saturday late evening: today is over, tomorrow is Sunday (day off).
+final _lateSaturday = DateTime(2026, 11, 28, 23, 50);
+
+List<Override> _overrides(SharedPreferences prefs, {DateTime? now}) => [
+  ...appOverrides(prefs: prefs, useFake: true),
+  doctorsClockProvider.overrideWithValue(() => now ?? _morning),
+];
+
 class _Harness {
   late GoRouter router;
   late ProviderContainer container;
@@ -29,6 +44,7 @@ Future<_Harness> _pumpRouter(
   WidgetTester tester,
   String location, {
   AppLang lang = AppLang.uz,
+  DateTime? now,
 }) async {
   final h = _Harness();
   final prefs = await fakePrefs(signedIn: true);
@@ -39,7 +55,7 @@ Future<_Harness> _pumpRouter(
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: appOverrides(prefs: prefs, useFake: true),
+      overrides: _overrides(prefs, now: now),
       child: MaterialApp.router(
         theme: AppTheme.light,
         locale: lang.locale,
@@ -132,12 +148,10 @@ void main() {
       final h = await _pumpRouter(tester, DoctorsPaths.doctor(_aliyev));
       // Offline doctor: no visit type switch.
       expect(find.text('Qabul turi'), findsNothing);
-      final confirm = find.ancestor(
-        of: find.text('Vaqtni tanlang'),
-        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
-      );
+      final confirm = find.byKey(const ValueKey('book-appointment'));
       await _scrollTo(tester, confirm);
-      expect(tester.widget<ButtonStyleButton>(confirm).onPressed, isNull);
+      expect(find.text('Vaqtni tanlang'), findsOneWidget);
+      expect(tester.widget<PrimaryButton>(confirm).onPressed, isNull);
 
       await _scrollTo(tester, find.widgetWithText(ChoiceChip, 'Malika'));
       await tester.tap(find.widgetWithText(ChoiceChip, 'Malika'));
@@ -181,13 +195,24 @@ void main() {
       final appts = h.container.read(appointmentsProvider).requireValue;
       expect(
         appts.where(
-          (a) =>
-              a.doctorId == _karimova &&
-              a.online &&
-              a.isUpcoming(DateTime.now()),
+          (a) => a.doctorId == _karimova && a.online && a.isUpcoming(_morning),
         ),
         isNotEmpty,
       );
+    });
+
+    testWidgets('late Saturday evening: first day is Monday', (tester) async {
+      await _pumpRouter(
+        tester,
+        DoctorsPaths.doctor(_aliyev),
+        now: _lateSaturday,
+      );
+      // Today (Saturday) is over and Sunday is a day off → Monday.
+      final today = find.widgetWithText(ChoiceChip, 'Bugun');
+      expect(tester.widget<ChoiceChip>(today).selected, isFalse);
+      expect(find.widgetWithText(ChoiceChip, 'Ertaga'), findsNothing);
+      await _scrollTo(tester, find.text('Vaqtni tanlang'));
+      expect(_freeSlot, findsWidgets);
     });
 
     testWidgets('unknown doctor', (tester) async {
@@ -219,7 +244,7 @@ void main() {
     final prefs = await fakePrefs(signedIn: true);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: appOverrides(prefs: prefs, useFake: true),
+        overrides: _overrides(prefs),
         child: MaterialApp(
           locale: AppLang.uz.locale,
           supportedLocales: AppLang.locales,
@@ -239,6 +264,12 @@ void main() {
     'catalog': () => const DoctorsScreen(),
     'doctor': () => const DoctorScreen(doctorId: _karimova),
     'appointments': () => const AppointmentsScreen(),
+    'home card': () => Scaffold(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [Builder(builder: doctorsHomeCards.single.builder)],
+      ),
+    ),
   };
   for (final MapEntry(key: name, value: build) in screens.entries) {
     for (final lang in AppLang.values) {
@@ -246,18 +277,24 @@ void main() {
         testWidgets('$name · ${lang.name} · ${dark ? 'dark' : 'light'}', (
           tester,
         ) async {
-          tester.view.physicalSize = const Size(360, 640);
+          // Smallest common phone + enlarged system font.
+          tester.view.physicalSize = const Size(320, 568);
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.reset);
           final prefs = await fakePrefs(signedIn: true);
           await tester.pumpWidget(
             ProviderScope(
-              overrides: appOverrides(prefs: prefs, useFake: true),
+              overrides: _overrides(prefs),
               child: MaterialApp(
                 theme: dark ? AppTheme.dark : AppTheme.light,
                 locale: lang.locale,
                 supportedLocales: AppLang.locales,
                 localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(context)
+                      .copyWith(textScaler: const TextScaler.linear(1.3)),
+                  child: child!,
+                ),
                 home: build(),
               ),
             ),

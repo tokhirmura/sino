@@ -34,7 +34,7 @@ class AppointmentsScreen extends ConsumerWidget {
         loading: () => const SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.all(16),
-          child: SkeletonList(count: 3, itemHeight: 140),
+          child: SkeletonLoader(count: 3, kind: SkeletonKind.card),
         ),
         data: (list) {
           if (list.isEmpty) {

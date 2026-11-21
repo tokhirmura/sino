@@ -10,6 +10,7 @@ import '../../../core/widgets/money.dart';
 import '../application/doctors_providers.dart';
 import '../data/models.dart';
 import 'labels.dart';
+import 'motion.dart';
 
 /// Required on every medical screen.
 class DoctorsDisclaimer extends StatelessWidget {
@@ -116,7 +117,12 @@ class DoctorPrice extends StatelessWidget {
     if (doctor.isFree) {
       return Text(
         context.tr(uz: 'Bepul', ru: 'Бесплатно', en: 'Free'),
-        style: style?.copyWith(color: AppColors.good),
+        style: style?.copyWith(
+          color: AppColors.readable(
+            AppColors.good,
+            Theme.of(context).brightness,
+          ),
+        ),
       );
     }
     final p = doctor.priceUzs;
@@ -127,10 +133,18 @@ class DoctorPrice extends StatelessWidget {
 
 /// A catalog row: specialty emoji, name, specialty, clinic, rating, price.
 class DoctorTile extends StatelessWidget {
-  const DoctorTile({super.key, required this.doctor, required this.onTap});
+  const DoctorTile({
+    super.key,
+    required this.doctor,
+    required this.onTap,
+    this.index,
+  });
 
   final Doctor doctor;
   final VoidCallback onTap;
+
+  /// Position in a list → staggered entrance.
+  final int? index;
 
   @override
   Widget build(BuildContext context) {
@@ -142,9 +156,10 @@ class DoctorTile extends StatelessWidget {
       specialtyLabel(context, d.specialty),
       if (d.years != null) yearsLabel(context, d.years!),
     ].join(' · ');
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AppCard(
+        animate: index == null,
         onTap: onTap,
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -214,6 +229,7 @@ class DoctorTile extends StatelessWidget {
         ),
       ),
     );
+    return index == null ? tile : tile.staggerIn(index!);
   }
 }
 
@@ -280,7 +296,7 @@ class _AppointmentCardState extends ConsumerState<AppointmentCard> {
     final muted = theme.colorScheme.onSurfaceVariant;
     final a = widget.appointment;
     final d = a.doctor ?? ref.watch(doctorsByIdProvider).value?[a.doctorId];
-    final now = DateTime.now();
+    final now = ref.watch(doctorsClockProvider)();
     final members = ref.watch(familyMembersProvider).value ?? const [];
     final who = memberName(members, a.memberId);
     final color = appointmentStatusColor(a, now);
@@ -328,10 +344,10 @@ class _AppointmentCardState extends ConsumerState<AppointmentCard> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.event_rounded,
                     size: 18,
-                    color: AppColors.primary,
+                    color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 6),
                   Expanded(
@@ -411,7 +427,8 @@ class _AppointmentCardState extends ConsumerState<AppointmentCard> {
   }
 }
 
-/// Like core `Pill`, but the label ellipsizes in narrow cards.
+/// Like core `Pill` (readable ink on a tinted background), but the label
+/// ellipsizes — never overflows in narrow cards or wraps.
 class Tag extends StatelessWidget {
   const Tag(this.label, {super.key, this.color = AppColors.primary, this.icon});
 
@@ -421,34 +438,42 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    // Text / icon darkened (light) or lightened (dark) to contrast ≥ 4.5.
+    final ink = AppColors.readable(color, brightness);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.22 : 0.14),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-          ],
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                height: 1.3,
-                fontWeight: FontWeight.w600,
+      // The icon is dropped only when there is no room even for it.
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final withIcon = icon != null && box.maxWidth >= 40;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (withIcon) ...[
+                Icon(icon, size: 14, color: ink),
+                const SizedBox(width: 4),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: ink,
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

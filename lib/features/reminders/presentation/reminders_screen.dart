@@ -1,88 +1,139 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/async_value_view.dart';
-import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/progress_ring.dart';
-import '../../../core/widgets/section_title.dart';
-import '../../../core/widgets/loading_view.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/widgets.dart';
 import '../application/reminder_schedule.dart';
 import '../application/reminders_providers.dart';
 import '../data/models.dart';
 import 'labels.dart';
+import 'motion.dart';
 import 'reminders_paths.dart';
 import 'widgets.dart';
 
-/// `/reminders`: today's doses by time, adherence, all reminders.
+/// `/reminders`: gradient header with today's stats, adherence + next
+/// dose, today's doses by time, all reminders.
 class RemindersScreen extends ConsumerWidget {
   const RemindersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reminders = ref.watch(remindersProvider);
-    return AppScaffold(
-      title: context.tr(uz: 'Eslatmalar', ru: 'Напоминания', en: 'Reminders'),
-      actions: [
-        IconButton(
-          tooltip: context.tr(
-            uz: 'Qabul tarixi',
-            ru: 'История приёма',
-            en: 'Intake history',
-          ),
-          onPressed: () => context.push(RemindersPaths.history),
-          icon: const Icon(Icons.history_rounded),
-        ),
-      ],
+    return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(RemindersPaths.create),
         icon: const Icon(Icons.add_alarm_rounded),
         label: Text(context.tr(uz: 'Qo‘shish', ru: 'Добавить', en: 'Add')),
       ),
-      padding: EdgeInsets.zero,
-      body: AsyncValueView(
-        value: reminders,
-        onRetry: () {
-          ref.invalidate(remindersProvider);
-          ref.invalidate(reminderLogsProvider);
-        },
-        loading: () => const SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.all(16),
-          child: SkeletonList(count: 4),
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 96),
+          children: [
+            const _Header(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: AsyncValueView(
+                value: reminders,
+                compact: true,
+                onRetry: () {
+                  ref.invalidate(remindersProvider);
+                  ref.invalidate(reminderLogsProvider);
+                },
+                loading: () => const SkeletonLoader(count: 4),
+                data: (list) => list.isEmpty
+                    ? EmptyState(
+                        emoji: '⏰',
+                        title: context.tr(
+                          uz: 'Hali eslatma yo‘q',
+                          ru: 'Напоминаний пока нет',
+                          en: 'No reminders yet',
+                        ),
+                        message: context.tr(
+                          uz:
+                              'Dori ichish vaqtini qo‘shing — o‘z vaqtida '
+                              'eslatamiz.',
+                          ru: 'Добавьте время приёма — мы вовремя напомним.',
+                          en: 'Add a medicine time and we’ll remind you.',
+                        ),
+                        color: AppColors.amber,
+                        actionLabel: context.tr(
+                          uz: 'Eslatma qo‘shish',
+                          ru: 'Добавить напоминание',
+                          en: 'Add a reminder',
+                        ),
+                        actionIcon: Icons.add_alarm_rounded,
+                        onAction: () => context.push(RemindersPaths.create),
+                      )
+                    : _Body(reminders: list),
+              ),
+            ),
+          ],
         ),
-        data: (list) => list.isEmpty
-            ? EmptyState(
-                emoji: '⏰',
-                title: context.tr(
-                  uz: 'Hali eslatma yo‘q',
-                  ru: 'Напоминаний пока нет',
-                  en: 'No reminders yet',
-                ),
-                message: context.tr(
-                  uz: 'Dori ichish vaqtini qo‘shing — o‘z vaqtida eslatamiz.',
-                  ru: 'Добавьте время приёма — мы вовремя напомним.',
-                  en: 'Add a medicine time and we’ll remind you.',
-                ),
-                color: AppColors.amber,
-                action: FilledButton.icon(
-                  onPressed: () => context.push(RemindersPaths.create),
-                  icon: const Icon(Icons.add_alarm_rounded),
-                  label: Text(
-                    context.tr(
-                      uz: 'Eslatma qo‘shish',
-                      ru: 'Добавить напоминание',
-                      en: 'Add a reminder',
-                    ),
-                  ),
-                ),
-              )
-            : _Body(reminders: list),
+      ),
+    );
+  }
+}
+
+/// Title, back / history, and today at a glance: doses taken and active
+/// reminders.
+class _Header extends ConsumerWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final today = dayOf(DateTime.now());
+    final doses = ref.watch(dosesForDayProvider(today)).value;
+    final reminders = ref.watch(remindersProvider).value;
+    final taken = doses?.where((d) => d.taken).length;
+    final active = reminders?.where((r) => r.active).length;
+    final canPop = Navigator.of(context).canPop();
+    return GradientHeader(
+      leading: canPop ? const BackButton(color: Colors.white) : null,
+      title: context.tr(uz: 'Eslatmalar', ru: 'Напоминания', en: 'Reminders'),
+      subtitle: context.tr(
+        uz: 'Dorini o‘z vaqtida iching',
+        ru: 'Принимайте лекарства вовремя',
+        en: 'Take your medicine on time',
+      ),
+      trailing: IconButton(
+        tooltip: context.tr(
+          uz: 'Qabul tarixi',
+          ru: 'История приёма',
+          en: 'Intake history',
+        ),
+        onPressed: () => context.push(RemindersPaths.history),
+        icon: const Icon(Icons.history_rounded),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: StatTile(
+              onDark: true,
+              value: doses == null ? '—' : '$taken/${doses.length}',
+              label: context.tr(
+                uz: 'Bugun ichildi',
+                ru: 'Принято сегодня',
+                en: 'Taken today',
+              ),
+              icon: Icons.task_alt_rounded,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: StatTile(
+              onDark: true,
+              value: active == null ? '—' : '$active',
+              label: context.tr(uz: 'Faol', ru: 'Активные', en: 'Active'),
+              icon: Icons.alarm_on_rounded,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -98,8 +149,8 @@ class _Body extends ConsumerWidget {
     final now = DateTime.now();
     final today = dayOf(now);
     final doses = ref.watch(dosesForDayProvider(today));
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _SummaryCard(),
         const SizedBox(height: 16),
@@ -123,11 +174,12 @@ class _Body extends ConsumerWidget {
                 )
               : Column(
                   children: [
-                    for (final d in list)
+                    for (final (i, d) in list.indexed)
                       DoseTile(
                         key: ValueKey('dose-${d.reminder.id}'),
                         dose: d,
                         now: now,
+                        index: i,
                       ),
                   ],
                 ),
@@ -141,7 +193,8 @@ class _Body extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 8),
-        for (final r in reminders) _ReminderTile(reminder: r),
+        for (final (i, r) in reminders.indexed)
+          _ReminderTile(reminder: r).staggerIn(i + 2),
         const SizedBox(height: 8),
         const RemindersDisclaimer(),
       ],
@@ -216,7 +269,7 @@ class _SummaryCard extends ConsumerWidget {
                               '${next.reminder.name}',
                         ),
                   style: text.bodyMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 2,
@@ -263,6 +316,7 @@ class _ReminderTile extends ConsumerWidget {
       child: Opacity(
         opacity: r.active ? 1 : 0.6,
         child: AppCard(
+          animate: false,
           onTap: () => context.push(RemindersPaths.edit(r.id)),
           padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
           child: Row(

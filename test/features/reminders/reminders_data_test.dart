@@ -11,6 +11,8 @@ import 'package:sino/features/reminders/application/reminders_providers.dart';
 import 'package:sino/features/reminders/data/models.dart';
 import 'package:sino/features/reminders/data/reminder_notifications.dart';
 import 'package:sino/features/reminders/data/reminders_repository.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 
 /// Records every sync instead of touching the plugin.
 class _RecordingNotifications implements ReminderNotifications {
@@ -29,6 +31,27 @@ class _RecordingNotifications implements ReminderNotifications {
     syncs.add(reminders);
     lastNames = memberNames;
   }
+}
+
+/// SharedPreferences whose writes take a while to complete.
+class _SlowPrefs implements SharedPreferences {
+  final _data = <String, Object>{};
+
+  @override
+  bool containsKey(String key) => _data.containsKey(key);
+
+  @override
+  String? getString(String key) => _data[key] as String?;
+
+  @override
+  Future<bool> setString(String key, String value) async {
+    _data[key] = value;
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+    return true;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _GatedRepo extends FakeRemindersRepository {
@@ -214,6 +237,38 @@ void main() {
       expect(body, 'Amlodipin — 5 mg · Akbar');
       expect(reminderNotificationText(r, AppLang.ru).$1, contains('лекарство'));
     });
+
+    group('device timezone', () {
+      setUpAll(tzdata.initializeTimeZones);
+
+      test('uses the zone name from flutter_timezone', () async {
+        final l = await LocalReminderNotifications.deviceLocation(
+          zoneName: () async => 'Europe/Berlin',
+        );
+        expect(l.name, 'Europe/Berlin');
+      });
+
+      test('plugin failure or unknown name → zone with the offset', () async {
+        for (final zoneName in <Future<String> Function()>[
+          () async => throw Exception('no plugin'),
+          () async => 'Nowhere/Unknown',
+        ]) {
+          final l = await LocalReminderNotifications.deviceLocation(
+            zoneName: zoneName,
+            offset: const Duration(hours: 9),
+          );
+          expect(l.currentTimeZone.offset, const Duration(hours: 9));
+        }
+      });
+
+      test('no zone with the offset → UTC', () async {
+        final l = await LocalReminderNotifications.deviceLocation(
+          zoneName: () async => throw Exception('no plugin'),
+          offset: const Duration(hours: 15, minutes: 7),
+        );
+        expect(l, tz.UTC);
+      });
+    });
   });
 
   group('FakeRemindersRepository', () {
@@ -236,6 +291,28 @@ void main() {
       final logs = await repo.logsSince(DateTime(2026, 11, 1));
       expect(logs, hasLength(10));
       expect(logs.last.takenAt.isBefore(DateTime(2026, 11, 17)), isTrue);
+    });
+
+    test('first launch: reads during seeding never see half a demo', () async {
+      // Like the real plugin: a write is visible at once but completes
+      // later — the window where only the reminders key existed.
+      final slow = _SlowPrefs();
+      final repo = FakeRemindersRepository(slow, now: now);
+      final first = repo.reminders();
+      final reads = <Future<Object>>[];
+      var done = false;
+      unawaited(first.whenComplete(() => done = true));
+      while (!done) {
+        reads
+          ..add(repo.logsSince(DateTime(2026, 11, 1)))
+          ..add(repo.reminders());
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+      }
+      for (final r in await Future.wait(reads)) {
+        expect(r, isNotEmpty);
+      }
+      expect(await first, isNotEmpty);
+      expect(await repo.logsSince(DateTime(2026, 11, 1)), hasLength(10));
     });
 
     test('add / update / remove persist; remove drops the logs', () async {

@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -8,6 +9,9 @@ import 'package:sino/app/app.dart';
 import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/routing/app_routes.dart';
 import 'package:sino/core/theme/app_theme.dart';
+import 'package:sino/core/widgets/primary_button.dart';
+import 'package:sino/features/pharmacy/application/pharmacy_providers.dart';
+import 'package:sino/features/pharmacy/data/models.dart';
 import 'package:sino/features/pharmacy/data/external_launcher.dart';
 import 'package:sino/features/pharmacy/data/rx_photo.dart';
 import 'package:sino/features/pharmacy/pharmacy_feature.dart';
@@ -17,6 +21,7 @@ import 'package:sino/features/pharmacy/presentation/pharmacy_paths.dart';
 import 'package:sino/features/pharmacy/presentation/pharmacy_screen.dart';
 import 'package:sino/features/pharmacy/presentation/reservations_screen.dart';
 import 'package:sino/features/pharmacy/presentation/scan_screen.dart';
+import 'package:sino/features/pharmacy/presentation/widgets/reservation_steps.dart';
 
 import '../../helpers/test_app.dart';
 
@@ -135,6 +140,7 @@ void main() {
       tester,
     ) async {
       final h = await _pumpRouter(tester, AppRoutes.pharmacy);
+      await _scrollTo(tester, find.text('Amlodipin 5 mg'));
       await tester.tap(find.text('Amlodipin 5 mg'));
       await tester.pumpAndSettle();
       expect(find.byType(MedicineScreen), findsOneWidget);
@@ -151,7 +157,9 @@ void main() {
       await _pumpRouter(tester, PharmacyPaths.medicine(_paracetamol));
       expect(find.text('Paracetamol 500 mg'), findsOneWidget);
       expect(find.text('Shifokor maslahatini almashtirmaydi'), findsOneWidget);
-      expect(find.text('Retseptsiz'), findsOneWidget);
+      // Big badge in the header (+ compact ones on OTC analogs).
+      expect(find.text('Retseptsiz'), findsWidgets);
+      expect(find.text('Retsept kerak'), findsNothing);
       expect(find.textContaining('Isitma va o‘rtacha'), findsOneWidget);
       expect(find.textContaining('Sutkalik dozadan'), findsOneWidget);
       await _scrollTo(tester, find.textContaining('ta dorixonada bor'));
@@ -187,32 +195,55 @@ void main() {
       expect(find.text('Bron qilindi: Loratadin 10 mg'), findsOneWidget);
 
       h.router.push(PharmacyPaths.reservations);
-      // The pending card has an endless progress bar — no pumpAndSettle.
       for (var i = 0; i < 5; i++) {
         await tester.pump(const Duration(milliseconds: 100));
       }
       expect(find.byType(ReservationsScreen), findsOneWidget);
-      expect(find.text('Tayyorlanmoqda'), findsOneWidget);
+      // 3-step bar: accepted, now «Tayyorlanmoqda».
+      final steps = find.byType(ReservationSteps);
+      expect(steps, findsWidgets);
+      expect(find.text('Qabul qilindi'), findsWidgets);
+      expect(find.text('Tayyorlanmoqda'), findsWidgets);
       expect(find.text('Dilfuza'), findsOneWidget);
+      Reservation loratadin() => h.container
+          .read(reservationsProvider)
+          .requireValue
+          .firstWhere((r) => r.forMemberId == 'fake-mother');
+      expect(reservationProgress(loratadin()), 1);
 
+      // The fake pharmacy prepares it → full-screen celebration.
       await tester.pump(const Duration(seconds: 21));
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('Tayyorlanmoqda'), findsNothing);
-      expect(find.text('Olib ketishga tayyor'), findsNWidgets(2));
-      // The «reserved» snack (with an action) animates out first.
-      await tester.pump(const Duration(seconds: 1));
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(reservationProgress(loratadin()), 3);
+      expect(
+        find.byKey(const ValueKey('reservation-ready-celebration')),
+        findsOneWidget,
+      );
+      expect(find.text('Bron tayyor! 🎉'), findsOneWidget);
       expect(
         find.text('Loratadin 10 mg olib ketishga tayyor!'),
         findsOneWidget,
       );
+      expect(find.byType(ConfettiWidget), findsOneWidget);
+      // `confetti` moves particles by the real `DateTime.now()`, which the
+      // test clock doesn't advance — it never settles here. Close the
+      // banner first, then settle.
+      await tester.pump(const Duration(seconds: 2));
+      await tester.tap(find.text('Ajoyib!'));
       await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('reservation-ready-celebration')),
+        findsNothing,
+      );
     });
 
     testWidgets('prescription medicine needs a photo, kept on the device', (
       tester,
     ) async {
       final h = await _pumpRouter(tester, PharmacyPaths.medicine(_amoxicillin));
-      expect(find.text('Retsept bilan'), findsOneWidget);
+      expect(find.text('Retsept kerak'), findsOneWidget);
       await _scrollTo(tester, find.textContaining('ta dorixonada bor'));
       final reserve = find.widgetWithText(FilledButton, 'Bron qilish').first;
       await _scrollTo(tester, reserve);
@@ -220,17 +251,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Retsept rasmi (majburiy)'), findsOneWidget);
-      final confirm = find.ancestor(
-        of: find.textContaining('Bron qilish ·'),
-        matching: find.byType(FilledButton),
-      );
-      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+      final confirm = find.byKey(const ValueKey('reserve-confirm'));
+      expect(tester.widget<PrimaryButton>(confirm).onPressed, isNull);
 
       await tester.tap(find.text('Kamera'));
       await tester.pumpAndSettle();
       expect(h.picker.calls, [RxPhotoSource.camera]);
       expect(find.text('Retsept biriktirildi'), findsOneWidget);
-      expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+      expect(tester.widget<PrimaryButton>(confirm).onPressed, isNotNull);
 
       await tester.tap(confirm);
       await tester.pumpAndSettle();
@@ -244,7 +272,9 @@ void main() {
       final h = await _pumpRouter(tester, PharmacyPaths.reservations);
       expect(find.text('Faol'), findsOneWidget);
       expect(find.text('Tarix'), findsOneWidget);
-      expect(find.text('Olib ketishga tayyor'), findsOneWidget);
+      // The active (ready) one shows the full 3-step bar.
+      expect(find.byType(ReservationSteps), findsOneWidget);
+      expect(find.text('Tayyor'), findsOneWidget);
       expect(find.text('Olib ketilgan'), findsOneWidget);
 
       await tester.tap(find.text('Yo‘nalish'));
@@ -284,14 +314,31 @@ void main() {
     testWidgets('map view shows a marker per pharmacy (no tiles)', (
       tester,
     ) async {
-      await _pumpRouter(tester, PharmacyPaths.pharmacies);
+      final h = await _pumpRouter(tester, PharmacyPaths.pharmacies);
       await tester.tap(find.text('Xarita'));
       await tester.pumpAndSettle();
       expect(find.byType(FlutterMap), findsOneWidget);
-      expect(find.byIcon(Icons.location_on_rounded), findsWidgets);
-      await tester.tap(find.byIcon(Icons.location_on_rounded).first);
+      final pins = find.byType(PharmacyPin);
+      expect(pins, findsWidgets);
+      expect(find.byKey(const ValueKey('no-selection')), findsOneWidget);
+      await tester.tap(pins.first);
+      await tester.pump();
+      // The card slides up from the bottom.
+      final card = find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('selected-'),
+      );
+      expect(card, findsOneWidget);
+      expect(find.byType(SlideTransition), findsWidgets);
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(FilledButton, 'Yo‘nalish'), findsOneWidget);
+      expect(tester.widget<PharmacyPin>(pins.first).selected, isTrue);
+      await tester.tap(find.text('Yo‘nalish'));
+      await tester.pumpAndSettle();
+      expect(h.launched, hasLength(1));
+      await tester.tap(find.byTooltip('Yopish'));
+      await tester.pumpAndSettle();
+      expect(card, findsNothing);
     });
   });
 
@@ -361,6 +408,12 @@ void main() {
     'medicine': () => const MedicineScreen(medicineId: _amoxicillin),
     'pharmacies': () => const PharmaciesScreen(),
     'reservations': () => const ReservationsScreen(),
+    'home card': () => Scaffold(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [Builder(builder: pharmacyHomeCards.single.builder)],
+      ),
+    ),
   };
   for (final MapEntry(key: name, value: build) in screens.entries) {
     for (final lang in AppLang.values) {
@@ -368,7 +421,8 @@ void main() {
         testWidgets('$name · ${lang.name} · ${dark ? 'dark' : 'light'}', (
           tester,
         ) async {
-          tester.view.physicalSize = const Size(360, 640);
+          // Smallest common phone + enlarged system font.
+          tester.view.physicalSize = const Size(320, 568);
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.reset);
           final prefs = await fakePrefs(signedIn: true);
@@ -380,6 +434,11 @@ void main() {
                 locale: lang.locale,
                 supportedLocales: AppLang.locales,
                 localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(context)
+                      .copyWith(textScaler: const TextScaler.linear(1.3)),
+                  child: child!,
+                ),
                 home: build(),
               ),
             ),

@@ -26,6 +26,9 @@
   Если понадобится — лиду миграция с частичным уникальным индексом `where status = 'booked'`.
 
 ## Экраны
+- **Design 2.0:** `/doctors` — `GradientHeader` (назад, поиск, `StatTile` «Shifokorlar» / «Yozuvlarim» с переходом),
+  `SkeletonLoader`, `EmptyState` с «Filtrni tozalash», каскад карточек (`presentation/motion.dart`,
+  `DoctorTile(index:)`), запись — `PrimaryButton` (`ValueKey('book-appointment')`).
 - **`/doctors`**: поиск (имя, специальность, клиника), чипы «Onlayn» и специальностей (подписи uz/ru/en —
   `presentation/labels.dart`: `specialtyLabel`, `specialtyEmoji`, `specialtyColor`), счётчик, карточки врачей
   (стаж, рейтинг, онлайн, цена / «Bepul»); баннер ближайшей записи; в app bar — «Mening yozuvlarim» с бейджем.
@@ -57,12 +60,14 @@
 - `application/doctors_providers.dart` — `doctorsCatalogProvider`, `doctorsByIdProvider`, `specialtiesProvider`,
   `appointmentsProvider` (`AppointmentsNotifier`: оптимистичные `book(doctor, at, memberId:, online:)` /
   `cancel(id)`, слот перепроверяется перед записью, ошибки — `AppointmentException`),
-  `upcomingAppointmentsProvider`, `pastAppointmentsProvider`, `doctorSlotsProvider((doctorId:, day:, memberId:))`
+  `upcomingAppointmentsProvider`, `pastAppointmentsProvider`, `doctorSlotsProvider((doctorId:, day:, memberId:))`,
+  `doctorsClockProvider` (часы фичи: слоты, «сегодня», предстоящие; в тестах — фиксированное время)
 - `application/write_queue.dart` — очередь записей и `pending-…` id
 - `presentation/` — `doctors_screen.dart`, `doctor_screen.dart`, `appointments_screen.dart`, `labels.dart`,
   `widgets.dart` (`DoctorTile`, `AppointmentCard`, `DoctorPrice`, `DoctorsDisclaimer`, `Tag`, тексты ошибок)
 - Тесты: `test/features/doctors/` — `doctors_screens_test.dart`: фильтры и переводы, поиск + онлайн, запись для
-  члена семьи и онлайн, записи и отмена, home-карточка, каждый экран в uz/ru/en × светлая/тёмная на 360×640
+  члена семьи и онлайн, записи и отмена, home-карточка, каждый экран + home-карточка в uz/ru/en × светлая/тёмная на 320×568 с шрифтом ×1.3;
+  часы зафиксированы `doctorsClockProvider` (утро вторника; отдельный тест — поздний вечер субботы)
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
 ## Нужно от лида
@@ -75,4 +80,26 @@
 - [x] Карточка врача → выбор дня и слота, для себя / члена семьи, очно / онлайн → запись
 - [x] «Mening yozuvlarim»: предстоящие и прошедшие, отмена
 - [x] `doctorsHomeCards`: ближайшая запись
-- [x] Тёмная тема и uz/ru/en (3 языка × 2 темы, 360×640 в тестах)
+- [x] Тёмная тема и uz/ru/en (3 языка × 2 темы, 320×568 и шрифт ×1.3 в тестах)
+
+**Sprint 2.0 B+**
+- [x] Тест «pick a slot for a family member» не зависит от времени суток (`doctorsClockProvider`)
+- [x] Контраст и переполнение (светлая/тёмная, 320×568, шрифт ×1.3)
+- [x] Design 2.0: `GradientHeader` с поиском и `StatTile`, `SkeletonLoader`, `EmptyState` «Filtrni tozalash»,
+  `PrimaryButton` записи, каскад карточек
+- Не успели: —
+
+## Для лида (Sprint 2.0 B+, ветка `feat/module-b-v2`)
+
+**Сделано:** см. «Чеклист задач → Sprint 2.0 B+». Новых миграций нет.
+
+**Известные ограничения**
+- Расписания врачей в БД нет: слоты генерируются на устройстве, ~30 % «заняты» по хэшу (имитация).
+- Нет `unique (doctor_id, starts_at)` — два пользователя могут занять один слот (при необходимости — миграция с
+  частичным уникальным индексом `where status = 'booked'`).
+- `booked → done` ставит клиника — панели нет; прошедшие записи показываются как прошедшие без смены статуса.
+
+**Демо жюри**
+- Главная → «Qabulga yozilish» (или «Ertaga · …» из демо-записей) → поиск «kardiolog» → врач → «Kim uchun»: член
+  семьи → день и слот → «Yozilish» → snackbar → «Yozuvlarim» (счётчик в шапке +1). Пустой поиск «zzzz» →
+  «Filtrni tozalash».

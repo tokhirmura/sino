@@ -8,6 +8,7 @@ import '../../../core/widgets/app_card.dart';
 import '../application/reminders_providers.dart';
 import '../data/models.dart';
 import 'labels.dart';
+import 'motion.dart';
 
 /// Required on every medical screen.
 class RemindersDisclaimer extends StatelessWidget {
@@ -107,10 +108,18 @@ String reminderErrorText(BuildContext context, Object error) {
 /// One dose of a day: time, medicine, dose, person, status and the
 /// «Ichdim» / undo button.
 class DoseTile extends ConsumerStatefulWidget {
-  const DoseTile({super.key, required this.dose, required this.now});
+  const DoseTile({
+    super.key,
+    required this.dose,
+    required this.now,
+    this.index,
+  });
 
   final Dose dose;
   final DateTime now;
+
+  /// Position in a list → staggered entrance.
+  final int? index;
 
   @override
   ConsumerState<DoseTile> createState() => _DoseTileState();
@@ -148,117 +157,141 @@ class _DoseTileState extends ConsumerState<DoseTile> {
     final members = ref.watch(familyMembersProvider).value ?? const [];
     final who = memberName(members, r.memberId);
     final takenAt = d.log?.takenAt;
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AppCard(
+        animate: widget.index == null,
         padding: const EdgeInsets.all(12),
         color: status == DoseStatus.due ? color.withValues(alpha: 0.10) : null,
-        child: Row(
-          children: [
-            SizedBox(
-              width: 56,
-              child: Column(
-                children: [
-                  Text(
-                    hhmm(d.scheduledAt),
-                    style: text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Icon(doseStatusIcon(status), color: color, size: 20),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    r.name,
-                    style: text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if ((r.dose ?? '').isNotEmpty)
-                    Text(
-                      r.dose!,
-                      style: text.bodySmall?.copyWith(color: muted),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
+        // Narrow card (small phone, large font): the button goes under the
+        // tags so the name and tags keep their width.
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final inline = box.maxWidth >= 300;
+            final action = _action(d, status);
+            return Row(
+              children: [
+                SizedBox(
+                  width: 56,
+                  child: Column(
                     children: [
-                      Tag(doseStatusLabel(context, status), color: color),
-                      if (who != null)
-                        Tag(
-                          who,
-                          color: AppColors.violet,
-                          icon: Icons.person_rounded,
+                      Text(
+                        hhmm(d.scheduledAt),
+                        style: text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
-                      if (takenAt != null)
-                        Text(
-                          context.tr(
-                            uz: '${hhmm(takenAt)} da',
-                            ru: 'в ${hhmm(takenAt)}',
-                            en: 'at ${hhmm(takenAt)}',
-                          ),
-                          style: text.bodySmall?.copyWith(color: muted),
-                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Icon(doseStatusIcon(status), color: color, size: 20),
                     ],
                   ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        r.name,
+                        style: text.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if ((r.dose ?? '').isNotEmpty)
+                        Text(
+                          r.dose!,
+                          style: text.bodySmall?.copyWith(color: muted),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          Tag(doseStatusLabel(context, status), color: color),
+                          if (who != null)
+                            Tag(
+                              who,
+                              color: AppColors.violet,
+                              icon: Icons.person_rounded,
+                            ),
+                          if (takenAt != null)
+                            Text(
+                              context.tr(
+                                uz: '${hhmm(takenAt)} da',
+                                ru: 'в ${hhmm(takenAt)}',
+                                en: 'at ${hhmm(takenAt)}',
+                              ),
+                              style: text.bodySmall?.copyWith(color: muted),
+                            ),
+                        ],
+                      ),
+                      if (!inline && action != null) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: action,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (inline && action != null) ...[
+                  const SizedBox(width: 8),
+                  action,
                 ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (_busy)
-              const SizedBox(
-                width: 40,
-                height: 40,
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-            else if (d.log != null)
-              IconButton(
-                tooltip: context.tr(
-                  uz: 'Bekor qilish',
-                  ru: 'Отменить',
-                  en: 'Undo',
-                ),
-                onPressed: _toggle,
-                icon: const Icon(Icons.undo_rounded),
-              )
-            else if (status != DoseStatus.upcoming ||
-                dayOfDate(d.scheduledAt) == dayOfDate(widget.now))
-              FilledButton.tonal(
-                onPressed: _toggle,
-                style: FilledButton.styleFrom(
-                  // The theme makes filled buttons full-width.
-                  minimumSize: const Size(0, 40),
-                  visualDensity: VisualDensity.compact,
-                ),
-                child: Text(
-                  context.tr(uz: 'Ichdim', ru: 'Принял', en: 'Taken'),
-                ),
-              ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
+    final i = widget.index;
+    return i == null ? tile : tile.staggerIn(i);
+  }
+
+  /// «Ichdim» / undo / progress, or `null` (a later day's dose).
+  Widget? _action(Dose d, DoseStatus status) {
+    if (_busy) {
+      return const SizedBox(
+        width: 40,
+        height: 40,
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+    if (d.log != null) {
+      return IconButton(
+        tooltip: context.tr(uz: 'Bekor qilish', ru: 'Отменить', en: 'Undo'),
+        onPressed: _toggle,
+        icon: const Icon(Icons.undo_rounded),
+      );
+    }
+    if (status != DoseStatus.upcoming ||
+        dayOfDate(d.scheduledAt) == dayOfDate(widget.now)) {
+      return FilledButton.tonal(
+        onPressed: _toggle,
+        style: FilledButton.styleFrom(
+          // The theme makes filled buttons full-width.
+          minimumSize: const Size(0, 40),
+          visualDensity: VisualDensity.compact,
+        ),
+        child: Text(context.tr(uz: 'Ichdim', ru: 'Принял', en: 'Taken')),
+      );
+    }
+    return null;
   }
 }
 
 DateTime dayOfDate(DateTime d) => DateTime(d.year, d.month, d.day);
 
-/// Like core `Pill`, but the label ellipsizes in narrow cards.
+/// Like core `Pill` (readable ink on a tinted background), but the label
+/// ellipsizes — never overflows in narrow cards or wraps.
 class Tag extends StatelessWidget {
   const Tag(this.label, {super.key, this.color = AppColors.primary, this.icon});
 
@@ -268,34 +301,42 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    // Text / icon darkened (light) or lightened (dark) to contrast ≥ 4.5.
+    final ink = AppColors.readable(color, brightness);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.22 : 0.14),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-          ],
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                height: 1.3,
-                fontWeight: FontWeight.w600,
+      // The icon is dropped only when there is no room even for it.
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final withIcon = icon != null && box.maxWidth >= 40;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (withIcon) ...[
+                Icon(icon, size: 14, color: ink),
+                const SizedBox(width: 4),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: ink,
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

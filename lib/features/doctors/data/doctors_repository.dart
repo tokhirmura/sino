@@ -128,8 +128,13 @@ class SupabaseDoctorsRepository implements DoctorsRepository {
 /// SharedPreferences (first use — demo from `fake_pharmacy.json`, dates
 /// relative to today).
 class FakeDoctorsRepository implements DoctorsRepository {
-  FakeDoctorsRepository(this._prefs, {AssetBundle? bundle, this.now})
-    : _bundle = bundle ?? rootBundle;
+  FakeDoctorsRepository(
+    this._prefs, {
+    AssetBundle? bundle,
+    this.now,
+    DateTime Function()? clock,
+  }) : _bundle = bundle ?? rootBundle,
+       _clock = clock ?? DateTime.now;
 
   final SharedPreferences _prefs;
   final AssetBundle _bundle;
@@ -137,11 +142,13 @@ class FakeDoctorsRepository implements DoctorsRepository {
   /// Fixed "now" for tests; `null` = real clock.
   final DateTime? now;
 
+  final DateTime Function() _clock;
+
   static const doctorsAsset = 'assets/pharmacy/doctors.json';
   static const demoAsset = 'assets/pharmacy/fake_pharmacy.json';
   static const appointmentsKey = 'doctors.fake_appointments';
 
-  DateTime get _now => now ?? DateTime.now();
+  DateTime get _now => now ?? _clock();
 
   List<Doctor>? _doctors;
 
@@ -240,8 +247,17 @@ class FakeDoctorsRepository implements DoctorsRepository {
   }
 }
 
+/// The feature's clock: slots, «today», upcoming / past. Tests override it
+/// with a fixed time so results don't depend on when they run.
+final doctorsClockProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
+
 final doctorsRepositoryProvider = Provider<DoctorsRepository>(
   (ref) => ref.watch(useFakeProvider)
-      ? FakeDoctorsRepository(ref.watch(sharedPreferencesProvider))
+      ? FakeDoctorsRepository(
+          ref.watch(sharedPreferencesProvider),
+          clock: ref.watch(doctorsClockProvider),
+        )
       : SupabaseDoctorsRepository(ref.watch(supabaseClientProvider)),
 );

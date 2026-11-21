@@ -11,7 +11,6 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/money.dart';
-import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/external_launcher.dart';
@@ -19,6 +18,9 @@ import '../data/models.dart';
 import '../data/rx_photo.dart';
 import 'labels.dart';
 import 'widgets/common.dart';
+import 'widgets/motion.dart';
+import 'widgets/ready_celebration.dart';
+import 'widgets/reservation_steps.dart';
 import 'widgets/reserve_sheet.dart';
 
 /// «Bronlarim»: active reservations with a live status (realtime / the
@@ -28,103 +30,95 @@ class ReservationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Tell the user when the pharmacy has prepared a reservation.
-    ref.listen(reservationsProvider, (prev, next) {
-      final before = {
-        for (final r in prev?.value ?? const <Reservation>[]) r.id: r.status,
-      };
-      for (final r in next.value ?? const <Reservation>[]) {
-        if (before[r.id] == ReservationStatus.pending &&
-            r.status == ReservationStatus.ready) {
-          showPharmacySnack(
-            context,
-            context.tr(
-              uz: '${r.medicine?.name ?? ''} olib ketishga tayyor!',
-              ru: '${r.medicine?.name ?? ''} готово к выдаче!',
-              en: '${r.medicine?.name ?? ''} is ready for pickup!',
-            ),
-          );
-        }
-      }
-    });
-
     final reservations = ref.watch(reservationsProvider);
-    return AppScaffold(
-      title: context.tr(
-        uz: 'Bronlarim',
-        ru: 'Мои брони',
-        en: 'My reservations',
-      ),
-      body: AsyncValueView(
-        value: reservations,
-        onRetry: () => ref.invalidate(reservationsProvider),
-        loading: () => const SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.only(top: 8),
-          child: SkeletonList(count: 3, itemHeight: 140),
+    // A reservation turning ready → full-screen celebration.
+    return ReadyCelebrationHost(
+      child: AppScaffold(
+        title: context.tr(
+          uz: 'Bronlarim',
+          ru: 'Мои брони',
+          en: 'My reservations',
         ),
-        data: (list) {
-          if (list.isEmpty) {
-            return EmptyState(
-              emoji: '🧾',
-              title: context.tr(
-                uz: 'Hali bron yo‘q',
-                ru: 'Броней пока нет',
-                en: 'No reservations yet',
-              ),
-              message: context.tr(
-                uz: 'Dorini toping va yaqin dorixonada bron qiling.',
-                ru: 'Найдите лекарство и забронируйте в ближайшей аптеке.',
-                en: 'Find a medicine and reserve it at a nearby pharmacy.',
-              ),
-              action: FilledButton.icon(
-                onPressed: () => Navigator.of(context).maybePop(),
-                icon: const Icon(Icons.search_rounded),
-                label: Text(
-                  context.tr(
-                    uz: 'Dori qidirish',
-                    ru: 'Найти лекарство',
-                    en: 'Find a medicine',
+        body: AsyncValueView(
+          value: reservations,
+          onRetry: () => ref.invalidate(reservationsProvider),
+          loading: () => const SingleChildScrollView(
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.only(top: 8),
+            child: SkeletonLoader(count: 3, kind: SkeletonKind.card),
+          ),
+          data: (list) {
+            if (list.isEmpty) {
+              return EmptyState(
+                emoji: '🧾',
+                title: context.tr(
+                  uz: 'Hali bron yo‘q',
+                  ru: 'Броней пока нет',
+                  en: 'No reservations yet',
+                ),
+                message: context.tr(
+                  uz: 'Dorini toping va yaqin dorixonada bron qiling.',
+                  ru: 'Найдите лекарство и забронируйте в ближайшей аптеке.',
+                  en: 'Find a medicine and reserve it at a nearby pharmacy.',
+                ),
+                actionLabel: context.tr(
+                  uz: 'Dori qidirish',
+                  ru: 'Найти лекарство',
+                  en: 'Find a medicine',
+                ),
+                actionIcon: Icons.search_rounded,
+                onAction: () => Navigator.of(context).maybePop(),
+              );
+            }
+            final active = [
+              for (final r in list)
+                if (r.status.isActive) r,
+            ];
+            final history = [
+              for (final r in list)
+                if (!r.status.isActive) r,
+            ];
+            return ListView(
+              padding: const EdgeInsets.only(top: 4, bottom: 24),
+              children: [
+                if (active.isNotEmpty) ...[
+                  SectionTitle(
+                    context.tr(uz: 'Faol', ru: 'Активные', en: 'Active'),
                   ),
-                ),
-              ),
+                  for (final (i, r) in active.indexed)
+                    ReservationCard(
+                      key: ValueKey('res-${r.id}'),
+                      reservation: r,
+                      index: i,
+                    ),
+                ],
+                if (history.isNotEmpty) ...[
+                  SectionTitle(
+                    context.tr(uz: 'Tarix', ru: 'История', en: 'History'),
+                  ),
+                  for (final (i, r) in history.indexed)
+                    ReservationCard(
+                      key: ValueKey('res-${r.id}'),
+                      reservation: r,
+                      index: active.length + i,
+                    ),
+                ],
+              ],
             );
-          }
-          final active = [
-            for (final r in list)
-              if (r.status.isActive) r,
-          ];
-          final history = [
-            for (final r in list)
-              if (!r.status.isActive) r,
-          ];
-          return ListView(
-            padding: const EdgeInsets.only(top: 4, bottom: 24),
-            children: [
-              if (active.isNotEmpty) ...[
-                SectionTitle(
-                  context.tr(uz: 'Faol', ru: 'Активные', en: 'Active'),
-                ),
-                for (final r in active) ReservationCard(reservation: r),
-              ],
-              if (history.isNotEmpty) ...[
-                SectionTitle(
-                  context.tr(uz: 'Tarix', ru: 'История', en: 'History'),
-                ),
-                for (final r in history) ReservationCard(reservation: r),
-              ],
-            ],
-          );
-        },
+          },
+        ),
       ),
     );
   }
 }
 
 class ReservationCard extends ConsumerWidget {
-  const ReservationCard({super.key, required this.reservation});
+  const ReservationCard({super.key, required this.reservation, this.index});
 
   final Reservation reservation;
+
+  /// Position in the list → staggered entrance.
+  final int? index;
 
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
     final ok = await showDialog<bool>(
@@ -200,9 +194,10 @@ class ReservationCard extends ConsumerWidget {
     }
     final saving = r.id.startsWith('pending-');
 
-    return Padding(
+    final card = Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AppCard(
+        animate: index == null,
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,19 +243,20 @@ class ReservationCard extends ConsumerWidget {
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Pill(
-                  statusLabel(context, r.status),
-                  color: statusColor(r.status),
-                  icon: statusIcon(r.status),
-                ),
+                if (!r.status.isActive)
+                  Tag(
+                    statusLabel(context, r.status),
+                    color: statusColor(r.status),
+                    icon: statusIcon(r.status),
+                  ),
                 if (memberName != null)
-                  Pill(
+                  Tag(
                     memberName,
                     color: AppColors.violet,
                     icon: Icons.person_rounded,
                   ),
                 if (r.rxAttached)
-                  Pill(
+                  Tag(
                     context.tr(uz: 'Retsept', ru: 'Рецепт', en: 'Prescription'),
                     color: AppColors.coral,
                     icon: Icons.receipt_long_rounded,
@@ -272,13 +268,12 @@ class ReservationCard extends ConsumerWidget {
                   ),
               ],
             ),
+            if (r.status.isActive) ...[
+              const SizedBox(height: 14),
+              ReservationSteps(reservation: r),
+            ],
             if (r.status == ReservationStatus.pending) ...[
               const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: const LinearProgressIndicator(minHeight: 4),
-              ),
-              const SizedBox(height: 6),
               Text(
                 saving
                     ? context.tr(
@@ -308,7 +303,12 @@ class ReservationCard extends ConsumerWidget {
                       'Go to the pharmacy and mention your reservation. '
                       'Pay there.',
                 ),
-                style: text.bodySmall?.copyWith(color: AppColors.good),
+                style: text.bodySmall?.copyWith(
+                  color: AppColors.readable(
+                    AppColors.good,
+                    Theme.of(context).brightness,
+                  ),
+                ),
               ),
             ],
             if (photo != null) ...[
@@ -365,5 +365,6 @@ class ReservationCard extends ConsumerWidget {
         ),
       ),
     );
+    return index == null ? card : card.staggerIn(index!);
   }
 }

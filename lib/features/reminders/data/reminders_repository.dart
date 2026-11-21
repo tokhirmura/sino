@@ -144,11 +144,25 @@ class FakeRemindersRepository implements RemindersRepository {
   String _newId(String kind) =>
       'fake-$kind-${DateTime.now().microsecondsSinceEpoch}';
 
+  Future<void>? _seeding;
+
   /// Fills both stores with the demo (once, when neither exists).
-  Future<void> _seed() async {
+  /// Memoized: on first launch `reminders()` and `logsSince()` run at the
+  /// same time — without it one could see the reminders key already
+  /// written while the logs key is not yet, and read `null`.
+  Future<void> _seed() {
+    final pending = _seeding;
+    if (pending != null) return pending;
     if (_prefs.containsKey(remindersKey) || _prefs.containsKey(logsKey)) {
-      return;
+      return Future.value();
     }
+    return _seeding ??= _writeDemo().catchError((Object e, StackTrace st) {
+      _seeding = null; // let the next read retry
+      Error.throwWithStackTrace(e, st);
+    });
+  }
+
+  Future<void> _writeDemo() async {
     final demo = jsonDecode(
       await _bundle.loadString(demoAsset, cache: false),
     ) as Map<String, dynamic>;
@@ -194,24 +208,23 @@ class FakeRemindersRepository implements RemindersRepository {
         ),
       );
     }
-    await _saveReminders(reminders);
     await _saveLogs(logs);
+    await _saveReminders(reminders);
   }
+
+  List<Map<String, dynamic>> _read(String key) => [
+    for (final m in jsonDecode(_prefs.getString(key) ?? '[]') as List)
+      Map<String, dynamic>.from(m as Map),
+  ];
 
   Future<List<Reminder>> _allReminders() async {
     await _seed();
-    return [
-      for (final m in jsonDecode(_prefs.getString(remindersKey)!) as List)
-        Reminder.fromJson(Map<String, dynamic>.from(m as Map)),
-    ];
+    return [for (final m in _read(remindersKey)) Reminder.fromJson(m)];
   }
 
   Future<List<ReminderLog>> _allLogs() async {
     await _seed();
-    return [
-      for (final m in jsonDecode(_prefs.getString(logsKey)!) as List)
-        ReminderLog.fromJson(Map<String, dynamic>.from(m as Map)),
-    ];
+    return [for (final m in _read(logsKey)) ReminderLog.fromJson(m)];
   }
 
   Future<void> _saveReminders(List<Reminder> list) => _prefs.setString(

@@ -11,10 +11,10 @@ import '../../../core/widgets/emoji_box.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/money.dart';
-import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/models.dart';
+import 'home_meds_screen.dart';
 import 'labels.dart';
 import 'pharmacy_paths.dart';
 import 'widgets/common.dart';
@@ -94,58 +94,81 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
       padding: const EdgeInsets.only(top: 4, bottom: 24),
       children: [
         AppCard(
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              EmojiBox(
-                emoji: categoryEmoji(m.category),
-                color: categoryColor(m.category),
-                size: 56,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      m.name,
-                      style: text.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    if (m.ingredient != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        context.tr(
-                          uz: 'Ta’sir qiluvchi modda: ${m.ingredient}',
-                          ru: 'Действующее вещество: ${m.ingredient}',
-                          en: 'Active ingredient: ${m.ingredient}',
-                        ),
-                        style: text.bodySmall,
-                      ),
-                    ],
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EmojiBox(
+                    emoji: categoryEmoji(m.category),
+                    color: categoryColor(m.category),
+                    size: 56,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RxPill(rx: m.rx),
-                        if (m.form != null)
-                          Pill(
-                            formLabel(context, m.form),
-                            color: AppColors.sky,
+                        Text(
+                          m.name,
+                          style: text.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
-                        if (m.category != null)
-                          Pill(
-                            categoryLabel(context, m.category),
-                            color: categoryColor(m.category),
+                        ),
+                        if (m.ingredient != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr(
+                              uz: 'Ta’sir qiluvchi modda: ${m.ingredient}',
+                              ru: 'Действующее вещество: ${m.ingredient}',
+                              en: 'Active ingredient: ${m.ingredient}',
+                            ),
+                            style: text.bodySmall,
                           ),
+                        ],
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            if (m.form != null)
+                              Tag(
+                                formLabel(context, m.form),
+                                color: AppColors.sky,
+                              ),
+                            if (m.category != null)
+                              Tag(
+                                categoryLabel(context, m.category),
+                                color: categoryColor(m.category),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 14),
+              // Prescription status — big and first thing the eye catches.
+              RxBadge(rx: m.rx),
             ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          key: const ValueKey('add-to-home-meds'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(44),
+          ),
+          onPressed: () => showHomeMedSheet(context, medicine: m),
+          icon: const Icon(Icons.home_rounded),
+          label: Text(
+            context.tr(
+              uz: 'Uy dorixonasiga qo‘shish',
+              ru: 'В домашнюю аптечку',
+              en: 'Add to home cabinet',
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -201,7 +224,12 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
                   'Attach a photo of the prescription to reserve — show the '
                   'original at the pharmacy.',
             ),
-            style: text.bodySmall?.copyWith(color: AppColors.coral),
+            style: text.bodySmall?.copyWith(
+              color: AppColors.readable(
+                AppColors.coral,
+                Theme.of(context).brightness,
+              ),
+            ),
           ),
         ],
         const SizedBox(height: 8),
@@ -237,7 +265,7 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
           value: offers,
           compact: true,
           onRetry: () => ref.invalidate(offersProvider),
-          loading: () => const SkeletonList(count: 3, itemHeight: 110),
+          loading: () => const SkeletonLoader(count: 3),
           data: (list) {
             if (list.isEmpty) {
               return Text(
