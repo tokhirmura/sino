@@ -43,11 +43,17 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   `MealSection` (порции ±0.5, свайп/корзина — удалить, «Qaytarish»), `add_food_sheet.dart` (поиск, приём, порция),
   `nutrition_home_card.dart` (карточка главной, те же `dayLogsProvider`/`waterProvider`, что и вкладка)
 - `data/dasturxon.dart` — «Dasturxon» (S2-1): `HomeMeasure` (kosa, likopcha, dona, piyola, choy_qoshiq), `DasturxonItem`
-  (slug, `food_id`, меры в граммах; первая — по умолчанию), `loadDasturxon`, `dasturxonServings(food, measure, count)` —
+  (slug, `food_id`, короткое имя `label` {uz,ru,en}, меры в граммах; первая — по умолчанию), `loadDasturxon`, `dasturxonServings(food, measure, count)` —
   граммы / граммы порции `foods` (до 0.01). Источник — `assets/wellness/dasturxon.json` (12 блюд), без таблицы: ссылается
   на `foods` по uuid, одинаково в fake и Supabase. `Food.portionGrams` — «300 g» → 300
 - `application/nutrition_providers.dart` (ещё) — `dasturxonItemsProvider`, `dasturxonProvider` (блюда + строки каталога,
   порядок из JSON; нет в каталоге / порция не в граммах — пропуск)
+- «Dasturxon» — быстрое добавление (S2-5): `presentation/widgets/dasturxon_card.dart` — `DasturxonCard` на экране под
+  кольцом: 12 крупных кнопок (эмодзи + короткое имя `label` из JSON в одну строку, сжимается, не ломает слово), тап →
+  `showDasturxonSheet`: приём пищи (чипы, по часам), для каждой меры — готовые количества `presetCounts` (kosa ½/1/2,
+  likopcha ½/1/1½, dona 1–4, piyola 1–3, choy qoshiq 1–3) с ~ккал; **одно нажатие на количество — добавлено**
+  (`dayLogsProvider.add`, SnackBar «Palov (osh) — 1 likopcha · Kechki ovqat»). `labels.dart` — `countText` (½, 1½),
+  `measureText` (uz «2 dona», ru «2 миски / ½ тарелки», en «2 bowls»), `formatServings` до 0.01 (0.25 порции)
 - `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов
 - Тесты: `test/features/nutrition/`; `module_c_screens_test.dart` — все экраны модуля C в uz/ru/en × светлая/тёмная
   на маленьком телефоне (без переполнения и узбекских строк в ru/en)
@@ -72,6 +78,6 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   kosa / likopcha / dona / piyola / choy qoshiq → граммы), модель, пересчёт мера → порции `foods`, тесты
 - [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`;
   кольцо калорий — `AnimatedProgressRing`, цифры плавно меняются при добавлении еды
-- [ ] S2-5 «Dasturxon» — быстрое добавление: 12 блюд крупными кнопками, выбор меры и количества (1 kosa, 2 dona),
+- [x] S2-5 «Dasturxon» — быстрое добавление: 12 блюд крупными кнопками, выбор меры и количества (1 kosa, 2 dona),
   добавление в дневник одним нажатием
 - [ ] S2-7 (если останется время) Напоминание о воде каждые 2 ч (9:00–21:00), выключается в настройках
