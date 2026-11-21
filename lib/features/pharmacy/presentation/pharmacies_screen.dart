@@ -10,7 +10,6 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/emoji_box.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_view.dart';
-import '../../../core/widgets/pill.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/external_launcher.dart';
 import '../data/location_repository.dart';
@@ -173,7 +172,7 @@ class _PharmacyList extends StatelessWidget {
                         formatDistance(context, n.distanceKm!),
                         style: text.labelLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     if (p.rating != null)
@@ -309,18 +308,18 @@ class _PharmacySheet extends ConsumerWidget {
             spacing: 6,
             runSpacing: 6,
             children: [
-              Pill(
+              Tag(
                 hoursLabel(context, p),
                 color: p.open24 ? AppColors.good : AppColors.sky,
                 icon: Icons.schedule_rounded,
               ),
               if (n.distanceKm != null)
-                Pill(
+                Tag(
                   formatDistance(context, n.distanceKm!),
                   icon: Icons.near_me_rounded,
                 ),
               if (p.rating != null)
-                Pill(
+                Tag(
                   p.rating!.toStringAsFixed(1),
                   color: AppColors.amber,
                   icon: Icons.star_rounded,

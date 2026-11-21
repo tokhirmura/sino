@@ -11,7 +11,6 @@ import '../../../core/widgets/emoji_box.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/money.dart';
-import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/models.dart';
@@ -131,12 +130,9 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
                       children: [
                         RxPill(rx: m.rx),
                         if (m.form != null)
-                          Pill(
-                            formLabel(context, m.form),
-                            color: AppColors.sky,
-                          ),
+                          Tag(formLabel(context, m.form), color: AppColors.sky),
                         if (m.category != null)
-                          Pill(
+                          Tag(
                             categoryLabel(context, m.category),
                             color: categoryColor(m.category),
                           ),
@@ -201,7 +197,12 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
                   'Attach a photo of the prescription to reserve — show the '
                   'original at the pharmacy.',
             ),
-            style: text.bodySmall?.copyWith(color: AppColors.coral),
+            style: text.bodySmall?.copyWith(
+              color: AppColors.readable(
+                AppColors.coral,
+                Theme.of(context).brightness,
+              ),
+            ),
           ),
         ],
         const SizedBox(height: 8),

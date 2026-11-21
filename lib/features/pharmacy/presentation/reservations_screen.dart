@@ -11,7 +11,6 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/money.dart';
-import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/external_launcher.dart';
@@ -248,19 +247,19 @@ class ReservationCard extends ConsumerWidget {
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Pill(
+                Tag(
                   statusLabel(context, r.status),
                   color: statusColor(r.status),
                   icon: statusIcon(r.status),
                 ),
                 if (memberName != null)
-                  Pill(
+                  Tag(
                     memberName,
                     color: AppColors.violet,
                     icon: Icons.person_rounded,
                   ),
                 if (r.rxAttached)
-                  Pill(
+                  Tag(
                     context.tr(uz: 'Retsept', ru: 'Рецепт', en: 'Prescription'),
                     color: AppColors.coral,
                     icon: Icons.receipt_long_rounded,
@@ -308,7 +307,12 @@ class ReservationCard extends ConsumerWidget {
                       'Go to the pharmacy and mention your reservation. '
                       'Pay there.',
                 ),
-                style: text.bodySmall?.copyWith(color: AppColors.good),
+                style: text.bodySmall?.copyWith(
+                  color: AppColors.readable(
+                    AppColors.good,
+                    Theme.of(context).brightness,
+                  ),
+                ),
               ),
             ],
             if (photo != null) ...[

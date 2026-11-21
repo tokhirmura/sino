@@ -193,7 +193,12 @@ class _ReserveSheetState extends ConsumerState<ReserveSheet> {
                       ru: 'Рецепт прикреплён',
                       en: 'Prescription attached',
                     ),
-                    style: text.bodyMedium?.copyWith(color: AppColors.good),
+                    style: text.bodyMedium?.copyWith(
+                      color: AppColors.readable(
+                        AppColors.good,
+                        Theme.of(context).brightness,
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(
@@ -235,7 +240,9 @@ class _ReserveSheetState extends ConsumerState<ReserveSheet> {
             const SizedBox(height: 12),
             Text(
               _error!,
-              style: text.bodyMedium?.copyWith(color: AppColors.danger),
+              style: text.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ],
           const SizedBox(height: 16),
@@ -293,7 +300,13 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary),
+          Icon(
+            icon,
+            color: AppColors.readable(
+              AppColors.primary,
+              Theme.of(context).brightness,
+            ),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

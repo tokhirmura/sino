@@ -88,7 +88,7 @@ Fake-режим: пользовательские данные в prefs (`pharma
   `pharmacyMapTilesProvider` (в тестах `false`)
 - `presentation/` — `pharmacy_screen.dart`, `medicine_screen.dart`, `reservations_screen.dart`,
   `pharmacies_screen.dart`, `scan_screen.dart`, `labels.dart` (форма, категория, статус, расстояние, часы),
-  `widgets/common.dart` (`MedicalDisclaimer`, `RxPill`, `MedicineTile`, `OfferTile`, тексты ошибок брони),
+  `widgets/common.dart` (`MedicalDisclaimer`, `Tag` — как core `Pill`, но с многоточием, `RxPill`, `MedicineTile`, `OfferTile`, тексты ошибок брони),
   `widgets/reserve_sheet.dart` (`showReserveSheet`, `RxThumbnail`)
 - `application/write_queue.dart` — очередь записей и `pending-…` id (копия есть в reminders и doctors — фичи не
   импортируют друг друга)
@@ -98,7 +98,7 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - Тема делает FilledButton / OutlinedButton во всю ширину — в `Row` задавайте `minimumSize` или `Expanded`.
 - Тесты: `test/features/pharmacy/` — `pharmacy_screens_test.dart` гоняет экраны под настоящим `GoRouter`
   (поиск, лекарство, бронь `pending → ready` по таймеру, рецепт, отмена, список/карта, сканер, home-карточка)
-  и каждый экран в uz/ru/en × светлая/тёмная на 360×640 (в тестах с `ProviderContainer` сначала `container.listen(...)`, потом
+  и каждый экран + home-карточку в uz/ru/en × светлая/тёмная на 320×568 с шрифтом ×1.3 (в тестах с `ProviderContainer` сначала `container.listen(...)`, потом
   `read(...future)`: Riverpod 3 ставит на паузу провайдеры без слушателей, а офферы пересобираются при получении
   геопозиции)
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
@@ -115,4 +115,5 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - [x] Сканер штрих-кода (`mobile_scanner`) → `medicineByBarcodeProvider`, ручной ввод
 - [x] Бронь: для себя / члена семьи, фото рецепта для `rx` (`image_picker`), список броней со статусом вживую
 - [x] `pharmacyHomeCards`: активные брони
-- [x] Тёмная тема и uz/ru/en (проверяет `pharmacy_screens_test.dart`: 3 языка × 2 темы, 360×640)
+- [x] Тёмная тема и uz/ru/en (проверяет `pharmacy_screens_test.dart`: 3 языка × 2 темы, 320×568, шрифт ×1.3)
+- Текст цветом бренда — `colorScheme.primary` или `AppColors.readable(...)`, не голый `AppColors.primary`.
