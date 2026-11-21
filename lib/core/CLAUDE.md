@@ -29,3 +29,39 @@
 - [x] «Oila»: `FamilyMember.phone` (+ `dialable` для `tel:`; у fake-мамы и папы есть номера), `AppRoutes.family`,
   `AppRoutes.familyMemberNew` / `familyMember(id)` (форма в профиле — чтобы другие фичи открывали её без импорта);
   миграция `20261121160000_core_family_phone.sql`
+- [x] Общий сервис уведомлений `notifications/local_notifications.dart` (раздел ниже; тест —
+  `test/core/local_notifications_test.dart`)
+
+## Уведомления (`notifications/local_notifications.dart`)
+Один сервис `flutter_local_notifications` на всё приложение: `ref.read(appNotificationsProvider)` —
+`LocalAppNotifications` на Android/iOS, `NoopAppNotifications` на web/desktop и в `flutter test` (выбор автоматический).
+- `init()` — один раз (Future кэшируется): база часовых поясов, `tz.local` = зона устройства из `flutter_timezone`
+  (не вышло — зона с тем же смещением, затем UTC), `initialize` плагина (на iOS разрешения не спрашивает).
+  Остальные методы вызывают его сами.
+- `requestPermission()` — Android 13+ / iOS.
+- `schedule(id:, at:, title:, body:, payload:, channel:, repeat:)` — обёртка над `zonedSchedule` (неточный режим,
+  без exact-alarm; `repeat: DateTimeComponents.time` — каждый день, `dayOfWeekAndTime` — каждую неделю).
+- `cancel(id)`, `pendingNotificationRequests()`, `cancelByPayloadPrefix(prefix)`.
+- `nextLocalTime(hour, minute, weekday:)` — ближайшее время в `tz.local` (после `init()`).
+- Любая ошибка платформы глотается (`debugPrint`): приложение работает и без уведомлений.
+
+| Модуль | id (`NotificationIds`) | payload (`NotificationPayloads`) | канал (`AppNotificationChannel`) |
+|---|---|---|---|
+| B reminders | 0 … 1 999 999 999 (`< remindersEnd`) | `reminder:` | `reminders` = `sino_reminders` |
+| C wellness | 2 100 000 000 … 2 139 999 999 (`wellnessBase`) | `wellness:` | `wellness` = `sino_wellness` |
+| A core | 2 140 000 000 … 2 147 483 647 (`coreBase`) | `core:` | `core` = `sino_core` |
+
+id на Android — int32 (максимум 2 147 483 647 = `NotificationIds.max`), поэтому у A не «2 200 000 000+»;
+id вне диапазона сервис не ставит.
+
+### Как перейти (B и C делают сами, в своих папках)
+1. Убрать из своего `*_notifications.dart` `FlutterLocalNotificationsPlugin`, `_init`, `deviceLocation`, свой
+   `requestPermission` и выбор Noop/Local.
+2. Свой класс получает сервис: `Provider((ref) => LocalReminderNotifications(ref.watch(appNotificationsProvider)))`.
+3. Планирование: `n.schedule(id: …, at: nextLocalTime(h, m, weekday: d), title: …, body: …,
+   payload: '${NotificationPayloads.reminder}$id', channel: AppNotificationChannel.reminders,
+   repeat: DateTimeComponents.dayOfWeekAndTime)`; разрешение — `n.requestPermission()`.
+4. B при синхронизации: `await n.cancelByPayloadPrefix(NotificationPayloads.reminder)`, затем `schedule` заново.
+   C: `n.cancel(id)` для своих id (`NotificationIds.wellnessBase + …`).
+5. Тесты: подменять `appNotificationsProvider` своим фейком (`implements AppNotifications`) или оставить Noop.
+6. Каналы прежние: `AppNotificationChannel.reminders` / `wellness` — те же id и названия, что сейчас у B и C.
