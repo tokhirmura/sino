@@ -373,6 +373,22 @@ class _FamilyList extends ConsumerWidget {
                   onTap: () => context.push(ProfilePaths.familyMember(m.id)),
                 ),
               ),
+            ShortcutCard(
+              key: const ValueKey('open-family-care'),
+              emoji: '💊',
+              color: AppColors.garnet,
+              title: context.tr(
+                uz: 'Oila nazorati',
+                ru: 'Забота о семье',
+                en: 'Family care',
+              ),
+              subtitle: context.tr(
+                uz: 'Bugungi dorilar, qabullar va bronlar',
+                ru: 'Лекарства, приёмы и брони на сегодня',
+                en: 'Today’s medicines, visits and reservations',
+              ),
+              onTap: () => context.push(AppRoutes.family),
+            ),
           ],
         );
       },

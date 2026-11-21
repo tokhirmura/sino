@@ -1,0 +1,15 @@
+{
+  "_comment": "Fake family day for /family (members = core FamilyMember.fakes). Reminder time: \"time\" (HH:mm) or \"minutes_ago\" (relative to now). taken = marked 5 min after its time (only if that's already past).",
+  "reminders": [
+    {"id": "fc000000-0000-4000-8000-000000000001", "member": "fake-mother", "name": "Metformin", "dose": "500 mg, 1 tabletka", "minutes_ago": 240, "taken": true},
+    {"id": "fc000000-0000-4000-8000-000000000002", "member": "fake-mother", "name": "Lozartan", "dose": "50 mg, 1 tabletka", "minutes_ago": 95, "taken": false},
+    {"id": "fc000000-0000-4000-8000-000000000003", "member": "fake-father", "name": "Amlodipin", "dose": "5 mg, 1 tabletka", "time": "08:00", "taken": true},
+    {"id": "fc000000-0000-4000-8000-000000000004", "member": "fake-daughter", "name": "Nurofen sirop", "dose": "5 ml", "time": "20:00", "taken": true}
+  ],
+  "visits": [
+    {"member": "fake-father", "doctor": "Tursunov Bahodir", "specialty": "Kardiolog", "days_from_now": 5, "time": "15:00", "online": true}
+  ],
+  "reservations": [
+    {"member": "fake-mother", "medicine": "Lozartan 50 mg", "pharmacy": "Malham dorixonasi", "status": "ready"}
+  ]
+}

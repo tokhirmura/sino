@@ -97,13 +97,16 @@ class _DevToolsCardState extends ConsumerState<DevToolsCard> {
           : context.tr(
               uz:
                   'Yuklandi: oila — ${r.familyMembers}, tibbiy karta — '
-                  '${r.medicalRecords}, tahlillar — ${r.labResults}.',
+                  '${r.medicalRecords}, tahlillar — ${r.labResults}, '
+                  'oila dorilari — ${r.familyCare}.',
               ru:
                   'Загружено: семья — ${r.familyMembers}, медкарта — '
-                  '${r.medicalRecords}, анализы — ${r.labResults}.',
+                  '${r.medicalRecords}, анализы — ${r.labResults}, '
+                  'лекарства семьи — ${r.familyCare}.',
               en:
                   'Loaded: family — ${r.familyMembers}, medical record — '
-                  '${r.medicalRecords}, lab results — ${r.labResults}.',
+                  '${r.medicalRecords}, lab results — ${r.labResults}, '
+                  'family medicines — ${r.familyCare}.',
             );
     } catch (e) {
       if (!mounted) return;

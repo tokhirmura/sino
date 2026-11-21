@@ -26,3 +26,6 @@
 - [x] S2-5 `data/health_goal.dart` — `HealthGoal` (4 цели, коды `profiles.goal`, uz/ru/en), `UserProfile.goal`
   (в `toMap` только если выбрана); `widgets/goal_picker.dart` — `GoalPicker` (анкета и редактирование профиля);
   `Pill(wrap: true)` — перенос длинной подписи; миграция `20261121140000_core_profile_goal.sql`
+- [x] «Oila»: `FamilyMember.phone` (+ `dialable` для `tel:`; у fake-мамы и папы есть номера), `AppRoutes.family`,
+  `AppRoutes.familyMemberNew` / `familyMember(id)` (форма в профиле — чтобы другие фичи открывали её без импорта);
+  миграция `20261121160000_core_family_phone.sql`

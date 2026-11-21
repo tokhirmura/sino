@@ -19,7 +19,7 @@ Sino — одно приложение для здоровой жизни (ха�
 ## Модули и владельцы
 | Модуль | Фичи (`lib/features/…`) | Ассеты / утилиты |
 |---|---|---|
-| A (лид) | onboarding, home, profile, sos, assistant | `assets/core/` |
+| A (лид) | onboarding, home, profile, family, sos, assistant | `assets/core/` |
 | B | pharmacy, reminders, doctors | `assets/pharmacy/`, `tool/pharmacy/` |
 | C | nutrition, workouts, vitals, weather | `assets/wellness/`, `tool/wellness/` |
 
@@ -64,11 +64,11 @@ lib/
   NavigationBar, ставит `parentNavigatorKey: rootNavigatorKey`.
 - Фичи **не импортируют друг друга**. Общее — только из `lib/core`.
 - Переход в другую фичу: `context.push(AppRoutes.x)` для полноэкранных
-  (`/reminders /doctors /vitals /weather /sos /assistant /report`), `context.go(AppRoutes.x)` — переключить вкладку.
+  (`/reminders /doctors /vitals /weather /sos /assistant /report /family`), `context.go(AppRoutes.x)` — переключить вкладку.
 - Контракт: `/pharmacy?q=<запрос>` открывает поиск аптеки с готовым запросом →
   `context.go(AppRoutes.pharmacySearch(q))`; экран получает `initialQuery`.
 - `order` карточек на главной (меньше = выше): sos 10, weather 20, reminders 30, pharmacy 40, nutrition 50,
-  workouts 60, vitals 70, doctors 80, assistant 90. Для новых карточек берите свободные числа рядом со своими.
+  workouts 60, vitals 70, doctors 80, family 85, assistant 90. Для новых карточек берите свободные числа рядом со своими.
 
 ## Паттерн репозитория (в `data/` каждой фичи)
 ```dart
@@ -83,7 +83,8 @@ final medicinesRepositoryProvider = Provider<MedicinesRepository>((ref) =>
 ```
 
 ## Схема БД (`supabase/migrations/20261111120000_core_schema.sql`)
-- **core:** `profiles` (id = auth.users.id, создаётся триггером при регистрации; `goal` — главная цель), `family_members`,
+- **core:** `profiles` (id = auth.users.id, создаётся триггером при регистрации; `goal` — главная цель), `family_members`
+  (`phone` — для звонка с `/family`),
   `medical_records` (source `davlat|xususiy`), `lab_results`, `achievements` (unique user_id+code,
   `20261121120000_core_achievements.sql`)
 - **B:** `medicines` (description/warning jsonb `{uz,ru,en}`, analogs text[]), `pharmacies`, `pharmacy_stock`
