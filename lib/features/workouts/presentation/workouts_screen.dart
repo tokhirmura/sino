@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/async_value_view.dart';
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/loading_view.dart';
-import '../../../core/widgets/pill.dart';
-import '../../../core/widgets/section_title.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../../core/storage/prefs.dart';
 import '../application/air_quality.dart';
 import '../application/plan_generator.dart';
@@ -53,48 +50,68 @@ class WorkoutsScreen extends ConsumerWidget {
       }
     }
 
-    return AppScaffold(
-      title: context.tr(uz: 'Sport', ru: 'Тренировки', en: 'Workouts'),
+    final p = plan.value;
+    final streak = ref.watch(streakProvider).value;
+
+    return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(latestPlanProvider);
           ref.invalidate(exercisesProvider);
+          ref.invalidate(sessionsProvider);
           await ref
               .read(latestPlanProvider.future)
               .catchError((Object _) => null);
         },
-        child: AsyncValueView(
-          value: plan,
-          onRetry: () => ref.invalidate(latestPlanProvider),
-          loading: () => const SkeletonList(count: 3, itemHeight: 160),
-          data: (p) => p == null
-              ? ListView(
-                  padding: const EdgeInsets.only(bottom: 32),
-                  children: [
-                    const SizedBox(height: 8),
-                    const _Intro(),
-                    const SizedBox(height: 12),
-                    AppCard(
-                      child: PlanForm(aqi: aqi, onSubmit: create),
-                    ),
-                    const _Disclaimer(),
-                  ],
-                )
-              : AsyncValueView(
-                  value: catalog,
-                  onRetry: () => ref.invalidate(exercisesProvider),
-                  data: (byId) => _PlanView(
-                    plan: p,
-                    catalog: byId,
-                    aqi: aqi,
-                    onNewPlan: () => _openGenerator(
-                      context,
-                      PlanParams.fromJson(p.params),
-                      aqi,
-                      (params) => create(params, closeSheet: true),
-                    ),
-                  ),
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+          children: [
+            _Header(plan: p, streak: streak),
+            Padding(
+              padding: AppSpacing.screen,
+              child: AsyncValueView(
+                value: plan,
+                onRetry: () => ref.invalidate(latestPlanProvider),
+                loading: () => const Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.cardGap),
+                  child: SkeletonLoader(count: 3, kind: SkeletonKind.card),
                 ),
+                data: (p) => p == null
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const _Intro(),
+                          AppCard(
+                            child: PlanForm(aqi: aqi, onSubmit: create),
+                          ),
+                          const _Disclaimer(),
+                        ],
+                      )
+                    : AsyncValueView(
+                        value: catalog,
+                        onRetry: () => ref.invalidate(exercisesProvider),
+                        loading: () => const Padding(
+                          padding: EdgeInsets.only(top: AppSpacing.cardGap),
+                          child: SkeletonLoader(
+                            count: 3,
+                            kind: SkeletonKind.card,
+                          ),
+                        ),
+                        data: (byId) => _PlanView(
+                          plan: p,
+                          catalog: byId,
+                          aqi: aqi,
+                          onNewPlan: () => _openGenerator(
+                            context,
+                            PlanParams.fromJson(p.params),
+                            aqi,
+                            (params) => create(params, closeSheet: true),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -153,10 +170,10 @@ class _PlanView extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final a = aqi;
     final outdoorWarning = a != null && a.isBad && isOutdoor(params.type);
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 32),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.cardGap),
         if (outdoorWarning) ...[
           AppCard(
             key: const Key('workouts-plan-air-warning'),
@@ -169,17 +186,7 @@ class _PlanView extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    context.tr(
-                      uz:
-                          'Bugun havo sifati yomon (AQI ${a.aqi}) — '
-                          'yugurish o‘rniga uyda mashq qiling.',
-                      ru:
-                          'Сегодня плохой воздух (AQI ${a.aqi}) — вместо '
-                          'бега потренируйтесь дома.',
-                      en:
-                          'Poor air today (AQI ${a.aqi}) — train at home '
-                          'instead of running.',
-                    ),
+                    airAlertText(context, a.aqi),
                     style: text.bodyMedium,
                   ),
                 ),
@@ -197,7 +204,7 @@ class _PlanView extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.cardGap),
         ],
         AppCard(
           child: Column(
@@ -283,7 +290,7 @@ class _PlanView extends StatelessWidget {
             catalog: catalog,
             onStart: () => context.push(workoutPlayerPath(d.day)),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
         ],
         const _Disclaimer(),
       ],
@@ -295,35 +302,108 @@ class _Intro extends StatelessWidget {
   const _Intro();
 
   @override
+  Widget build(BuildContext context) => EmptyState(
+    key: const Key('workouts-intro'),
+    emoji: '🏋️',
+    title: context.tr(
+      uz: 'Mashg‘ulot rejangizni tuzamiz',
+      ru: 'Составим план тренировок',
+      en: 'Let’s build your workout plan',
+    ),
+    message: context.tr(
+      uz:
+          'Sport turi, maqsad, daraja va kunlar sonini tanlang — '
+          'haftalik reja daqiqa va kaloriya bilan tayyor bo‘ladi.',
+      ru:
+          'Выберите вид спорта, цель, уровень и число дней — план на '
+          'неделю с минутами и калориями будет готов.',
+      en:
+          'Pick a sport, goal, level and number of days — you get a '
+          'weekly plan with minutes and calories.',
+    ),
+  );
+}
+
+/// Gradient header: title and, with a plan, the week's numbers.
+class _Header extends StatelessWidget {
+  const _Header({required this.plan, required this.streak});
+
+  final WorkoutPlan? plan;
+  final int? streak;
+
+  @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.tr(
-            uz: 'Mashg‘ulot rejangizni tuzamiz',
-            ru: 'Составим план тренировок',
-            en: 'Let’s build your workout plan',
-          ),
-          style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          context.tr(
-            uz:
-                'Sport turi, maqsad, daraja va kunlar sonini tanlang — '
-                'haftalik reja daqiqa va kaloriya bilan tayyor bo‘ladi.',
-            ru:
-                'Выберите вид спорта, цель, уровень и число дней — план на '
-                'неделю с минутами и калориями будет готов.',
-            en:
-                'Pick a sport, goal, level and number of days — you get a '
-                'weekly plan with minutes and calories.',
-          ),
-          style: text.bodyMedium,
-        ),
-      ],
+    final p = plan;
+    final week = p == null ? null : weekTotals(p.days);
+    final s = streak ?? 0;
+    return GradientHeader(
+      title: context.tr(uz: 'Sport', ru: 'Тренировки', en: 'Workouts'),
+      subtitle: p == null
+          ? context.tr(
+              uz: 'Shaxsiy haftalik reja',
+              ru: 'Личный план на неделю',
+              en: 'Your weekly plan',
+            )
+          : context.tr(
+              uz: 'Haftasiga ${p.days.length} kun',
+              ru: '${p.days.length} дн. в неделю',
+              en: '${p.days.length} days a week',
+            ),
+      child: week == null
+          ? null
+          : Row(
+              children:
+                  [
+                        Expanded(
+                          child: StatTile(
+                            key: const Key('workouts-header-streak'),
+                            value: '$s',
+                            unit: context.tr(uz: 'kun', ru: 'дн.', en: 'days'),
+                            label: context.tr(
+                              uz: 'Seriya',
+                              ru: 'Серия',
+                              en: 'Streak',
+                            ),
+                            emoji: '🔥',
+                            color: AppColors.saffron,
+                            onDark: true,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: StatTile(
+                            value: '${week.minutes}',
+                            unit: minUnit(context),
+                            label: context.tr(
+                              uz: 'Haftada',
+                              ru: 'В неделю',
+                              en: 'Per week',
+                            ),
+                            emoji: '⏱️',
+                            color: AppColors.sky,
+                            onDark: true,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: StatTile(
+                            value: '~${week.kcal}',
+                            unit: kcalUnit(context),
+                            label: context.tr(
+                              uz: 'Yoqiladi',
+                              ru: 'Сжечь',
+                              en: 'Burn',
+                            ),
+                            emoji: '💪',
+                            color: AppColors.coral,
+                            onDark: true,
+                          ),
+                        ),
+                      ]
+                      .animate(interval: AppMotion.stagger)
+                      .fadeIn(duration: AppMotion.medium)
+                      .slideY(begin: 0.15, curve: AppMotion.enter),
+            ),
     );
   }
 }

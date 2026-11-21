@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../../application/air_quality.dart';
 import '../../application/plan_generator.dart';
 import '../../data/models.dart';
@@ -126,21 +127,15 @@ class _PlanFormState extends State<PlanForm> {
           ],
         ),
         const SizedBox(height: 20),
-        FilledButton.icon(
+        PrimaryButton(
           key: const Key('workouts-generate'),
+          loading: _busy,
           onPressed: _busy ? null : _submit,
-          icon: _busy
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.auto_awesome_rounded),
-          label: Text(
-            context.tr(
-              uz: 'Reja tuzish',
-              ru: 'Составить план',
-              en: 'Build plan',
-            ),
+          icon: Icons.auto_awesome_rounded,
+          label: context.tr(
+            uz: 'Reja tuzish',
+            ru: 'Составить план',
+            en: 'Build plan',
           ),
         ),
       ],
@@ -193,7 +188,7 @@ class _AirBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final place = aqi.place.isEmpty ? '' : ', ${context.trMap(aqi.place)}';
-    final color = outdoor ? AppColors.danger : const Color(0xFFF97316);
+    final color = outdoor ? AppColors.danger : AppColors.saffron;
     return AppCard(
       key: const Key('workouts-air-banner'),
       elevated: false,
