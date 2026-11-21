@@ -19,12 +19,18 @@ enum StepsStatus {
   /// Readings arrive.
   counting,
 
-  /// No reading for [stepsSilenceLimit]: most likely no «physical
-  /// activity» permission (Android sends nothing then).
+  /// No reading for [stepsSilenceLimit] although the permission is there
+  /// (the phone may not report until the first steps).
   silent,
 
   /// No step counter on this device (emulator).
   unavailable,
+
+  /// No «physical activity» permission yet — it can be asked.
+  denied,
+
+  /// The permission was denied for good — only the system settings help.
+  blocked,
 }
 
 /// After this long without a reading the card suggests the permission.
@@ -67,8 +73,14 @@ class StepsNotifier extends Notifier<StepsView> {
   Timer? _silence;
   StepsDay? _day;
 
+  /// prefs: the permission was asked once automatically (vitals screen).
+  static const askedKey = 'vitals.steps_asked';
+
   /// One write at a time; a newer value waits for it.
   Future<void>? _writing;
+
+  /// Bumped by every [_start]: a slower permission check gives way.
+  int _gen = 0;
 
   @override
   StepsView build() {
@@ -76,16 +88,51 @@ class StepsNotifier extends Notifier<StepsView> {
     final sensor = ref.watch(stepSensorProvider);
     _day = StepsDay.tryFromJson(_readJson(dayKey));
     final known = _day?.day == dateOnly(DateTime.now()) ? _day!.steps : null;
-    _listen(sensor);
+    unawaited(_start(sensor, ask: false));
     return StepsView(StepsStatus.starting, known);
   }
 
-  /// Listens again — after the user allowed the permission in settings.
+  /// Checks the permission again and listens — on return to the app (the
+  /// user may have allowed it in the settings).
   void restart() {
     if (state.status == StepsStatus.counting) return;
-    _stop();
     state = StepsView(StepsStatus.starting, state.steps);
-    _listen(ref.read(stepSensorProvider));
+    unawaited(_start(ref.read(stepSensorProvider), ask: false));
+  }
+
+  /// The «Ruxsat berish» button: the system prompt, or the settings when
+  /// the permission is blocked.
+  Future<void> allow() async {
+    if (state.status == StepsStatus.blocked) return openSettings();
+    state = StepsView(StepsStatus.starting, state.steps);
+    await _start(ref.read(stepSensorProvider), ask: true);
+  }
+
+  /// The first time the vitals screen shows the card: asks once by itself
+  /// (later — only by the button).
+  Future<void> askOnce() async {
+    if (_prefs.getBool(askedKey) == true) return;
+    await _prefs.setBool(askedKey, true);
+    final sensor = ref.read(stepSensorProvider);
+    // Granted or blocked — nothing to ask (and no need to listen again).
+    if (await sensor.permission() != StepPermission.denied) return;
+    if (!ref.mounted || state.status == StepsStatus.counting) return;
+    await _start(sensor, ask: true);
+  }
+
+  Future<void> _start(StepSensor sensor, {required bool ask}) async {
+    _stop();
+    final gen = ++_gen;
+    final p = await sensor.permission(request: ask);
+    if (!ref.mounted || gen != _gen) return;
+    switch (p) {
+      case StepPermission.granted:
+        _listen(sensor);
+      case StepPermission.denied:
+        state = StepsView(StepsStatus.denied, state.steps);
+      case StepPermission.blocked:
+        state = StepsView(StepsStatus.blocked, state.steps);
+    }
   }
 
   /// Saves today's total now (the app goes to the background).
