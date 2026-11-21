@@ -41,6 +41,22 @@ Fake-режим: пользовательские данные в prefs (`pharma
   цене, карта по центру Ташкента (`tashkentCenter`). Fake — Ташкент.
 
 ## Экраны
+- **Design 2.0 (Sprint 2.0 B+):** вкладка — `GradientHeader` (поиск + `StatTile` «Dorilar» / «Faol bronlar»),
+  скелетоны `SkeletonLoader`, `EmptyState(actionLabel:)`, каскадное появление карточек — `widgets/motion.dart`
+  (`staggerIn(i)`, задержки внутри эффектов `flutter_animate`, без таймеров; учитывает «уменьшить движение»).
+- **3 шага брони** `Qabul qilindi → Tayyorlanmoqda → Tayyor` — `widgets/reservation_steps.dart`
+  (`reservationProgress`: отправка 0, `pending` 1, `ready` 3; только конечные анимации) — в карточке брони,
+  в баннере вкладки и в home-карточке (`widgets/active_reservation_card.dart`, `dense` на главной).
+- **«Wow» при готовности:** `application/ready_celebrations.dart` — очередь переходов `pending → ready`;
+  `ReadyCelebrationHost` (вкладка, «Bronlarim», home-карточка) показывает полноэкранный баннер
+  (`widgets/ready_celebration.dart`: конфетти, `HapticFeedback.heavyImpact`, «Yo‘nalish»). Хостов может быть
+  несколько — переход показывается один раз (`take()` после кадра).
+  Тесты: `confetti` двигает частицы по реальному `DateTime.now()`, под тестовыми часами он не завершается —
+  закрывайте баннер («Ajoyib!») до `pumpAndSettle`.
+- **Rx-бейдж** `RxBadge` («Retsept kerak» / «Retseptsiz»): сплошная заливка, белый текст ≥ 4.5:1; большой — в
+  шапке лекарства, `compact` — в строках списка.
+- **Карта:** пины `PharmacyPin` (градиент бренда, 24/7 — зелёные, выбранный крупнее с шафрановой обводкой);
+  тап → карточка аптеки выезжает снизу (`AnimatedSwitcher` + `SlideTransition`), тап по карте / ✕ — закрыть.
 - **Поиск** (вкладка): поле с поиском по мере ввода (250 мс), очистка, сканер; без запроса — баннер активных броней,
   чипы категорий, весь каталог. Новый `?q=` при уже открытой вкладке заменяет запрос (`didUpdateWidget`).
   Штрих-код: найден → карточка лекарства, нет → запрос = код + сообщение.

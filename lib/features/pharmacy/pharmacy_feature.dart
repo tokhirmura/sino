@@ -7,11 +7,12 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/routing/app_routes.dart';
 import 'application/pharmacy_providers.dart';
-import 'data/models.dart';
 import 'presentation/medicine_screen.dart';
 import 'presentation/pharmacies_screen.dart';
 import 'presentation/pharmacy_paths.dart';
 import 'presentation/pharmacy_screen.dart';
+import 'presentation/widgets/active_reservation_card.dart';
+import 'presentation/widgets/ready_celebration.dart';
 import 'presentation/reservations_screen.dart';
 import 'presentation/scan_screen.dart';
 
@@ -51,38 +52,32 @@ final List<HomeCardSpec> pharmacyHomeCards = [
   HomeCardSpec(
     id: 'pharmacy',
     order: 40,
-    builder: (context) => Consumer(
-      builder: (context, ref, _) {
-        final active = ref.watch(activeReservationsProvider).value ?? const [];
-        final ready = active
-            .where((r) => r.status == ReservationStatus.ready)
-            .length;
-        return ShortcutCard(
-          emoji: '💊',
-          title: context.tr(uz: 'Dorixona', ru: 'Аптека', en: 'Pharmacy'),
-          subtitle: active.isEmpty
-              ? context.tr(
-                  uz: 'Dori qidirish va bron qilish',
-                  ru: 'Поиск и бронь лекарств',
-                  en: 'Find and reserve medicines',
-                )
-              : ready > 0
-              ? context.tr(
-                  uz: 'Olib ketishga tayyor: $ready',
-                  ru: 'Готово к выдаче: $ready',
-                  en: 'Ready for pickup: $ready',
-                )
-              : context.tr(
-                  uz: 'Faol bronlar: ${active.length}',
-                  ru: 'Активные брони: ${active.length}',
-                  en: 'Active reservations: ${active.length}',
-                ),
-          color: AppColors.primary,
-          onTap: () => active.isEmpty
-              ? context.go(AppRoutes.pharmacy)
-              : context.push(PharmacyPaths.reservations),
-        );
-      },
+    builder: (context) => ReadyCelebrationHost(
+      child: Consumer(
+        builder: (context, ref, _) {
+          final active =
+              ref.watch(activeReservationsProvider).value ?? const [];
+          if (active.isNotEmpty) {
+            // Live 3-step progress of the reservation right on the home.
+            return ActiveReservationsCard(
+              dense: true,
+              title: context.tr(uz: 'Dorixona', ru: 'Аптека', en: 'Pharmacy'),
+              onTap: () => context.push(PharmacyPaths.reservations),
+            );
+          }
+          return ShortcutCard(
+            emoji: '💊',
+            title: context.tr(uz: 'Dorixona', ru: 'Аптека', en: 'Pharmacy'),
+            subtitle: context.tr(
+              uz: 'Dori qidirish va bron qilish',
+              ru: 'Поиск и бронь лекарств',
+              en: 'Find and reserve medicines',
+            ),
+            color: AppColors.primary,
+            onTap: () => context.go(AppRoutes.pharmacy),
+          );
+        },
+      ),
     ),
   ),
 ];

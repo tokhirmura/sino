@@ -1,25 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_lang.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/async_value_view.dart';
-import '../../../core/widgets/emoji_box.dart';
-import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/loading_view.dart';
-import '../../../core/widgets/section_title.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/widgets.dart';
 import '../application/pharmacy_providers.dart';
 import '../data/models.dart';
 import '../data/pharmacy_repository.dart';
 import 'labels.dart';
 import 'pharmacy_paths.dart';
 import 'widgets/common.dart';
+import 'widgets/ready_celebration.dart';
+import 'widgets/active_reservation_card.dart';
 
 /// «Dorixona» tab: search by name, active ingredient, symptom or barcode
 /// (typed or scanned), category chips, active reservations.
@@ -107,80 +103,149 @@ class _PharmacyScreenState extends ConsumerState<PharmacyScreen> {
   @override
   Widget build(BuildContext context) {
     final catalog = ref.watch(medicinesCatalogProvider);
-    return AppScaffold(
-      title: context.tr(uz: 'Dorixona', ru: 'Аптека', en: 'Pharmacy'),
-      padding: EdgeInsets.zero,
-      actions: [
-        IconButton(
-          tooltip: context.tr(
-            uz: 'Dorixonalar xaritasi',
-            ru: 'Карта аптек',
-            en: 'Pharmacy map',
-          ),
-          icon: const Icon(Icons.map_outlined),
-          onPressed: () => context.push(PharmacyPaths.pharmacies),
-        ),
-        const _ReservationsAction(),
-      ],
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: TextField(
-              controller: _search,
-              onChanged: _onChanged,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (v) => _setQuery(v.trim()),
-              decoration: InputDecoration(
-                hintText: context.tr(
-                  uz: 'Dori, ta’sir qiluvchi modda yoki shtrix-kod',
-                  ru: 'Лекарство, вещество или штрих-код',
-                  en: 'Medicine, ingredient or barcode',
+    final active = ref.watch(activeReservationsProvider).value ?? const [];
+    final ready = active
+        .where((r) => r.status == ReservationStatus.ready)
+        .length;
+    final theme = Theme.of(context);
+    return ReadyCelebrationHost(
+      child: Scaffold(
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: [
+              GradientHeader(
+                title: context.tr(uz: 'Dorixona', ru: 'Аптека', en: 'Pharmacy'),
+                subtitle: context.tr(
+                  uz: 'Toping, narxlarni solishtiring, bron qiling',
+                  ru: 'Найдите, сравните цены, забронируйте',
+                  en: 'Find, compare prices, reserve',
                 ),
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: Row(
+                trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (_search.text.isNotEmpty)
-                      IconButton(
-                        tooltip: context.tr(
-                          uz: 'Tozalash',
-                          ru: 'Очистить',
-                          en: 'Clear',
-                        ),
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () => _setQuery(''),
-                      ),
                     IconButton(
                       tooltip: context.tr(
-                        uz: 'Shtrix-kodni skanerlash',
-                        ru: 'Сканировать штрих-код',
-                        en: 'Scan barcode',
+                        uz: 'Dorixonalar xaritasi',
+                        ru: 'Карта аптек',
+                        en: 'Pharmacy map',
                       ),
-                      icon: const Icon(Icons.qr_code_scanner_rounded),
-                      onPressed: _scan,
+                      icon: const Icon(Icons.map_outlined),
+                      onPressed: () => context.push(PharmacyPaths.pharmacies),
+                    ),
+                    const _ReservationsAction(),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _searchField(theme),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatTile(
+                            onDark: true,
+                            value: '${catalog.value?.length ?? '—'}',
+                            label: context.tr(
+                              uz: 'Dorilar',
+                              ru: 'Лекарства',
+                              en: 'Medicines',
+                            ),
+                            icon: Icons.medication_rounded,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: StatTile(
+                            onDark: true,
+                            value: '${active.length}',
+                            label: ready > 0
+                                ? context.tr(
+                                    uz: 'Tayyor: $ready',
+                                    ru: 'Готово: $ready',
+                                    en: 'Ready: $ready',
+                                  )
+                                : context.tr(
+                                    uz: 'Faol bronlar',
+                                    ru: 'Активные брони',
+                                    en: 'Active orders',
+                                  ),
+                            icon: Icons.shopping_bag_rounded,
+                            onTap: () =>
+                                context.push(PharmacyPaths.reservations),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: AsyncValueView(
-              value: catalog,
-              onRetry: () => ref.invalidate(medicinesCatalogProvider),
-              loading: () => const SingleChildScrollView(
-                physics: NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.all(16),
-                child: SkeletonList(count: 6),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: AsyncValueView(
+                  value: catalog,
+                  compact: true,
+                  onRetry: () => ref.invalidate(medicinesCatalogProvider),
+                  loading: () => const SkeletonLoader(count: 6),
+                  data: (list) => _results(context, list),
+                ),
               ),
-              data: (list) => _results(context, list),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
+
+  Widget _searchField(ThemeData theme) => TextField(
+    controller: _search,
+    onChanged: _onChanged,
+    textInputAction: TextInputAction.search,
+    onSubmitted: (v) => _setQuery(v.trim()),
+    style: TextStyle(color: theme.colorScheme.onSurface),
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: theme.colorScheme.surface,
+      hintText: context.tr(
+        uz: 'Dori, ta’sir qiluvchi modda yoki shtrix-kod',
+        ru: 'Лекарство, вещество или штрих-код',
+        en: 'Medicine, ingredient or barcode',
+      ),
+      prefixIcon: Icon(
+        Icons.search_rounded,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+      suffixIcon: IconTheme.merge(
+        data: IconThemeData(color: theme.colorScheme.onSurfaceVariant),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_search.text.isNotEmpty)
+              IconButton(
+                tooltip: context.tr(
+                  uz: 'Tozalash',
+                  ru: 'Очистить',
+                  en: 'Clear',
+                ),
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () => _setQuery(''),
+              ),
+            IconButton(
+              tooltip: context.tr(
+                uz: 'Shtrix-kodni skanerlash',
+                ru: 'Сканировать штрих-код',
+                en: 'Scan barcode',
+              ),
+              icon: const Icon(Icons.qr_code_scanner_rounded),
+              onPressed: _scan,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   Widget _results(BuildContext context, List<Medicine> all) {
     final searching = _query.isNotEmpty;
@@ -194,9 +259,8 @@ class _PharmacyScreenState extends ConsumerState<PharmacyScreen> {
       for (final c in medicineCategories)
         if (all.any((m) => m.category == c)) c,
     ];
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!searching) ...[
           const _ActiveReservationsBanner(),
@@ -264,17 +328,20 @@ class _PharmacyScreenState extends ConsumerState<PharmacyScreen> {
                   'Try another name, ingredient or symptom, or scan the '
                   'barcode on the box.',
             ),
-            action: OutlinedButton.icon(
-              onPressed: _scan,
-              icon: const Icon(Icons.qr_code_scanner_rounded),
-              label: Text(
-                context.tr(uz: 'Skanerlash', ru: 'Сканировать', en: 'Scan'),
-              ),
+            actionLabel: context.tr(
+              uz: 'Skanerlash',
+              ru: 'Сканировать',
+              en: 'Scan',
             ),
+            actionIcon: Icons.qr_code_scanner_rounded,
+            onAction: _scan,
           )
         else
-          for (final m in found)
+          for (final (i, m) in found.indexed)
             MedicineTile(
+              // Keyed: a new search or category replays the entrance.
+              key: ValueKey('med-${m.id}-$_query-$_category'),
+              index: i,
               medicine: m,
               onTap: () => context.push(PharmacyPaths.medicine(m.id)),
             ),
@@ -306,65 +373,14 @@ class _ReservationsAction extends ConsumerWidget {
   }
 }
 
-class _ActiveReservationsBanner extends ConsumerWidget {
+class _ActiveReservationsBanner extends StatelessWidget {
   const _ActiveReservationsBanner();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final active = ref.watch(activeReservationsProvider).value ?? const [];
-    if (active.isEmpty) return const SizedBox.shrink();
-    final ready = active
-        .where((r) => r.status == ReservationStatus.ready)
-        .length;
-    final text = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: AppCard(
-        onTap: () => context.push(PharmacyPaths.reservations),
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            EmojiBox(
-              emoji: ready > 0 ? '✅' : '⏳',
-              color: ready > 0 ? AppColors.good : AppColors.amber,
-              size: 40,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.tr(
-                      uz: 'Faol bronlar: ${active.length}',
-                      ru: 'Активные брони: ${active.length}',
-                      en: 'Active reservations: ${active.length}',
-                    ),
-                    style: text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    ready > 0
-                        ? context.tr(
-                            uz: 'Olib ketishga tayyor: $ready',
-                            ru: 'Готово к выдаче: $ready',
-                            en: 'Ready for pickup: $ready',
-                          )
-                        : context.tr(
-                            uz: 'Dorixona tayyorlamoqda',
-                            ru: 'Аптека собирает заказ',
-                            en: 'The pharmacy is preparing it',
-                          ),
-                    style: text.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: ActiveReservationsCard(
+      onTap: () => context.push(PharmacyPaths.reservations),
+    ),
+  );
 }

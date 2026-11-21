@@ -8,6 +8,7 @@ import '../../../../core/widgets/money.dart';
 import '../../application/pharmacy_providers.dart';
 import '../../data/models.dart';
 import '../labels.dart';
+import 'motion.dart';
 
 /// Required on every medical screen.
 class MedicalDisclaimer extends StatelessWidget {
@@ -114,27 +115,86 @@ class Tag extends StatelessWidget {
   }
 }
 
-/// «Retsept bilan» / «Retseptsiz».
-class RxPill extends StatelessWidget {
-  const RxPill({super.key, required this.rx});
+/// «Retsept kerak» / «Retseptsiz» — a solid, high-contrast badge that is
+/// hard to miss: the fill is darkened until white text on it reads at
+/// ≥ 4.5:1 in both themes. [compact] — smaller, for list rows.
+class RxBadge extends StatelessWidget {
+  const RxBadge({super.key, required this.rx, this.compact = false});
 
   final bool rx;
+  final bool compact;
 
   @override
-  Widget build(BuildContext context) => rx
-      ? Tag(
-          context.tr(uz: 'Retsept bilan', ru: 'По рецепту', en: 'Prescription'),
-          color: AppColors.coral,
-          icon: Icons.receipt_long_rounded,
-        )
-      : Tag(
-          context.tr(
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final base = rx ? AppColors.coral : AppColors.good;
+    // Dark enough for white text on it in either theme.
+    final fill = AppColors.readable(base, Brightness.light);
+    final label = rx
+        ? context.tr(
+            uz: 'Retsept kerak',
+            ru: 'Нужен рецепт',
+            en: 'Prescription needed',
+          )
+        : context.tr(
             uz: 'Retseptsiz',
             ru: 'Без рецепта',
-            en: 'Over the counter',
-          ),
-          color: AppColors.good,
-        );
+            en: 'No prescription',
+          );
+    final icon = rx ? Icons.receipt_long_rounded : Icons.verified_rounded;
+    return Semantics(
+      label: label,
+      excludeSemantics: true,
+      child: Container(
+        padding: compact
+            ? const EdgeInsets.symmetric(horizontal: 8, vertical: 3)
+            : const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: fill,
+          borderRadius: BorderRadius.circular(compact ? 8 : 14),
+          boxShadow: compact
+              ? null
+              : [
+                  BoxShadow(
+                    color: fill.withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final withIcon = box.maxWidth >= (compact ? 40 : 60);
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (withIcon) ...[
+                  Icon(icon, size: compact ? 13 : 20, color: Colors.white),
+                  SizedBox(width: compact ? 4 : 8),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        (compact
+                                ? theme.textTheme.labelSmall
+                                : theme.textTheme.titleSmall)
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: compact ? 0.1 : 0.2,
+                            ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
 
 /// A medicine row: category emoji, name, ingredient · form, price.
@@ -144,10 +204,14 @@ class MedicineTile extends StatelessWidget {
     required this.medicine,
     required this.onTap,
     this.price,
+    this.index,
   });
 
   final Medicine medicine;
   final VoidCallback onTap;
+
+  /// Position in a list → staggered entrance; `null` — the card's default.
+  final int? index;
 
   /// Shown instead of the reference price (e.g. the best price).
   final int? price;
@@ -161,9 +225,10 @@ class MedicineTile extends StatelessWidget {
       if (medicine.ingredient != null) medicine.ingredient!,
       formLabel(context, medicine.form),
     ].where((s) => s.isNotEmpty).join(' · ');
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AppCard(
+        animate: index == null,
         onTap: onTap,
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -195,6 +260,8 @@ class MedicineTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 6),
+                  RxBadge(rx: medicine.rx, compact: true),
                 ],
               ),
             ),
@@ -221,14 +288,6 @@ class MedicineTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  if (medicine.rx) ...[
-                    const SizedBox(height: 4),
-                    const Icon(
-                      Icons.receipt_long_rounded,
-                      size: 16,
-                      color: AppColors.coral,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -236,6 +295,7 @@ class MedicineTile extends StatelessWidget {
         ),
       ),
     );
+    return index == null ? tile : tile.staggerIn(index!);
   }
 }
 

@@ -93,54 +93,64 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
       padding: const EdgeInsets.only(top: 4, bottom: 24),
       children: [
         AppCard(
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              EmojiBox(
-                emoji: categoryEmoji(m.category),
-                color: categoryColor(m.category),
-                size: 56,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      m.name,
-                      style: text.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    if (m.ingredient != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        context.tr(
-                          uz: 'Ta’sir qiluvchi modda: ${m.ingredient}',
-                          ru: 'Действующее вещество: ${m.ingredient}',
-                          en: 'Active ingredient: ${m.ingredient}',
-                        ),
-                        style: text.bodySmall,
-                      ),
-                    ],
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EmojiBox(
+                    emoji: categoryEmoji(m.category),
+                    color: categoryColor(m.category),
+                    size: 56,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RxPill(rx: m.rx),
-                        if (m.form != null)
-                          Tag(formLabel(context, m.form), color: AppColors.sky),
-                        if (m.category != null)
-                          Tag(
-                            categoryLabel(context, m.category),
-                            color: categoryColor(m.category),
+                        Text(
+                          m.name,
+                          style: text.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
+                        ),
+                        if (m.ingredient != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr(
+                              uz: 'Ta’sir qiluvchi modda: ${m.ingredient}',
+                              ru: 'Действующее вещество: ${m.ingredient}',
+                              en: 'Active ingredient: ${m.ingredient}',
+                            ),
+                            style: text.bodySmall,
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            if (m.form != null)
+                              Tag(
+                                formLabel(context, m.form),
+                                color: AppColors.sky,
+                              ),
+                            if (m.category != null)
+                              Tag(
+                                categoryLabel(context, m.category),
+                                color: categoryColor(m.category),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 14),
+              // Prescription status — big and first thing the eye catches.
+              RxBadge(rx: m.rx),
             ],
           ),
         ),
@@ -238,7 +248,7 @@ class _MedicineScreenState extends ConsumerState<MedicineScreen> {
           value: offers,
           compact: true,
           onRetry: () => ref.invalidate(offersProvider),
-          loading: () => const SkeletonList(count: 3, itemHeight: 110),
+          loading: () => const SkeletonLoader(count: 3),
           data: (list) {
             if (list.isEmpty) {
               return Text(
