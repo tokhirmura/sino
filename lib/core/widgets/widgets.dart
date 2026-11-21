@@ -10,6 +10,7 @@ export 'emoji_box.dart';
 export 'empty_state.dart';
 export 'error_view.dart';
 export 'girih_pattern.dart';
+export 'goal_picker.dart';
 export 'gradient_header.dart';
 export 'loading_view.dart';
 export 'money.dart';

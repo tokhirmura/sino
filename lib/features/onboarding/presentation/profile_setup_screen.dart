@@ -11,11 +11,15 @@ import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/goal_picker.dart';
+import '../../../core/widgets/pill.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../application/setup_prefill.dart';
 import 'widgets/common.dart';
 
-/// `/profile-setup`: first-run questionnaire (name, birth year, height,
-/// weight) → `profiles`. The router keeps the user here while the profile
+/// `/profile-setup`: first-run questionnaire. Step 1 — the main goal
+/// (optional, «Keyinroq» skips); step 2 — name, birth year, height,
+/// weight → `profiles`. The router keeps the user here while the profile
 /// is incomplete and moves to home as soon as it is saved.
 class ProfileSetupScreen extends ConsumerWidget {
   const ProfileSetupScreen({super.key});
@@ -69,6 +73,10 @@ class _SetupFormState extends ConsumerState<_SetupForm> {
   late final TextEditingController _weight;
   late final bool _fromOneId;
 
+  /// Chosen goal; asked first unless the profile already has one.
+  HealthGoal? _goal;
+  late bool _askGoal;
+
   bool _saving = false;
   Object? _error;
 
@@ -88,6 +96,8 @@ class _SetupFormState extends ConsumerState<_SetupForm> {
     _year = TextEditingController(text: year?.toString() ?? '');
     _height = TextEditingController(text: _num(p?.heightCm));
     _weight = TextEditingController(text: _num(p?.weightKg));
+    _goal = p?.goal;
+    _askGoal = _goal == null;
   }
 
   static String _num(double? v) => v == null
@@ -132,6 +142,7 @@ class _SetupFormState extends ConsumerState<_SetupForm> {
               heightCm: _parse(_height.text),
               weightKg: _parse(_weight.text),
               lang: lang,
+              goal: _goal,
             ),
           );
       // Profile is complete → the router moves to home.
@@ -160,8 +171,61 @@ class _SetupFormState extends ConsumerState<_SetupForm> {
           en: 'Could not save. Please try again.',
         );
 
+  Widget _goalStep(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return ListView(
+      key: const ValueKey('goal-step'),
+      padding: const EdgeInsets.only(bottom: 24),
+      children: [
+        Text(
+          context.tr(
+            uz: 'Asosiy maqsadingiz nima?',
+            ru: 'Какая у вас главная цель?',
+            en: 'What is your main goal?',
+          ),
+          style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          context.tr(
+            uz:
+                'Bosh sahifa shunga moslashadi. Keyin profilda o‘zgartirish '
+                'mumkin.',
+            ru: 'Главная подстроится под неё. Изменить можно в профиле.',
+            en: 'Home adapts to it. You can change it in your profile.',
+          ),
+          style: text.bodyLarge,
+        ),
+        const SizedBox(height: 20),
+        GoalPicker(value: _goal, onChanged: (g) => setState(() => _goal = g)),
+        const SizedBox(height: 24),
+        PrimaryButton(
+          key: const ValueKey('goal-next'),
+          label: context.tr(uz: 'Davom etish', ru: 'Далее', en: 'Continue'),
+          icon: Icons.arrow_forward_rounded,
+          onPressed: _goal == null
+              ? null
+              : () => setState(() => _askGoal = false),
+        ),
+        const SizedBox(height: 4),
+        TextButton(
+          onPressed: () => setState(() {
+            _goal = null;
+            _askGoal = false;
+          }),
+          child: Text(context.tr(uz: 'Keyinroq', ru: 'Позже', en: 'Later')),
+        ),
+      ],
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AnimatedSwitcher(
+    duration: const Duration(milliseconds: 250),
+    child: _askGoal ? _goalStep(context) : _form(context),
+  );
+
+  Widget _form(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final thisYear = DateTime.now().year;
     final digits = [FilteringTextInputFormatter.digitsOnly];
@@ -169,8 +233,35 @@ class _SetupFormState extends ConsumerState<_SetupForm> {
     return Form(
       key: _formKey,
       child: ListView(
+        key: const ValueKey('form-step'),
         padding: const EdgeInsets.only(bottom: 24),
         children: [
+          if (_goal != null) ...[
+            Row(
+              children: [
+                Flexible(
+                  child: Pill(
+                    '${_goal!.emoji} ${_goal!.title(context.lang)}',
+                    key: const ValueKey('chosen-goal'),
+                    wrap: true,
+                  ),
+                ),
+                TextButton(
+                  onPressed: _saving
+                      ? null
+                      : () => setState(() => _askGoal = true),
+                  child: Text(
+                    context.tr(
+                      uz: 'O‘zgartirish',
+                      ru: 'Изменить',
+                      en: 'Change',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(
             context.tr(
               uz:

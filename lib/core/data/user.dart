@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../backend/backend.dart';
 import '../storage/prefs.dart';
+import 'health_goal.dart';
+
+export 'health_goal.dart';
 
 class UserProfile {
   const UserProfile({
@@ -16,6 +19,7 @@ class UserProfile {
     this.bloodType,
     this.allergies = const [],
     this.lang = 'uz',
+    this.goal,
   });
 
   final String id;
@@ -26,6 +30,9 @@ class UserProfile {
   final String? bloodType;
   final List<String> allergies;
   final String lang;
+
+  /// Main goal (`profiles.goal`); `null` — not chosen yet (optional).
+  final HealthGoal? goal;
 
   int? get age => birthYear == null ? null : DateTime.now().year - birthYear!;
 
@@ -45,6 +52,7 @@ class UserProfile {
     String? bloodType,
     List<String>? allergies,
     String? lang,
+    HealthGoal? goal,
   }) => UserProfile(
     id: id,
     fullName: fullName ?? this.fullName,
@@ -54,6 +62,7 @@ class UserProfile {
     bloodType: bloodType ?? this.bloodType,
     allergies: allergies ?? this.allergies,
     lang: lang ?? this.lang,
+    goal: goal ?? this.goal,
   );
 
   /// Row for `profiles` (column names as in the DB).
@@ -66,6 +75,8 @@ class UserProfile {
     'blood_type': bloodType,
     'allergies': allergies,
     'lang': lang,
+    // Only when chosen: saving other fields never clears it.
+    'goal': ?goal?.code,
   };
 
   factory UserProfile.fromMap(Map<String, dynamic> m) => UserProfile(
@@ -77,6 +88,7 @@ class UserProfile {
     bloodType: m['blood_type'] as String?,
     allergies: List<String>.from(m['allergies'] as List? ?? const []),
     lang: (m['lang'] as String?) ?? 'uz',
+    goal: HealthGoal.byCode(m['goal']),
   );
 
   static final fake = UserProfile(
