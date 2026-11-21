@@ -5,13 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/async_value_view.dart';
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/loading_view.dart';
-import '../../../core/widgets/pill.dart';
-import '../../../core/widgets/section_title.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/widgets.dart';
 import '../application/vitals_math.dart';
 import '../application/vitals_providers.dart';
 import '../data/models.dart';
@@ -83,8 +78,9 @@ class VitalsScreen extends ConsumerWidget {
         child: AsyncValueView(
           value: week,
           onRetry: () => ref.invalidate(vitalsWeekAllProvider),
-          loading: () => const SkeletonList(count: 4, itemHeight: 120),
-          data: (list) => _Body(list: list, kind: kind),
+          loading: () =>
+              const SkeletonLoader(count: 6, kind: SkeletonKind.grid),
+          data: (list) => _Body(list: list, kind: kind, onAdd: add),
         ),
       ),
     );
@@ -92,10 +88,11 @@ class VitalsScreen extends ConsumerWidget {
 }
 
 class _Body extends ConsumerWidget {
-  const _Body({required this.list, required this.kind});
+  const _Body({required this.list, required this.kind, required this.onAdd});
 
   final List<Vital> list;
   final VitalKind kind;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -183,7 +180,7 @@ class _Body extends ConsumerWidget {
               ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -229,9 +226,27 @@ class _Body extends ConsumerWidget {
           ),
         ),
         if (ofKind.isEmpty)
-          Text(
-            context.tr(uz: 'Hali yo‘q', ru: 'Пока нет', en: 'None yet'),
-            style: text.bodyMedium,
+          EmptyState(
+            key: const Key('vitals-empty'),
+            emoji: kind.emoji,
+            color: kind.color,
+            title: context.tr(
+              uz: 'Bu hafta o‘lchov yo‘q',
+              ru: 'За неделю измерений нет',
+              en: 'No measurements this week',
+            ),
+            message: context.tr(
+              uz: '«${kind.label(context)}» ni kiriting — grafik o‘zi chiziladi.',
+              ru: 'Внесите «${kind.label(context)}» — график построится сам.',
+              en: 'Log “${kind.label(context)}” — the chart draws itself.',
+            ),
+            actionLabel: context.tr(
+              uz: 'O‘lchov qo‘shish',
+              ru: 'Добавить измерение',
+              en: 'Add a measurement',
+            ),
+            actionIcon: Icons.add_rounded,
+            onAction: onAdd,
           )
         else
           AppCard(
