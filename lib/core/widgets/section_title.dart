@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Section heading: bold, slightly larger, more air above.
 class SectionTitle extends StatelessWidget {
   const SectionTitle(this.title, {super.key, this.trailing});
 
@@ -15,8 +16,8 @@ class SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontSize: 19, fontWeight: FontWeight.w800),
             ),
           ),
           ?trailing,

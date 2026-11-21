@@ -11,3 +11,11 @@
   (`theme/app_tokens.dart`: `AppSpacing`, `AppShadows`; `widgets/loading_view.dart`: `LoadingView`,
   `Skeleton`, `SkeletonList`; `widgets/async_value_view.dart`: `AsyncValueView`; `errorMessage()` в
   `error_view.dart`; тесты — `test/core/widgets_test.dart`)
+- [x] Дизайн 2.0 «Samarqand»: палитра бирюза/лазурь/шафран/гранат, крем и ночная темы, шрифт Inter в
+  `assets/fonts`, радиус 24, градиентная шапка `AppScaffold` с гирихом (`widgets/girih_pattern.dart`), новые
+  `GradientHeader`/`GradientBackdrop`, `StatTile`, `AnimatedProgressRing`, `AchievementBadge`, `SkeletonLoader`,
+  `PrimaryButton`, `CascadeIn`/`Pressable` (`widgets/motion.dart`), `EmptyState(actionLabel:, onAction:)`,
+  плавающая нижняя панель (`lib/app/shell_scaffold.dart`), `widgets/widgets.dart` — общий импорт.
+  Пакеты для всех: flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer, flutter_timezone
+  (+ ACTIVITY_RECOGNITION / NSMotionUsageDescription, TTS_SERVICE в queries). Иконка и сплэш —
+  `tool/core/gen_icon.dart` → `assets/branding/`. Тесты — `test/core/design_v2_test.dart`.

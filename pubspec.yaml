@@ -52,6 +52,13 @@ dependencies:
   qr_flutter: ^4.1.0
   flutter_localizations:
     sdk: flutter
+  flutter_animate: ^4.5.2
+  share_plus: ^13.3.1
+  screenshot: ^3.0.0
+  confetti: ^0.8.0
+  flutter_tts: ^4.2.5
+  pedometer: ^4.2.0
+  flutter_timezone: ^5.1.1
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +70,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -76,3 +85,45 @@ flutter:
     - assets/core/
     - assets/pharmacy/
     - assets/wellness/
+
+  # Design 2.0: Inter (SIL OFL, assets/fonts/Inter-OFL.txt) — Uzbek ʻ (U+02BB),
+  # Cyrillic (incl. Ўў Ққ Ғғ Ҳҳ). Bundled so it works offline.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+          weight: 800
+
+# Design 2.0 app icon — sources: dart run tool/core/gen_icon.dart,
+# then: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/branding/icon.png"
+  remove_alpha_ios: true
+  min_sdk_android: 24
+  adaptive_icon_background: "assets/branding/icon_background.png"
+  adaptive_icon_foreground: "assets/branding/icon_foreground.png"
+  adaptive_icon_monochrome: "assets/branding/icon_foreground.png"
+
+# Splash: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0FB5AE"
+  image: assets/branding/splash_logo.png
+  color_dark: "#0B1220"
+  image_dark: assets/branding/splash_logo.png
+  android_12:
+    color: "#0FB5AE"
+    image: assets/branding/splash_logo.png
+    icon_background_color: "#0FB5AE"
+    color_dark: "#0B1220"
+    image_dark: assets/branding/splash_logo.png
+    icon_background_color_dark: "#0B1220"
+  web: false

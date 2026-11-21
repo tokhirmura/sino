@@ -119,20 +119,29 @@ class ErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 72,
-              height: 72,
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
-                color: AppColors.danger.withValues(alpha: 0.12),
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.danger.withValues(alpha: 0.18),
+                    AppColors.danger.withValues(alpha: 0.06),
+                  ],
+                ),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.error_outline_rounded,
-                size: 36,
+                size: 40,
                 color: AppColors.danger,
               ),
             ),
-            const SizedBox(height: 16),
-            Text(title, style: text.titleMedium, textAlign: TextAlign.center),
+            const SizedBox(height: 18),
+            Text(
+              title,
+              style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 6),
             Text(
               message,

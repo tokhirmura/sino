@@ -6,6 +6,7 @@ import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/health_index.dart';
 import 'widgets/health_index_card.dart';
@@ -32,7 +33,6 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final index = ref.watch(healthIndexProvider);
     final name = firstName(user.value?.fullName ?? '');
-    final text = Theme.of(context).textTheme;
 
     return AppScaffold(
       title: context.tr(
@@ -40,25 +40,18 @@ class HomeScreen extends ConsumerWidget {
         ru: 'Привет${name.isEmpty ? '' : ', $name'}',
         en: 'Hi${name.isEmpty ? '' : ', $name'}',
       ),
+      subtitle: capitalize(
+        MaterialLocalizations.of(context).formatFullDate(DateTime.now()),
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(currentUserProvider.future),
         child: ListView(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.only(top: 6, bottom: 24),
           children: [
-            Text(
-              capitalize(
-                MaterialLocalizations.of(context)
-                    .formatFullDate(DateTime.now()),
-              ),
-              style: text.bodyMedium?.copyWith(color: text.bodySmall?.color),
-            ),
-            const SizedBox(height: 12),
             index.when(
               skipLoadingOnReload: true,
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: Center(child: CircularProgressIndicator()),
-              ),
+              loading: () =>
+                  const SkeletonLoader(count: 1, kind: SkeletonKind.card),
               error: (e, _) => ErrorView(
                 error: e,
                 onRetry: () => ref.invalidate(currentUserProvider),

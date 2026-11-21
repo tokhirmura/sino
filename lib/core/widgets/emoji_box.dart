@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 /// Emoji on a soft tinted rounded square (circle when [circle] is true).
+/// Design 2.0: a gentle diagonal tint gradient instead of a flat fill.
 class EmojiBox extends StatelessWidget {
   const EmojiBox({
     super.key,
@@ -25,9 +26,16 @@ class EmojiBox extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.22 : 0.14),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: isDark ? 0.30 : 0.20),
+            color.withValues(alpha: isDark ? 0.14 : 0.08),
+          ],
+        ),
         shape: circle ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: circle ? null : BorderRadius.circular(size * 0.3),
+        borderRadius: circle ? null : BorderRadius.circular(size * 0.32),
       ),
       child: Text(
         emoji,

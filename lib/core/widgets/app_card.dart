@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_tokens.dart';
 import 'emoji_box.dart';
+import 'motion.dart';
 
-/// Rounded (20) card with a soft shadow and optional tap.
+/// Rounded (24) card with a soft shadow and optional tap.
+///
+/// Design 2.0: appears with a fade + slide (cascade with its neighbours,
+/// see [CascadeIn]) and springs slightly when pressed (if [onTap] is set).
 ///
 /// The shadow is skipped automatically for translucent [color]s
 /// (it would show through) and when [elevated] is false.
@@ -17,6 +21,8 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.elevated = true,
     this.gradient,
+    this.animate = true,
+    this.borderColor,
   });
 
   final Widget child;
@@ -30,6 +36,12 @@ class AppCard extends StatelessWidget {
   /// Optional background gradient; overrides [color].
   final Gradient? gradient;
 
+  /// Entrance animation (cascade). Turn off for cards that rebuild often.
+  final bool animate;
+
+  /// Optional outline (e.g. a selected state).
+  final Color? borderColor;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -38,8 +50,13 @@ class AppCard extends StatelessWidget {
     final bg = color ?? theme.cardTheme.color ?? theme.colorScheme.surface;
     final opaque = gradient == null && bg.a >= 1;
     final showShadow = elevated && (opaque || gradient != null);
+    final side = borderColor != null
+        ? BorderSide(color: borderColor!, width: 1.6)
+        : isDark && elevated && gradient == null
+        ? BorderSide(color: theme.colorScheme.outlineVariant)
+        : BorderSide.none;
 
-    return DecoratedBox(
+    Widget card = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
         gradient: gradient,
@@ -48,18 +65,15 @@ class AppCard extends StatelessWidget {
       child: Material(
         color: gradient == null ? bg : Colors.transparent,
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: isDark && elevated && gradient == null
-              ? BorderSide(color: theme.colorScheme.outlineVariant)
-              : BorderSide.none,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: radius, side: side),
         child: InkWell(
           onTap: onTap,
           child: Padding(padding: padding, child: child),
         ),
       ),
     );
+    if (onTap != null) card = Pressable(child: card);
+    return animate ? CascadeIn(child: card) : card;
   }
 }
 
@@ -92,16 +106,27 @@ class ShortcutCard extends StatelessWidget {
         trailing ??
         (onTap == null
             ? null
-            : Icon(
-                Icons.chevron_right_rounded,
-                color: theme.colorScheme.onSurfaceVariant,
+            : Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: color.withValues(
+                    alpha: theme.brightness == Brightness.dark ? 0.2 : 0.1,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: AppColors.readable(color, theme.brightness),
+                ),
               ));
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          EmojiBox(emoji: emoji, color: color),
+          EmojiBox(emoji: emoji, color: color, size: 52),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -110,12 +135,14 @@ class ShortcutCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: text.titleMedium,
+                  style: text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle!,
                     style: text.bodySmall,
@@ -126,7 +153,7 @@ class ShortcutCard extends StatelessWidget {
               ],
             ),
           ),
-          if (trail != null) ...[const SizedBox(width: 8), trail],
+          if (trail != null) ...[const SizedBox(width: 10), trail],
         ],
       ),
     );
