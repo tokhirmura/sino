@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +17,12 @@ import '../../../core/widgets/loading_view.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/progress_ring.dart';
 import '../application/plan_generator.dart';
+import '../application/voice_coach.dart';
+import '../application/voice_providers.dart';
 import '../application/workout_run.dart';
 import '../application/workouts_providers.dart';
 import '../data/models.dart';
+import '../data/voice.dart';
 import 'labels.dart';
 
 /// Path of the player for plan day [day] (`PlanDay.day`).
@@ -100,18 +104,28 @@ class _PlayerState extends ConsumerState<_Player> {
   /// Saving of the finished session (`null` until done).
   Future<WorkoutSession?>? _saving;
 
+  late final Speaker _speaker;
+
   @override
   void initState() {
     super.initState();
+    _speaker = ref.read(speakerProvider);
     _timer = Timer.periodic(
       const Duration(seconds: 1),
       (_) => _set(_run.tick()),
     );
+    // The voices are known a moment later: greet once they are.
+    ref.listenManual<VoiceLang?>(activeVoiceProvider, (prev, voice) {
+      if (prev == null && voice != null && _run.phase == RunPhase.ready) {
+        _speaker.say(startCue(_run, voice), voice);
+      }
+    }, fireImmediately: true);
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _speaker.stop();
     super.dispose();
   }
 
@@ -119,6 +133,11 @@ class _PlayerState extends ConsumerState<_Player> {
     if (!mounted) return;
     final before = _run;
     setState(() => _run = next);
+    final voice = ref.read(activeVoiceProvider);
+    if (voice != null) {
+      final say = cues(before, next, voice);
+      if (say.isNotEmpty) _speaker.say(say.join('. '), voice);
+    }
     if (next.phase != before.phase || next.index != before.index) {
       HapticFeedback.mediumImpact();
     }
@@ -220,6 +239,25 @@ class _PlayerState extends ConsumerState<_Player> {
             icon: const Icon(Icons.close_rounded),
             onPressed: () => Navigator.of(context).maybePop(),
           ),
+          actions: [
+            Consumer(
+              builder: (context, ref, _) {
+                final on = ref.watch(activeVoiceProvider) != null;
+                return IconButton(
+                  key: const Key('player-voice'),
+                  tooltip: context.tr(
+                    uz: 'Ovozli murabbiy',
+                    ru: 'Голосовой тренер',
+                    en: 'Voice coach',
+                  ),
+                  icon: Icon(
+                    on ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                  ),
+                  onPressed: () => showVoiceSheet(context),
+                );
+              },
+            ),
+          ],
           bottom: done
               ? null
               : PreferredSize(
@@ -579,7 +617,7 @@ class _Finish extends ConsumerWidget {
       ),
     );
 
-    return ListView(
+    final list = ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
         Center(
@@ -639,11 +677,40 @@ class _Finish extends ConsumerWidget {
               const Key('player-finish-kcal'),
             ),
             const SizedBox(width: 10),
-            stat(
-              '+${run.xp}',
-              'XP',
-              AppColors.violet,
-              const Key('player-finish-xp'),
+            Expanded(
+              child: AppCard(
+                gradient: nothing ? null : AppColors.saffronGradient,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 8,
+                ),
+                child: Column(
+                  children: [
+                    // Counts up to the earned XP.
+                    TweenAnimationBuilder<int>(
+                      tween: IntTween(begin: 0, end: run.xp),
+                      duration: const Duration(milliseconds: 1200),
+                      curve: Curves.easeOutCubic,
+                      builder: (_, v, _) => Text(
+                        '+$v',
+                        key: const Key('player-finish-xp'),
+                        style: text.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: nothing ? AppColors.saffron : Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'XP',
+                      style: text.bodySmall?.copyWith(
+                        color: nothing ? null : Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -718,6 +785,189 @@ class _Finish extends ConsumerWidget {
           style: text.bodySmall,
         ),
       ],
+    );
+    if (nothing) return list;
+    return Stack(
+      children: [
+        list,
+        const Align(alignment: Alignment.topCenter, child: _Celebration()),
+      ],
+    );
+  }
+}
+
+/// A burst of confetti in the brand colors when the finish screen opens.
+class _Celebration extends StatefulWidget {
+  const _Celebration();
+
+  @override
+  State<_Celebration> createState() => _CelebrationState();
+}
+
+class _CelebrationState extends State<_Celebration> {
+  final _c = ConfettiController(duration: const Duration(milliseconds: 1500));
+
+  /// The particles are gone by then; the widget leaves the tree so nothing
+  /// keeps animating.
+  static const _lifetime = Duration(seconds: 4);
+  Timer? _end;
+  bool _visible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _c.play();
+    _end = Timer(_lifetime, () {
+      if (mounted) setState(() => _visible = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _end?.cancel();
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // «Reduce motion» in the system settings — no confetti.
+    if (!_visible || MediaQuery.disableAnimationsOf(context)) {
+      return const SizedBox.shrink();
+    }
+    return IgnorePointer(
+      child: ConfettiWidget(
+        key: const Key('player-confetti'),
+        confettiController: _c,
+        blastDirectionality: BlastDirectionality.explosive,
+        numberOfParticles: 24,
+        emissionFrequency: 0.06,
+        gravity: 0.25,
+        colors: const [
+          AppColors.primary,
+          AppColors.secondary,
+          AppColors.saffron,
+          AppColors.coral,
+          AppColors.violet,
+          AppColors.good,
+        ],
+      ),
+    );
+  }
+}
+
+/// Voice coach setting: auto / a language / off; languages the phone
+/// lacks are marked, «auto» says what it speaks now.
+Future<void> showVoiceSheet(BuildContext context) => showModalBottomSheet<void>(
+  context: context,
+  showDragHandle: true,
+  builder: (context) => const SafeArea(child: _VoiceSheet()),
+);
+
+class _VoiceSheet extends ConsumerWidget {
+  const _VoiceSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = Theme.of(context).textTheme;
+    final choice = ref.watch(voiceChoiceProvider);
+    final langs = ref.watch(voiceLangsProvider);
+    final active = ref.watch(activeVoiceProvider);
+    final available = langs.value ?? const <VoiceLang>{};
+
+    String langName(VoiceLang l) => switch (l) {
+      VoiceLang.uz => 'O‘zbekcha',
+      VoiceLang.ru => 'Русский',
+      VoiceLang.en => 'English',
+    };
+
+    String? missing(VoiceLang l) => langs.hasValue && !available.contains(l)
+        ? context.tr(
+            uz: 'Telefonda bu ovoz yo‘q',
+            ru: 'На телефоне нет этого голоса',
+            en: 'This phone has no such voice',
+          )
+        : null;
+
+    final autoNow = active == null
+        ? context.tr(
+            uz: 'Mos ovoz topilmadi — jim',
+            ru: 'Подходящий голос не найден — без звука',
+            en: 'No suitable voice — silent',
+          )
+        : context.tr(
+            uz: 'Hozir: ${langName(active)}',
+            ru: 'Сейчас: ${langName(active)}',
+            en: 'Now: ${langName(active)}',
+          );
+
+    Widget option(VoiceChoice c, String title, String? subtitle) =>
+        RadioListTile<VoiceChoice>(
+          key: Key('player-voice-${c.name}'),
+          value: c,
+          title: Text(title),
+          subtitle: subtitle == null ? null : Text(subtitle),
+        );
+
+    return RadioGroup<VoiceChoice>(
+      groupValue: choice,
+      onChanged: (c) {
+        if (c != null) ref.read(voiceChoiceProvider.notifier).set(c);
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(
+                context.tr(
+                  uz: 'Ovozli murabbiy',
+                  ru: 'Голосовой тренер',
+                  en: 'Voice coach',
+                ),
+                style: text.titleLarge,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                context.tr(
+                  uz:
+                      'Hisoblaydi («bir, ikki, uch…»), dam olishni va keyingi '
+                      'mashqni aytadi. O‘zbek ovozi bo‘lmasa — rus tilida.',
+                  ru:
+                      'Считает («раз, два, три…»), объявляет отдых и '
+                      'следующее упражнение. Нет узбекского голоса — по-русски.',
+                  en:
+                      'Counts («one, two, three…»), announces rest and the '
+                      'next exercise. No Uzbek voice — Russian.',
+                ),
+                style: text.bodySmall,
+              ),
+            ),
+            const SizedBox(height: 8),
+            option(
+              VoiceChoice.auto,
+              context.tr(uz: 'Avtomatik', ru: 'Автоматически', en: 'Auto'),
+              autoNow,
+            ),
+            for (final l in VoiceLang.values)
+              option(
+                VoiceChoice.values.byName(l.name),
+                langName(l),
+                missing(l),
+              ),
+            option(
+              VoiceChoice.off,
+              context.tr(uz: 'O‘chirilgan', ru: 'Выключен', en: 'Off'),
+              null,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

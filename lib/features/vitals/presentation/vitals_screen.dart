@@ -7,13 +7,17 @@ import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/widgets.dart';
+import '../application/vital_zones.dart';
 import '../application/vitals_math.dart';
+import '../application/vitals_report.dart';
 import '../application/vitals_providers.dart';
 import '../data/models.dart';
 import 'breathing_screen.dart';
 import 'labels.dart';
 import 'widgets/add_vital_sheet.dart';
+import 'vitals_report_screen.dart';
 import 'widgets/bmi_card.dart';
+import 'widgets/steps_card.dart';
 import 'widgets/vital_chart.dart';
 
 /// Vitals: tiles with the latest value of each kind, a 7-day chart of the
@@ -165,6 +169,8 @@ class _Body extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 96),
       children: [
+        const SizedBox(height: AppSpacing.sm),
+        const StepsCard(),
         _SecretHeader(now: now),
         Wrap(
           spacing: 10,
@@ -215,6 +221,24 @@ class _Body extends ConsumerWidget {
                 ),
               const SizedBox(height: 8),
               VitalChart(kind: kind, points: weekSeries(list, kind, now)),
+              if (hasReport(kind)) ...[
+                const SizedBox(height: 4),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    key: const Key('vitals-report'),
+                    onPressed: () => context.push(vitalsReportPath(kind)),
+                    icon: const Icon(Icons.insights_rounded),
+                    label: Text(
+                      context.tr(
+                        uz: '30 kun · Shifokorga yuborish',
+                        ru: '30 дней · Отправить врачу',
+                        en: '30 days · Send to a doctor',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -267,7 +291,9 @@ class _Body extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (kind != VitalKind.weight)
+                        if (zoneOf(v) case final z?)
+                          Pill(zoneText(context, z), color: zoneColor(z))
+                        else if (kind != VitalKind.weight)
                           Pill(
                             statusText(context, kind, v.status),
                             color: statusColor(v.status),

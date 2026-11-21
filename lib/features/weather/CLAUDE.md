@@ -35,16 +35,30 @@
   при AQI > 100, `severe` > 150 — для баннера, карточки и утреннего уведомления; текст — `airAlertText` в `labels.dart`
   («Havo ifloslangan (AQI 156) — bugun uyda mashq qiling», тот же у workouts)
 - `application/weather_providers.dart` — `weatherPlaceProvider` (по умолчанию Toshkent — без запроса геолокации),
-  `weatherReportProvider` (без авто-retry: иначе повторный запрос разрешения; `gps` без координат → кэш `gps` или
-  `LocationUnavailableException`), `todayAqiKey`
+  `weatherReportProvider` — `WeatherReportNotifier` (без авто-retry при ошибке: иначе повторный запрос разрешения;
+  `gps` без координат → кэш `gps` или `LocationUnavailableException`); `refresh({silent})` — заново без состояния
+  загрузки: `silent` (таймер) **не спрашивает разрешение геолокации** (`WeatherLocator.current(ask: false)`) и при
+  ошибке оставляет старый отчёт; ручной — пробрасывает ошибку (экран — SnackBar). `weatherAutoRefresh` = 1 мин,
+  `todayAqiKey`
 - `application/weather_logic.dart` (ещё) — `DayPart` / `dayPartOf(time)` (S2-2): tong 05–10, kun 10–17, kech 17–21, tun
   21–05 по местному времени места; `labels.dart` — `dayPartGradient`, `dayPartText`; цвета AQI — только `AppColors`
-- `presentation/weather_screen.dart` — дизайн 2.0: сверху `_Hero` на `GradientBackdrop` с градиентом по времени суток
+- `presentation/weather_screen.dart` — открытый экран сам обновляется раз в минуту (`Timer.periodic`, в фоне —
+  пауза, при возврате — сразу), «потянуть вниз» / кнопка — сразу и перезапускают отсчёт; дизайн 2.0: сверху `_Hero` на `GradientBackdrop` с градиентом по времени суток
   (метка «Kech», назад, обновить), крупная температура 88, небо, ощущается, влажность/ветер/мин–макс; при AQI > 100
   сразу под ним — красно-шафрановый баннер `weather-air-alert` (`airAlertText`) с кнопкой «Uyda» → вкладка Sport;
   загрузка — `SkeletonLoader`; ниже — чипы «Joylashuvim» + города, баннер «Internet yo‘q — oxirgi saqlangan prognoz
   (N soat oldin)», AQI, советы, 24 часа, 7 дней,
   дисклеймер; `weather_home_card.dart`; `labels.dart`
+- Утреннее уведомление (S2-7): air-quality запрос берёт ещё `hourly=us_aqi` на 2 дня → `WeatherReport.airHours`
+  (`AqiHour`; кэш — `air_hourly`; fake — AQI города на 48 ч). `morningAirAlert(hours, now)` в `weather_logic.dart`:
+  ближайшие 07:30 (сегодня, если ещё впереди, иначе завтра), худший AQI прогноза 07:00–10:00; > 100 → уведомление.
+  `application/air_notify.dart` — `airNotifyProvider` (prefs `weather.air_notify`, по умолчанию вкл.;
+  `weather.air_notify_asked` — разрешение спрошено один раз при первом открытии экрана; `weather.air_notify_last` —
+  что запланировано, ежеминутное обновление плагин не трогает), `sync(report)` вызывается после каждого отчёта
+  (`WeatherReportNotifier._load`), текст `airNotificationText` («Havo ifloslangan (AQI 156)» / «Toshkent: bugun uyda
+  mashq qiling»). `data/air_notifications.dart` — `LocalAirNotifications` (flutter_local_notifications, id
+  2100000001, payload `wellness:air`, канал `sino_wellness`, inexact; зона — flutter_timezone), Noop вне Android/iOS
+  и в тестах. На экране — карточка-переключатель `weather-air-notify` «Ertalabki havo ogohlantirishi» под AQI
 - Тесты: `test/features/weather/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
@@ -61,4 +75,5 @@
   bugun uyda mashq qiling» (uz/ru/en), тесты
 - [x] S2-2 Дизайн 2.0: фон по времени суток (tong, kun, kech, tun), крупная температура, при AQI > 100 — сверху
   красно-жёлтый баннер
-- [ ] S2-7 (если останется время) Утреннее уведомление при высоком AQI, выключается в настройках
+- [x] Доработка после проверки на телефоне: автообновление раз в минуту без запросов, ручное обновление
+- [x] S2-7 Утреннее уведомление при высоком AQI, выключается в настройках

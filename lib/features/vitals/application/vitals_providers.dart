@@ -5,6 +5,7 @@ import '../../../core/storage/prefs.dart';
 import '../data/models.dart';
 import '../data/vitals_repository.dart';
 import 'vitals_math.dart';
+import 'vitals_report.dart';
 
 /// Measurements of one kind for the last 7 days (today included),
 /// newest first — for the charts.
@@ -27,6 +28,20 @@ final vitalsWeekAllProvider = FutureProvider<List<Vital>>((ref) {
   return ref
       .watch(vitalsRepositoryProvider)
       .list(since: DateTime(n.year, n.month, n.day - 6));
+});
+
+/// Measurements of a kind for the report window (30 days, S2-6), newest
+/// first.
+final vitalsReportProvider = FutureProvider.family<List<Vital>, VitalKind>((
+  ref,
+  kind,
+) async {
+  ref.watch(authStateProvider);
+  final now = DateTime.now();
+  final list = await ref
+      .watch(vitalsRepositoryProvider)
+      .list(kind: kind, since: reportStart(now));
+  return reportRows(list, kind, now);
 });
 
 /// The latest measurement of a kind, `null` if none.
@@ -80,6 +95,7 @@ class VitalsActions {
   void _refresh() {
     _ref.invalidate(vitalsWeekProvider);
     _ref.invalidate(vitalsWeekAllProvider);
+    _ref.invalidate(vitalsReportProvider);
   }
 
   Future<Vital> add({

@@ -5,7 +5,13 @@ import 'package:sino/core/routing/app_routes.dart';
 import 'package:sino/features/nutrition/nutrition_feature.dart';
 import 'package:sino/features/nutrition/presentation/nutrition_screen.dart';
 
+import 'package:sino/features/nutrition/presentation/widgets/meal_section.dart';
+
 import '../../helpers/test_app.dart';
+
+/// A dish in the day's meals (the «Dasturxon» buttons show names too).
+Finder _inDiary(String name) =>
+    find.descendant(of: find.byType(MealSection), matching: find.text(name));
 
 void main() {
   test('nutrition exposes its root route', () {
@@ -23,7 +29,7 @@ void main() {
     expect(find.text('Bugun'), findsOneWidget);
     expect(find.text('Nonushta'), findsOneWidget);
     expect(find.text('Tushlik'), findsOneWidget);
-    expect(find.text('Lag‘mon'), findsOneWidget);
+    expect(_inDiary('Lag‘mon'), findsOneWidget);
     expect(find.byKey(const Key('nutrition-kcal-left')), findsOneWidget);
     expect(find.textContaining('Non birligi'), findsOneWidget);
 
@@ -63,6 +69,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Kecha'), findsOneWidget);
     expect(find.text('Palov (osh)'), findsOneWidget); // yesterday's demo
-    expect(find.text('Lag‘mon'), findsNothing);
+    expect(_inDiary('Lag‘mon'), findsNothing);
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
+import '../data/dasturxon.dart';
 import '../data/models.dart';
 
 extension MealLabel on Meal {
@@ -39,9 +40,54 @@ extension MealLabel on Meal {
   };
 }
 
-/// 1 → «1», 1.5 → «1.5».
-String formatServings(double v) =>
-    v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
+/// 1 → «1», 1.5 → «1.5», 0.25 → «0.25» (home measures give quarters).
+String formatServings(double v) => v == v.roundToDouble()
+    ? v.toInt().toString()
+    : (v * 10) == (v * 10).roundToDouble()
+    ? v.toStringAsFixed(1)
+    : v.toStringAsFixed(2);
+
+/// 0.5 → «½», 1.5 → «1½», 2 → «2».
+String countText(double c) {
+  final whole = c.floor();
+  final half = c - whole >= 0.5;
+  if (!half) return '$whole';
+  return whole == 0 ? '½' : '$whole½';
+}
+
+/// «1 kosa», «½ likopcha», «2 dona»; Russian and English agree in number:
+/// «2 миски», «½ тарелки», «2 bowls».
+String measureText(BuildContext context, HomeMeasure m, double count) {
+  final n = countText(count);
+  final one = count == 1;
+  return switch (context.lang) {
+    AppLang.uz =>
+      '$n ${switch (m) {
+        HomeMeasure.kosa => 'kosa',
+        HomeMeasure.likopcha => 'likopcha',
+        HomeMeasure.dona => 'dona',
+        HomeMeasure.piyola => 'piyola',
+        HomeMeasure.choyQoshiq => 'choy qoshiq',
+      }}',
+    // 1 → nominative; ½, 1½, 2–4 → genitive singular (all presets ≤ 4).
+    AppLang.ru =>
+      '$n ${switch (m) {
+        HomeMeasure.kosa => one ? 'миска' : 'миски',
+        HomeMeasure.likopcha => one ? 'тарелка' : 'тарелки',
+        HomeMeasure.dona => 'шт.',
+        HomeMeasure.piyola => one ? 'пиала' : 'пиалы',
+        HomeMeasure.choyQoshiq => 'ч. л.',
+      }}',
+    AppLang.en =>
+      '$n ${switch (m) {
+        HomeMeasure.kosa => count <= 1 ? 'bowl' : 'bowls',
+        HomeMeasure.likopcha => count <= 1 ? 'plate' : 'plates',
+        HomeMeasure.dona => count <= 1 ? 'piece' : 'pieces',
+        HomeMeasure.piyola => count <= 1 ? 'cup' : 'cups',
+        HomeMeasure.choyQoshiq => 'tsp',
+      }}',
+  };
+}
 
 /// «Bugun», «Kecha» or «Pn, 12.11» (year shown if not the current one).
 String dayLabel(BuildContext context, DateTime day, DateTime today) {
