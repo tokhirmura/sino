@@ -58,8 +58,9 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   `waterRemindersProvider` (prefs `nutrition.water_notify`, по умолчанию вкл.; `nutrition.water_notify_asked` —
   разрешение спрошено один раз, когда `WaterCard` показана впервые; `nutrition.water_notify_last` — язык
   запланированного или `off`, пересоздаёт только при изменении), `waterNotificationText`. `data/water_notifications.dart` —
-  `LocalWaterNotifications`: 7 ежедневных (`DateTimeComponents.time`) уведомлений, id `2100000100 + час`, payload
-  `wellness:water`, канал `sino_wellness`; Noop вне Android/iOS и в тестах. В `WaterCard` — колокольчик
+  `LocalWaterNotifications` поверх общего `appNotificationsProvider` (`lib/core/notifications`): 7 ежедневных
+  (`DateTimeComponents.time`, `nextLocalTime`) уведомлений, id `NotificationIds.wellnessBase + 100 + час`, payload
+  `wellness:water`, канал `AppNotificationChannel.wellness`; Noop вне Android/iOS и в тестах выбирает core. В `WaterCard` — колокольчик
   `nutrition-water-notify` (вкл./выкл., SnackBar). ID модуля C ≥ 2 100 000 000 — не пересекаются с `reminders`
   (< 2 000 000 000, payload `reminder:`)
 - `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов

@@ -56,9 +56,9 @@
   `weather.air_notify_asked` — разрешение спрошено один раз при первом открытии экрана; `weather.air_notify_last` —
   что запланировано, ежеминутное обновление плагин не трогает), `sync(report)` вызывается после каждого отчёта
   (`WeatherReportNotifier._load`), текст `airNotificationText` («Havo ifloslangan (AQI 156)» / «Toshkent: bugun uyda
-  mashq qiling»). `data/air_notifications.dart` — `LocalAirNotifications` (flutter_local_notifications, id
-  2100000001, payload `wellness:air`, канал `sino_wellness`, inexact; зона — flutter_timezone), Noop вне Android/iOS
-  и в тестах. На экране — карточка-переключатель `weather-air-notify` «Ertalabki havo ogohlantirishi» под AQI
+  mashq qiling»). `data/air_notifications.dart` — `LocalAirNotifications` поверх общего
+  `appNotificationsProvider` (`lib/core/notifications`): id `NotificationIds.wellnessBase + 1` (2100000001), payload
+  `wellness:air`, канал `AppNotificationChannel.wellness`; Noop вне Android/iOS и в тестах выбирает core. На экране — карточка-переключатель `weather-air-notify` «Ertalabki havo ogohlantirishi» под AQI
 - Тесты: `test/features/weather/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
