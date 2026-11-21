@@ -40,13 +40,9 @@ class _PlanFormState extends State<PlanForm> {
   bool get _badAir => widget.aqi?.isBad ?? false;
 
   PlanParams _initial() {
-    final p = widget.initial;
-    // No plan yet (defaults) or an outdoor sport: pick «at home» for today.
-    if (_badAir && (isOutdoor(p.type) || p == const PlanParams())) {
-      _switchedHome = true;
-      return p.copyWith(type: WorkoutType.home);
-    }
-    return p;
+    final a = adjustForAir(widget.initial, widget.aqi);
+    _switchedHome = a.homeForAir;
+    return a.params;
   }
 
   Future<void> _submit() async {
@@ -227,19 +223,7 @@ class _AirBanner extends StatelessWidget {
                               'outside is not advised — train at home.',
                         )
                       : switchedHome
-                      ? context.tr(
-                          uz:
-                              'Bugun havo sifati yomon (AQI ${aqi.aqi}$place) — '
-                              'generator ochiq havo o‘rniga uyda mashg‘ulotni '
-                              'tanladi.',
-                          ru:
-                              'Сегодня плохой воздух (AQI ${aqi.aqi}$place) — '
-                              'генератор выбрал тренировку дома вместо улицы.',
-                          en:
-                              'Poor air today (AQI ${aqi.aqi}$place) — the '
-                              'generator picked a home workout instead of '
-                              'outdoors.',
-                        )
+                      ? airAlertText(context, aqi.aqi, place: place)
                       : context.tr(
                           uz:
                               'Bugun havo sifati yomon (AQI ${aqi.aqi}$place) — '

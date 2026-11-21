@@ -25,6 +25,33 @@ enum AqiLevel {
 /// Above this AQI outdoor training is not advised (P1-6).
 const outdoorAqiLimit = 100;
 
+/// «Bad air» state (Sprint 2.0, S2-1): one source for the screen banner,
+/// the home card and the morning notification. See [airAlert].
+class AirAlert {
+  const AirAlert(this.aqi);
+
+  final int aqi;
+
+  AqiLevel get level => AqiLevel.of(aqi);
+
+  /// Above 150 the air is unhealthy for everyone, not only sensitive groups.
+  bool get severe => aqi > 150;
+
+  @override
+  bool operator ==(Object other) => other is AirAlert && other.aqi == aqi;
+
+  @override
+  int get hashCode => aqi.hashCode;
+}
+
+/// A warning when AQI is above [outdoorAqiLimit]; `null` for clean air or
+/// an unknown AQI.
+AirAlert? airAlert(int? aqi) =>
+    aqi != null && aqi > outdoorAqiLimit ? AirAlert(aqi) : null;
+
+/// [airAlert] for a report (no air data → no warning).
+AirAlert? reportAirAlert(WeatherReport r) => airAlert(r.air?.aqi);
+
 /// Kind of a piece of advice (the screen maps it to text and an icon).
 enum WeatherTip {
   /// AQI > 150: stay inside, close windows, N95 outside.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/theme/app_colors.dart';
+import '../application/vital_zones.dart';
 import '../application/vitals_math.dart';
 import '../data/models.dart';
 
@@ -113,6 +114,38 @@ String statusText(BuildContext context, VitalKind k, VitalStatus s) =>
             : context.tr(uz: 'Past', ru: 'Низкий', en: 'Low'),
       VitalStatus.high => context.tr(uz: 'Yuqori', ru: 'Высокий', en: 'High'),
     };
+
+/// Zone name: past / me’yor / yuqori me’yor / baland (S2-1).
+String zoneText(BuildContext context, VitalZone z) => switch (z) {
+  VitalZone.low => context.tr(uz: 'Past', ru: 'Пониженное', en: 'Low'),
+  VitalZone.normal => context.tr(uz: 'Me’yor', ru: 'Норма', en: 'Normal'),
+  VitalZone.elevated => context.tr(
+    uz: 'Yuqori me’yor',
+    ru: 'Высокая норма',
+    en: 'High-normal',
+  ),
+  VitalZone.high => context.tr(uz: 'Baland', ru: 'Повышенное', en: 'High'),
+};
+
+Color zoneColor(VitalZone z) => switch (z) {
+  VitalZone.low => AppColors.sky,
+  VitalZone.normal => AppColors.good,
+  VitalZone.elevated => AppColors.saffron,
+  VitalZone.high => AppColors.danger,
+};
+
+/// Shown next to zones: reference information, not a diagnosis.
+String zoneDisclaimer(BuildContext context) => context.tr(
+  uz:
+      'Zonalar — umumiy ma’lumot, tashxis emas. '
+      'Shifokor maslahatini almashtirmaydi.',
+  ru:
+      'Зоны — общая информация, не диагноз. '
+      'Не заменяет консультацию врача.',
+  en:
+      'Zones are general information, not a diagnosis. '
+      'Does not replace a doctor’s advice.',
+);
 
 ({String text, Color color}) bmiText(BuildContext context, BmiLevel l) =>
     switch (l) {

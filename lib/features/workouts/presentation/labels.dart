@@ -117,6 +117,16 @@ String weekdayName(BuildContext context, int weekday) {
   return context.tr(uz: uz[i], ru: ru[i], en: en[i]);
 }
 
+/// Bad-air warning (AQI > 100), the same words as on the weather screen:
+/// «Havo ifloslangan (AQI 156) — bugun uyda mashq qiling». [place] is
+/// appended inside the brackets as given (e.g. `, Toshkent`).
+String airAlertText(BuildContext context, int aqi, {String place = ''}) =>
+    context.tr(
+      uz: 'Havo ifloslangan (AQI $aqi$place) — bugun uyda mashq qiling',
+      ru: 'Воздух загрязнён (AQI $aqi$place) — сегодня тренируйтесь дома',
+      en: 'The air is polluted (AQI $aqi$place) — work out at home today',
+    );
+
 String minUnit(BuildContext context) =>
     context.tr(uz: 'daq', ru: 'мин', en: 'min');
 
