@@ -73,12 +73,13 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - **Бронь** (bottom sheet): для себя / члена семьи, фото рецепта — камера или галерея (обязательно для `rx`,
   иначе по желанию), «Bron qilish · цена». Фото — локальный путь в prefs `pharmacy.rx_photos`
   (`reservation id → path`, `rxPhotosProvider`); пропал файл — заглушка.
-- **Bronlarim**: активные и история, статус вживую; у `pending` — полоса прогресса, при переходе
-  `pending → ready` — snackbar; отмена с подтверждением, «Yo‘nalish» открывает карты.
+- **Bronlarim**: активные и история, статус вживую; у активных — 3 шага `ReservationSteps`, при переходе
+  `pending → ready` — полноэкранный баннер (`ReadyCelebrationHost`); отмена с подтверждением, «Yo‘nalish» — карты.
 - **Dorixonalar**: список (ближние первыми, расстояние, рейтинг) / карта `flutter_map` (тайлы OpenStreetMap —
   нужен интернет; маркеры и список работают офлайн), фильтр 24/7, шторка с «Yo‘nalish».
 - **Сканер**: `mobile_scanner` (EAN-13/8, UPC), фонарик; ввод кода вручную всегда доступен (эмулятор, нет камеры).
-- **Home-карточка**: «Olib ketishga tayyor: N» / «Faol bronlar: N» → «Bronlarim», иначе — вкладка.
+- **Home-карточка**: есть активные брони — `ActiveReservationsCard(dense: true)` с 3 шагами → «Bronlarim»,
+  иначе — «Dori qidirish va bron qilish» → вкладка. Тоже хост баннера готовности.
 
 ## Маршруты
 - `/pharmacy` (`AppRoutes.pharmacy`) — вкладка «Dorixona»
@@ -146,6 +147,68 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - [x] Бронь: для себя / члена семьи, фото рецепта для `rx` (`image_picker`), список броней со статусом вживую
 - [x] `pharmacyHomeCards`: активные брони
 - [x] Тёмная тема и uz/ru/en (проверяет `pharmacy_screens_test.dart`: 3 языка × 2 темы, 320×568, шрифт ×1.3)
+
+**Sprint 2.0 B+**
+- [x] Баг-фиксы лида: контраст бирюзового текста, переполнение на 320×568 / шрифт ×1.3 (светлая и тёмная)
+- [x] Design 2.0: `GradientHeader` + `StatTile` на вкладке, `SkeletonLoader`, `EmptyState` с действием,
+  `PrimaryButton`, каскад карточек, крупный `RxBadge`, пины карты в цветах бренда, выезжающая карточка аптеки
+- [x] «Wow» брони: 3 шага `Qabul qilindi → Tayyorlanmoqda → Tayyor` (карточка брони, баннер вкладки,
+  home-карточка), баннер на весь экран + конфетти + вибрация при `pending → ready`
 - [x] Uy dorixonasi: `home_meds` (миграция, Supabase + Fake), срок с предупреждением за 30 дней, каталог/штрих-код,
   «Qayta buyurtma» → `/pharmacy?q=` (`test/features/pharmacy/home_meds_test.dart`)
+- [x] Передача лиду (этот раздел)
+- Не успели: — (всё из Sprint 2.0 B+ сделано)
+
 - Текст цветом бренда — `colorScheme.primary` или `AppColors.readable(...)`, не голый `AppColors.primary`.
+
+## Для лида (Sprint 2.0 B+, ветка `feat/module-b-v2`)
+
+**Сделано:** см. «Чеклист задач → Sprint 2.0 B+». Всё работает офлайн (fake) и с Supabase; `flutter test` — зелёный.
+
+**Нужно сделать лиду**
+1. `supabase db push` — новая миграция `20261121160000_pharmacy_home_meds.sql` (таблица `home_meds`, RLS,
+   GRANT). Без неё экран «Uy dorixonasi» в Supabase-режиме покажет ошибку с «Qayta urinish» (fake работает).
+2. Если ещё не применена — `20261117120000_pharmacy_seed.sql` (каталоги лекарств, аптек, остатков, врачей).
+
+**Известные ограничения**
+- Фото рецепта хранится **только на устройстве** (`pharmacy.rx_photos`); в БД — флаг `rx_attached`. Для хранения на
+  сервере нужна core-миграция (Storage-бакет + политики).
+- Статус брони в Supabase двигает «аптека» — панели аптеки нет, для демо меняйте статус SQL-запросом (ниже).
+  RLS `reservations_own` разрешает пользователю `update` своих строк целиком — приложение меняет только на
+  `cancelled`, но строгая защита статуса потребует триггер/политику (core-миграция).
+- Баннер «Bron tayyor!» показывается, только если в момент перехода открыт один из хостов: вкладка «Dorixona»,
+  «Bronlarim» или главная (home-карточка аптеки). Если приложение было свёрнуто — статус обновится, баннера не будет.
+- Остатки в аптеках при брони не уменьшаются (каталог — только select). Тайлы карты — из интернета (OSM);
+  маркеры и список работают офлайн.
+- Конфетти отключается при системном «уменьшить движение»; вибрация — только на реальном устройстве.
+- Тесты: `confetti` не завершается под тестовыми часами — закрывайте баннер («Ajoyib!») до `pumpAndSettle`.
+- Тест module C `workout_player_test.dart` тапает карточку тренировок на главной без прокрутки; карточка аптеки
+  на главной сделана компактной (`dense`), чтобы его не сдвинуть. Стоит добавить там `ensureVisible`.
+
+**Демо жюри: живая бронь → «Tayyor» + конфетти + 3 шага**
+
+*Вариант A — офлайн (рекомендуем, не зависит от сети):* fake-аптека сама переводит бронь в `ready` через 20 с.
+1. Реальный Android/iOS (ради вибрации), в системе выключено «уменьшить движение / убрать анимации».
+2. Чистое демо: удалить приложение или «Очистить данные», затем `flutter run --release --dart-define=USE_FAKE=true`.
+   Демо-данные создаются сами при первом запуске из `assets/pharmacy/fake_pharmacy.json`: Ibuprofen в «Shifo» —
+   уже `ready`, Amlodipin — выдан, 5 домашних лекарств (Smekta — просрочена, Ibuprofen — 18 дней).
+3. Пройти анкету (любые данные; главная цель меняет порядок карточек на главной — карточка «Dorixona» может
+   оказаться ниже) → вкладка «Dorixona».
+4. Поиск «Paracetamol» (без рецепта — фото не нужно) → лекарство → любая аптека из «Dorixonalardagi narxlar» → «Bron qilish · …».
+   **Не берите Ibuprofen в «Shifo»** — там уже активная бронь (ошибка «Bu dori shu dorixonada allaqachon bron qilingan»).
+5. Сразу видно: в баннере вкладки 3 шага — «Qabul qilindi ✓ → Tayyorlanmoqda … → Tayyor».
+   Можно показать то же в «Bronlarim» и на главной (карточка «Dorixona»).
+6. **Оставайтесь** на вкладке «Dorixona», в «Bronlarim» или на главной. Через ~20 с: вибрация, баннер на весь экран
+   «Bron tayyor! 🎉», конфетти, шаги «Tayyor». «Yo‘nalish» открывает карты, «Ajoyib!» — закрыть.
+7. Повтор: отменить бронь в «Bronlarim» и забронировать снова (или другое лекарство/аптеку).
+8. Бонус «Uy dorixonasi»: вкладка «Dorixona» → карточка «Uy dorixonasi» → у Smekta «Muddati o‘tgan» →
+   «Buyurtma berish» → поиск аптеки с готовым запросом.
+
+*Вариант B — с Supabase (realtime):* нужен вход в аккаунт, применённые seed-миграции и интернет.
+1. `flutter run --release --dart-define-from-file=env.json`, войти, забронировать Paracetamol, остаться на вкладке.
+2. В Supabase Dashboard → SQL Editor (за кулисами):
+   ```sql
+   update public.reservations set status = 'ready'
+   where status = 'pending' and created_at > now() - interval '10 minutes';
+   ```
+3. Realtime доставит изменение за ~1 с → баннер, конфетти, вибрация, шаги «Tayyor».
