@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../application/vital_zones.dart';
 import '../../application/vitals_math.dart';
 import '../../data/models.dart';
 import '../labels.dart';
@@ -183,15 +184,28 @@ class VitalChart extends StatelessWidget {
                 FlLine(color: grid, strokeWidth: 1),
           ),
           rangeAnnotations: RangeAnnotations(
-            horizontalRangeAnnotations: [
-              ...band,
-              if (kind.low2 != null && kind.high2 != null)
-                HorizontalRangeAnnotation(
-                  y1: kind.low2!,
-                  y2: kind.high2!,
-                  color: AppColors.sky.withValues(alpha: 0.08),
-                ),
-            ],
+            // Glucose: colored zones (S2-6). Pressure keeps the two
+            // neutral ranges — one set of zones can't fit both lines; its
+            // zones are on the 30-day report, one chart per value.
+            horizontalRangeAnnotations: kind == VitalKind.glucose
+                ? [
+                    for (final b in chartBands(kind))
+                      if ((b.to ?? maxY) > minY && (b.from ?? minY) < maxY)
+                        HorizontalRangeAnnotation(
+                          y1: math.max(b.from ?? minY, minY),
+                          y2: math.min(b.to ?? maxY, maxY),
+                          color: zoneColor(b.zone).withValues(alpha: 0.14),
+                        ),
+                  ]
+                : [
+                    ...band,
+                    if (kind.low2 != null && kind.high2 != null)
+                      HorizontalRangeAnnotation(
+                        y1: kind.low2!,
+                        y2: kind.high2!,
+                        color: AppColors.sky.withValues(alpha: 0.08),
+                      ),
+                  ],
           ),
           lineTouchData: const LineTouchData(enabled: false),
           lineBarsData: [

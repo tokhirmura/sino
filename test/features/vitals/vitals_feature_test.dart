@@ -105,7 +105,8 @@ void main() {
     await tester.tap(find.byKey(const Key('vitals-add-save')));
     await tester.pumpAndSettle();
     expect(_rich(tester, 'vitals-tile-value-pressure'), '120/95 mm sim. ust.');
-    expect(find.text('Yuqori'), findsWidgets); // 95 diastolic is high
+    // 95 diastolic: zone «Baland» (S2-6 zones replace «Yuqori» here).
+    expect(find.text('Baland'), findsWidgets);
 
     // Remove the newest pressure → previous one; «Qaytarish» brings it back.
     final newest = (await c.read(vitalsWeekAllProvider.future))

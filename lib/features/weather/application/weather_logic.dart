@@ -52,6 +52,44 @@ AirAlert? airAlert(int? aqi) =>
 /// [airAlert] for a report (no air data → no warning).
 AirAlert? reportAirAlert(WeatherReport r) => airAlert(r.air?.aqi);
 
+/// Morning air notification (S2-7): at [morningAlertHour]:[morningAlertMinute]
+/// if the forecast AQI between [morningWindowFrom] and [morningWindowTo]
+/// o'clock is above [outdoorAqiLimit].
+const morningAlertHour = 7;
+const morningAlertMinute = 30;
+const morningWindowFrom = 7;
+const morningWindowTo = 10;
+
+/// The next morning notification after [now]: today's 07:30 if it is still
+/// ahead, else tomorrow's; the worst forecast AQI of that morning's window.
+/// `null` — clean air or no forecast for that morning.
+({DateTime at, int aqi})? morningAirAlert(List<AqiHour> hours, DateTime now) {
+  var at = DateTime(
+    now.year,
+    now.month,
+    now.day,
+    morningAlertHour,
+    morningAlertMinute,
+  );
+  if (!at.isAfter(now)) {
+    at = DateTime(
+      now.year,
+      now.month,
+      now.day + 1,
+      morningAlertHour,
+      morningAlertMinute,
+    );
+  }
+  int? worst;
+  for (final h in hours) {
+    final t = h.time;
+    if (t.year != at.year || t.month != at.month || t.day != at.day) continue;
+    if (t.hour < morningWindowFrom || t.hour >= morningWindowTo) continue;
+    if (worst == null || h.aqi > worst) worst = h.aqi;
+  }
+  return airAlert(worst) == null ? null : (at: at, aqi: worst!);
+}
+
 /// Part of the day for the screen background (Sprint 2.0, S2-2):
 /// tong 05–10, kun 10–17, kech 17–21, tun 21–05 (local time of the place).
 enum DayPart { morning, day, evening, night }

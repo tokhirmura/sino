@@ -9,10 +9,12 @@
 ## Маршруты
 - `/vitals` (`AppRoutes.vitals`) — полноэкранный
 - `/vitals/breathing` (`vitalsBreathingPath`) — дыхание 4-7-8
+- `/vitals/report/:kind` (`vitalsReportPath(kind)`, `pressure` | `glucose`) — отчёт за 30 дней и «Shifokorga yuborish»
 
 ## Home-карточки
 - `vitals`, order 70 — `VitalsHomeCard`: «❤️ 71   🩺 118/76», «Me’yorda · Bugun 08:30» / красным «Me’yordan
   tashqarida»; без пульса и давления — приглашение внести первое измерение
+- `steps`, order 72 — `StepsHomeCard` (S2-3): кольцо, «N / 8000», статус; тап → `/vitals`
 - `breathing`, order 75 — «🌬️ 4-7-8 nafas mashqi» → `/vitals/breathing`
 
 ## Таблицы БД
@@ -48,6 +50,42 @@
 - `presentation/breathing_screen.dart` — градиентный фон (`AppColors.brandGradientDark`, свечение — `primary`), светящийся круг (`Ticker`, плавно), большое число, фаза и
   подсказка, точки циклов, пауза / стоп, финал «Barakalla!» и «Yana bir bor», вибро-отклик на смену фазы; круг ≤ 38 %
   высоты — «Boshlash» видна на маленьком телефоне; вход — карточка на `/vitals` и на главной
+- Шаги (S2-3):
+  - `data/step_sensor.dart` — `StepSensor` (`counts()` — накопленные шаги с перезагрузки, `openSettings()`),
+    `PedometerStepSensor` (`pedometer`; одинаково в fake и Supabase — это железо), `FakeStepSensor` для тестов,
+    `StepSensorUnavailable` (нет датчика / эмулятор). iOS сам спрашивает Motion (`NSMotionUsageDescription` есть).
+    **Android 10+**: `ACTIVITY_RECOGNITION` в манифесте есть, но запросить его из Dart без `permission_handler` нельзя
+    (пакета нет в pubspec — попросили лида). Пока: без разрешения Android молчит → через 5 с статус `silent` и кнопка
+    «Ruxsat berish» → `Geolocator.openAppSettings()`; при возврате в приложение — `restart()`
+  - `application/steps.dart` — без Flutter: `StepsDay` (день, baseline, last, carried; JSON в prefs), `applyStepCount`
+    (первое чтение дня = 0, перезагрузка телефона — сумма сохраняется, новый день — вчера `finished`), `shouldSaveSteps`
+    (раз в 5 мин или +500 шагов), `stepsGoal` = 8000, ~км (0.75 м/шаг), ~ккал (0.04/шаг)
+  - `application/steps_providers.dart` — `stepsProvider` (`StepsNotifier` → `StepsView` starting / counting / silent /
+    unavailable + шаги): prefs `vitals.steps_day`; итог дня → `vitals` kind `steps`, **одна строка на день**,
+    обновляется на месте (`VitalsRepository.update`; удалена пользователем — новая), prefs `vitals.steps_row`;
+    закончившийся день — `measured_at` 23:59; офлайн / не вошёл — тихо пропускает; `flush()` при уходе в фон
+  - `presentation/widgets/steps_card.dart` — `StepsCard` (вверху `/vitals`: `AnimatedProgressRing` с плавным числом,
+    ~км/~ккал, «Maqsadgacha N qadam» / «Maqsad bajarildi! 🎉», подсказки silent/unavailable) и `StepsHomeCard`;
+    оба слушают жизненный цикл (фон → `flush`, возврат → `restart`)
+- Давление и сахар 2.0 (S2-6):
+  - `application/vitals_report.dart` — без Flutter: `reportDays` = 30, `reportStart`, `reportRows` (вид, окно, новые
+    сверху), `reportX` (день + доля суток), `summarize` → `ReportSummary` (количество, по зонам, среднее, ср. нижнее,
+    мин/макс, доля «me’yor»); `hasReport(kind)`
+  - `vitalsReportProvider(kind)` — 30 дней одним запросом; `VitalsActions` инвалидирует и его
+  - `presentation/widgets/zone_chart.dart` — `ZoneChart` (fl_chart: каждая точка — день+время, полосы зон
+    `zoneColor` 16 %), **давление — два графика** (верхнее по `systolicBands`, нижнее по `diastolicBands`: на одном
+    нормальное нижнее 76 попало бы в «Past» верхнего), `ZoneLegend` («Yuqori me’yor 130–139»), `bandText`
+  - `presentation/vitals_report_screen.dart` — `VitalsReportScreen`: `ReportBody` (StatTile среднее / % в норме /
+    «Baland», графики с легендой, таблица дата · значение · зона-пилюля, `zoneDisclaimer`), `PrimaryButton`
+    «Shifokorga yuborish»; пусто — `EmptyState`. `reportShareText` — сводка для текста сообщения
+  - `presentation/widgets/report_share.dart` — `captureReport`: тот же `ReportBody(forImage: true)` (заголовок
+    «Sino · Qon bosimi», ФИО, период) рисуется **вне экрана целиком** (`screenshot.captureFromLongWidget`, 420 px ×2.5,
+    `disableAnimations` — иначе CascadeIn снимается прозрачным), `shareReport` — `share_plus` (PNG + текст,
+    `sharePositionOrigin` для iPad); оба через провайдеры (`reportCaptureProvider`, `reportShareProvider`) — тесты
+    подменяют
+  - экран `/vitals`: у давления/сахара под графиком — «30 kun · Shifokorga yuborish»; в списке измерений — пилюля
+    зоны; на 7-дневном графике сахара — цветные зоны (давление — прежние нейтральные полосы)
+- `data/vitals_repository.dart` (ещё) — `update(id, value:, measuredAt:)` → `false`, если строки нет
 - `presentation/vitals_home_card.dart`, `presentation/labels.dart`
 - Тесты: `test/features/vitals/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
@@ -65,7 +103,7 @@
 - [x] S2-1 Зоны давления и сахара: past / me’yor / yuqori me’yor / baland (общая информация, не диагноз) — функции
   расчёта, полосы зон для графика, тесты
 - [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
-- [ ] S2-3 Шаги: `pedometer` — реальные шаги за сегодня, цель 8000, кольцо; итог дня → `vitals` (kind = 'steps',
+- [x] S2-3 Шаги: `pedometer` — реальные шаги за сегодня, цель 8000, кольцо; итог дня → `vitals` (kind = 'steps',
   лид берёт в индекс Sino); запрос разрешения, понятный текст при отказе; проверить на телефоне (эмулятор не считает)
-- [ ] S2-6 Давление и сахар 2.0: цветные зоны на графике, последние 30 дней, «Shifokorga yuborish» — скриншот графика
+- [x] S2-6 Давление и сахар 2.0: цветные зоны на графике, последние 30 дней, «Shifokorga yuborish» — скриншот графика
   и таблицы через `share_plus`, дисклеймер «Shifokor maslahatini almashtirmaydi»
