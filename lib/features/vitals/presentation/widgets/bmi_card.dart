@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../application/vitals_math.dart';
 import '../labels.dart';
@@ -197,7 +198,7 @@ class _Scale extends StatelessWidget {
               top: 5,
               bottom: 5,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(99),
+                borderRadius: BorderRadius.circular(AppRadius.chip),
                 child: Row(
                   children: [
                     for (final z in zones)

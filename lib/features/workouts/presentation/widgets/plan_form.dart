@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../../application/air_quality.dart';
 import '../../application/plan_generator.dart';
 import '../../data/models.dart';
@@ -40,13 +41,9 @@ class _PlanFormState extends State<PlanForm> {
   bool get _badAir => widget.aqi?.isBad ?? false;
 
   PlanParams _initial() {
-    final p = widget.initial;
-    // No plan yet (defaults) or an outdoor sport: pick «at home» for today.
-    if (_badAir && (isOutdoor(p.type) || p == const PlanParams())) {
-      _switchedHome = true;
-      return p.copyWith(type: WorkoutType.home);
-    }
-    return p;
+    final a = adjustForAir(widget.initial, widget.aqi);
+    _switchedHome = a.homeForAir;
+    return a.params;
   }
 
   Future<void> _submit() async {
@@ -130,21 +127,15 @@ class _PlanFormState extends State<PlanForm> {
           ],
         ),
         const SizedBox(height: 20),
-        FilledButton.icon(
+        PrimaryButton(
           key: const Key('workouts-generate'),
+          loading: _busy,
           onPressed: _busy ? null : _submit,
-          icon: _busy
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.auto_awesome_rounded),
-          label: Text(
-            context.tr(
-              uz: 'Reja tuzish',
-              ru: 'Составить план',
-              en: 'Build plan',
-            ),
+          icon: Icons.auto_awesome_rounded,
+          label: context.tr(
+            uz: 'Reja tuzish',
+            ru: 'Составить план',
+            en: 'Build plan',
           ),
         ),
       ],
@@ -197,7 +188,7 @@ class _AirBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final place = aqi.place.isEmpty ? '' : ', ${context.trMap(aqi.place)}';
-    final color = outdoor ? AppColors.danger : const Color(0xFFF97316);
+    final color = outdoor ? AppColors.danger : AppColors.saffron;
     return AppCard(
       key: const Key('workouts-air-banner'),
       elevated: false,
@@ -227,19 +218,7 @@ class _AirBanner extends StatelessWidget {
                               'outside is not advised — train at home.',
                         )
                       : switchedHome
-                      ? context.tr(
-                          uz:
-                              'Bugun havo sifati yomon (AQI ${aqi.aqi}$place) — '
-                              'generator ochiq havo o‘rniga uyda mashg‘ulotni '
-                              'tanladi.',
-                          ru:
-                              'Сегодня плохой воздух (AQI ${aqi.aqi}$place) — '
-                              'генератор выбрал тренировку дома вместо улицы.',
-                          en:
-                              'Poor air today (AQI ${aqi.aqi}$place) — the '
-                              'generator picked a home workout instead of '
-                              'outdoors.',
-                        )
+                      ? airAlertText(context, aqi.aqi, place: place)
                       : context.tr(
                           uz:
                               'Bugun havo sifati yomon (AQI ${aqi.aqi}$place) — '

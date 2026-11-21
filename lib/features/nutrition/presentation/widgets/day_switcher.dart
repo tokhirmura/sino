@@ -7,7 +7,10 @@ import '../labels.dart';
 
 /// ‹ Bugun › — previous / next day, tap the label to pick a date.
 class DaySwitcher extends ConsumerWidget {
-  const DaySwitcher({super.key});
+  const DaySwitcher({super.key, this.onDark = false});
+
+  /// White arrows and label for a gradient header.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,9 +24,10 @@ class DaySwitcher extends ConsumerWidget {
     );
     final isToday = !day.isBefore(today);
     final isFirst = !day.isAfter(first);
-    final theme = Theme.of(context);
+    final base = Theme.of(context);
+    final theme = onDark ? _onDarkTheme(base) : base;
 
-    return Row(
+    final row = Row(
       children: [
         IconButton(
           tooltip: context.tr(
@@ -67,6 +71,23 @@ class DaySwitcher extends ConsumerWidget {
           icon: const Icon(Icons.chevron_right_rounded),
         ),
       ],
+    );
+    return onDark ? Theme(data: theme, child: row) : row;
+  }
+
+  static ThemeData _onDarkTheme(ThemeData base) {
+    const white = Colors.white;
+    return base.copyWith(
+      colorScheme: base.colorScheme.copyWith(
+        primary: white,
+        onSurface: white,
+        onSurfaceVariant: white,
+      ),
+      iconTheme: const IconThemeData(color: white),
+      textTheme: base.textTheme.apply(bodyColor: white, displayColor: white),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: white),
+      ),
     );
   }
 }

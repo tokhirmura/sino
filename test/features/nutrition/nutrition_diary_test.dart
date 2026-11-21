@@ -12,8 +12,11 @@ import 'package:sino/features/nutrition/data/nutrition_repository.dart';
 
 /// Fake repo whose writes wait for [gate] and fail when [fail] is set —
 /// to see the optimistic state and the rollback.
+///
+/// "Today" is pinned: the demo diary covers today and the 6 days before, so
+/// the test day ([_testDay]) must stay outside it whatever the real date is.
 class _GatedRepo extends FakeNutritionRepository {
-  _GatedRepo(super.prefs);
+  _GatedRepo(super.prefs) : super(now: _demoToday);
 
   Completer<void> gate = Completer<void>()..complete();
   bool fail = false;
@@ -68,6 +71,12 @@ class _GatedRepo extends FakeNutritionRepository {
   }
 }
 
+/// Fake "today" of the repo: demo logs are on 2026-11-08 … 2026-11-14.
+final _demoToday = DateTime(2026, 11, 14);
+
+/// Day the provider tests write to — after the demo week, so it starts empty.
+final _testDay = DateTime(2026, 11, 20);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -106,7 +115,7 @@ void main() {
   group('providers', () {
     late ProviderContainer container;
     late _GatedRepo repo;
-    final day = DateTime(2026, 11, 20);
+    final day = _testDay;
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});

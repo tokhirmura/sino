@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models.dart';
+import 'plan_generator.dart';
 
 /// Today's air quality as the weather feature saved it (P1-6).
 ///
@@ -49,3 +50,22 @@ TodayAqi? readTodayAqi(SharedPreferences prefs, DateTime now) {
 
 /// Sports done outside (bad air matters).
 bool isOutdoor(WorkoutType t) => t == WorkoutType.run;
+
+/// Generator inputs adjusted for today's air (Sprint 2.0, S2-1).
+///
+/// With a bad AQI ([TodayAqi.isBad]) an outdoor sport or untouched defaults
+/// become «at home», and [homeForAir] tells the form to say the generator
+/// chose it. Indoor sports the user picked (gym, yoga, …) stay as they are.
+/// Applied once to the form's starting values, so a later tap on «run» is
+/// the user's own choice and is not overridden.
+({PlanParams params, bool homeForAir}) adjustForAir(
+  PlanParams params,
+  TodayAqi? aqi,
+) {
+  final outdoorOrDefault =
+      isOutdoor(params.type) || params == const PlanParams();
+  if (aqi == null || !aqi.isBad || !outdoorOrDefault) {
+    return (params: params, homeForAir: false);
+  }
+  return (params: params.copyWith(type: WorkoutType.home), homeForAir: true);
+}

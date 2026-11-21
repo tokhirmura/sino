@@ -27,8 +27,9 @@ void main() {
     expect(find.byKey(const Key('nutrition-kcal-left')), findsOneWidget);
     expect(find.textContaining('Non birligi'), findsOneWidget);
 
+    // Built off-screen already (cache extent): scroll until it can be tapped.
     await tester.scrollUntilVisible(
-      find.byKey(const Key('nutrition-water-plus')),
+      find.byKey(const Key('nutrition-water-plus')).hitTestable(),
       200,
     );
     expect(find.text('3 / 8'), findsOneWidget);

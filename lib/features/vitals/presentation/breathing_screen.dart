@@ -4,14 +4,28 @@ import 'package:flutter/services.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/theme/app_colors.dart';
 import '../application/breathing.dart';
 
 /// Path of the breathing exercise (a sub-route of `/vitals`).
 const vitalsBreathingPath = '${AppRoutes.vitals}/breathing';
 
-const _bgTop = Color(0xFF0F3D3E);
-const _bgBottom = Color(0xFF312E81);
-const _glow = Color(0xFF5EEAD4);
+/// Night version of the brand gradient, top → bottom.
+final _bg = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: AppColors.brandGradientDark.colors,
+);
+const _glow = AppColors.primary;
+const _onWhite = AppColors.secondary;
+
+/// Light core of the circle → turquoise rim.
+final _core = RadialGradient(
+  colors: [
+    Color.lerp(Colors.white, AppColors.primary, 0.45)!,
+    AppColors.primary,
+  ],
+);
 
 /// 4-7-8 breathing: the circle grows for 4 s (inhale), stays for 7 s
 /// (hold), shrinks for 8 s (exhale); 4–8 cycles.
@@ -106,13 +120,7 @@ class _BreathingScreenState extends State<BreathingScreen>
         ),
       ),
       body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_bgTop, _bgBottom],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: _bg),
         child: SafeArea(
           child: DefaultTextStyle.merge(
             style: const TextStyle(color: Colors.white),
@@ -192,7 +200,7 @@ class _BreathingScreenState extends State<BreathingScreen>
           key: const Key('breath-start'),
           style: FilledButton.styleFrom(
             backgroundColor: Colors.white,
-            foregroundColor: _bgBottom,
+            foregroundColor: _onWhite,
             minimumSize: const Size(200, 52),
           ),
           onPressed: _start,
@@ -388,7 +396,7 @@ class _BreathingScreenState extends State<BreathingScreen>
         key: const Key('breath-again'),
         style: FilledButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: _bgBottom,
+          foregroundColor: _onWhite,
           minimumSize: const Size(200, 52),
         ),
         onPressed: _start,
@@ -454,9 +462,7 @@ class _Circle extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const RadialGradient(
-                  colors: [Color(0xFF99F6E4), Color(0xFF14B8A6)],
-                ),
+                gradient: _core,
                 boxShadow: [
                   BoxShadow(
                     color: _glow.withValues(alpha: holding ? 0.7 : 0.4),
