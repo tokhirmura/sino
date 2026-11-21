@@ -26,6 +26,14 @@ abstract final class AppRoutes {
   /// Weekly report (home feature, full-screen).
   static const report = '/report';
 
+  /// Family care: today's medicines, visits and reservations of every
+  /// family member (family feature, full-screen).
+  static const family = '/family';
+
+  /// Family member form (profile feature): new / edit.
+  static const familyMemberNew = '/profile/family/new';
+  static String familyMember(String id) => '/profile/family/$id';
+
   /// First-run questionnaire; the router forces it while the profile is empty.
   static const profileSetup = '/profile-setup';
 

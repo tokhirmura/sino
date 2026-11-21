@@ -251,10 +251,21 @@ void main() {
     await tester.tap(find.text('Jasur, $age'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).first, 'Jasurbek');
+    // Phone for «Qoʻngʻiroq qilish» on /family: checked, then saved.
+    final phone = find.byKey(const ValueKey('member-phone'));
+    await tester.enterText(phone, '12');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Saqlash'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Saqlash'));
+    await tester.pumpAndSettle();
+    expect(find.text('Telefon raqami noto‘g‘ri'), findsOneWidget);
+    await tester.enterText(phone, '+998 97 111 22 33');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Saqlash'));
     await tester.tap(find.widgetWithText(FilledButton, 'Saqlash'));
     await tester.pumpAndSettle();
     expect(find.text('Jasurbek, $age'), findsOneWidget);
     expect(family(), hasLength(4));
+    expect(family().last.phone, '+998 97 111 22 33');
+    expect(family().last.dialable, '+998971112233');
 
     // Delete
     await tester.tap(find.text('Jasurbek, $age'));
@@ -340,7 +351,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
     }
     expect(
-      find.text('Yuklandi: oila — 3, tibbiy karta — 8, tahlillar — 7.'),
+      find.text(
+        'Yuklandi: oila — 3, tibbiy karta — 8, tahlillar — 7, '
+        'oila dorilari — 2.',
+      ),
       findsOneWidget,
     );
   });

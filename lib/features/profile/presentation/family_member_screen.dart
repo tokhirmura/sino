@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -150,6 +151,7 @@ class _MemberFormState extends ConsumerState<_MemberForm> {
   late final _allergies = TextEditingController(
     text: widget.member?.allergies.join(', ') ?? '',
   );
+  late final _phone = TextEditingController(text: widget.member?.phone ?? '');
   late String? _relation = widget.member?.relation;
   late String? _bloodType = widget.member?.bloodType;
   bool _saving = false;
@@ -160,6 +162,7 @@ class _MemberFormState extends ConsumerState<_MemberForm> {
     _name.dispose();
     _year.dispose();
     _allergies.dispose();
+    _phone.dispose();
     super.dispose();
   }
 
@@ -177,6 +180,7 @@ class _MemberFormState extends ConsumerState<_MemberForm> {
       birthYear: year.isEmpty ? null : int.parse(year),
       bloodType: _bloodType,
       allergies: parseAllergies(_allergies.text),
+      phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
     );
     final repo = ref.read(familyRepositoryProvider);
     try {
@@ -248,6 +252,40 @@ class _MemberFormState extends ConsumerState<_MemberForm> {
               prefixIcon: const Icon(Icons.cake_outlined),
             ),
             validator: (v) => validateBirthYear(context, v, required: false),
+          ),
+          gap,
+          TextFormField(
+            key: const ValueKey('member-phone'),
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ()-]')),
+            ],
+            decoration: InputDecoration(
+              labelText: context.tr(
+                uz: 'Telefon (ixtiyoriy)',
+                ru: 'Телефон (необязательно)',
+                en: 'Phone (optional)',
+              ),
+              hintText: '+998 90 123 45 67',
+              helperText: context.tr(
+                uz: 'Dori ichilmasa, «Oila» ekranidan qo‘ng‘iroq qilasiz',
+                ru: 'Если лекарство пропущено — позвоните с экрана «Семья»',
+                en: 'Call from the Family screen when a dose is missed',
+              ),
+              prefixIcon: const Icon(Icons.phone_outlined),
+            ),
+            validator: (v) {
+              final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+              return digits.isEmpty ||
+                      (digits.length >= 7 && digits.length <= 15)
+                  ? null
+                  : context.tr(
+                      uz: 'Telefon raqami noto‘g‘ri',
+                      ru: 'Неверный номер телефона',
+                      en: 'Invalid phone number',
+                    );
+            },
           ),
           gap,
           BloodTypeField(

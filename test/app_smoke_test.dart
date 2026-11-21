@@ -66,10 +66,10 @@ void main() {
     final orders = [for (final c in allHomeCards) c.order];
     expect(orders, [...orders]..sort());
     expect(tabBranchRoutes, hasLength(5));
-    expect(allRoutes, hasLength(14));
+    expect(allRoutes, hasLength(15));
     expect([
       for (final r in allRoutes.whereType<GoRoute>()) r.path,
-    ], contains(AppRoutes.report));
+    ], containsAll([AppRoutes.report, AppRoutes.family]));
   });
 
   test('text on brand buttons is readable in both themes (WCAG AA)', () {

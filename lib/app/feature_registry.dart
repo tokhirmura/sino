@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/contracts/home_card.dart';
 import '../features/assistant/assistant_feature.dart';
 import '../features/doctors/doctors_feature.dart';
+import '../features/family/family_feature.dart';
 import '../features/home/home_feature.dart';
 import '../features/nutrition/nutrition_feature.dart';
 import '../features/onboarding/onboarding_feature.dart';
@@ -29,6 +30,7 @@ final List<List<RouteBase>> tabBranchRoutes = [
 final List<RouteBase> fullscreenRoutes = [
   ...homeFullscreenRoutes,
   ...onboardingRoutes,
+  ...familyRoutes,
   ...sosRoutes,
   ...assistantRoutes,
   ...remindersRoutes,
@@ -46,6 +48,7 @@ final List<HomeCardSpec> allHomeCards = [
   ...homeHomeCards,
   ...onboardingHomeCards,
   ...profileHomeCards,
+  ...familyHomeCards,
   ...sosHomeCards,
   ...assistantHomeCards,
   ...pharmacyHomeCards,

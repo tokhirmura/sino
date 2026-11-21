@@ -8,6 +8,7 @@ import 'package:sino/app/app.dart';
 import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/features/assistant/presentation/assistant_screen.dart';
+import 'package:sino/features/family/presentation/family_screen.dart';
 import 'package:sino/features/home/presentation/home_screen.dart';
 import 'package:sino/features/home/presentation/report_screen.dart';
 import 'package:sino/features/onboarding/presentation/profile_setup_screen.dart';
@@ -55,6 +56,7 @@ final _screens = <String, (Widget Function(), {bool data})>{
   'medical records': (() => const MedicalRecordsScreen(), data: true),
   'lab results': (() => const LabResultsScreen(), data: false),
   'doctor qr': (() => const DoctorQrScreen(), data: false),
+  'family': (() => const FamilyScreen(), data: false),
   'achievements': (() => const AchievementsScreen(), data: false),
   'sos': (() => const SosScreen(), data: false),
   'assistant': (() => const AssistantScreen(), data: false),

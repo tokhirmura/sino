@@ -1,7 +1,16 @@
 {
+  "family_care": {
+    "_comment": "«Oila» demo (dev button): mother's two medicines — one marked, one missed (minutes_ago = relative to now); father's doctor visit; mother's ready reservation. Seeded only while the family has no reminders.",
+    "reminders": [
+      { "relation": "ona", "name": "Metformin", "dose": "500 mg, 1 tabletka", "minutes_ago": 240, "taken": true },
+      { "relation": "ona", "name": "Lozartan", "dose": "50 mg, 1 tabletka", "minutes_ago": 95, "taken": false }
+    ],
+    "visit": { "relation": "ota", "days_from_now": 5, "time": "15:00", "online": true },
+    "reservation": { "relation": "ona", "status": "ready" }
+  },
   "family_members": [
-    { "name": "Dilfuza", "relation": "ona", "age": 56, "blood_type": "B(III) Rh+", "allergies": [] },
-    { "name": "Akbar", "relation": "ota", "age": 60, "blood_type": "A(II) Rh+", "allergies": ["Aspirin"] },
+    { "name": "Dilfuza", "relation": "ona", "age": 56, "blood_type": "B(III) Rh+", "allergies": [], "phone": "+998 90 123 45 67" },
+    { "name": "Akbar", "relation": "ota", "age": 60, "blood_type": "A(II) Rh+", "allergies": ["Aspirin"], "phone": "+998 93 765 43 21" },
     { "name": "Malika", "relation": "qizi", "age": 5, "blood_type": "A(II) Rh+", "allergies": [] }
   ],
   "medical_records": [

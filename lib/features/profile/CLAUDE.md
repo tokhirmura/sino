@@ -17,7 +17,8 @@
   не семьи; до 5 пунктов в списке.
 - **Oila:** список `family_members`; «Qo‘shish» → форма; тап → изменить / удалить (с подтверждением; записи
   медкарты этого человека удаляются каскадом). `relation` хранится по-узбекски (`ona`, `ota`, `qizi`, …),
-  подписи — `presentation/labels.dart`.
+  подписи — `presentation/labels.dart`. В форме — «Telefon (ixtiyoriy)» (`family_members.phone`, 7–15 цифр) для
+  «Qoʻngʻiroq qilish» на `/family`. Внизу раздела — «Oila nazorati» → `/family` (фича family).
 - **Sozlamalar:** язык (сразу в приложении + `profiles.lang`; если сохранить в БД не вышло — только на устройстве),
   тема (система / светлая / тёмная, core `themeModeProvider`), выход.
 
@@ -27,7 +28,10 @@ core `fakeFamilyProvider` (изменения сохраняются в prefs).
 Режим разработчика: 7 нажатий на строку «Sino · v1.0.0» внизу профиля (флаг `profile.dev_mode`, повтор — выключить).
 В нём карточка «Namuna ma’lumotlarni yuklash» (`SampleDataRepository`): добавляет текущему пользователю семью (3),
 медкарту (8) и анализы (7) из `assets/core/sample_profile_data.json`. Только в пустой аккаунт — если есть хоть
-одна запись в `family_members` / `medical_records` / `lab_results`, ничего не добавляет. В fake-режиме данные и так есть.
+одна запись в `family_members` / `medical_records` / `lab_results`, ничего не добавляет. Плюс демо «Oila»
+(`family_care` в том же JSON): маме 2 напоминания — одно отмечено, второе ~1,5 ч назад и пропущено, папе приём у
+врача (первый из `doctors`), маме готовая бронь (первая позиция `pharmacy_stock`) — пока у семьи нет напоминаний.
+В fake-режиме данные и так есть.
 
 ## Маршруты
 - `/profile` (`AppRoutes.profile`) — вкладка «Profil»

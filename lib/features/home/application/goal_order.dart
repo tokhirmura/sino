@@ -8,7 +8,7 @@ const goalCardPriority = <HealthGoal, List<String>>{
   HealthGoal.loseWeight: ['nutrition', 'workouts', 'vitals'],
   HealthGoal.energy: ['workouts', 'breathing', 'nutrition', 'weather'],
   HealthGoal.pressureSugar: ['vitals', 'reminders', 'nutrition', 'doctors'],
-  HealthGoal.family: ['reminders', 'doctors', 'pharmacy'],
+  HealthGoal.family: ['family', 'reminders', 'doctors', 'pharmacy'],
 };
 
 /// Always on top whatever the goal: emergency help.

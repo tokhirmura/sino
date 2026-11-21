@@ -110,6 +110,7 @@ class FamilyMember {
     this.birthYear,
     this.bloodType,
     this.allergies = const [],
+    this.phone,
   });
 
   final String id;
@@ -118,6 +119,15 @@ class FamilyMember {
   final int? birthYear;
   final String? bloodType;
   final List<String> allergies;
+
+  /// For «Qoʻngʻiroq qilish» on the family screen; `null` — not given.
+  final String? phone;
+
+  /// Phone ready for a `tel:` link (digits and a leading +), or `null`.
+  String? get dialable {
+    final p = phone?.replaceAll(RegExp(r'[^0-9+]'), '');
+    return p == null || p.replaceAll('+', '').length < 5 ? null : p;
+  }
 
   int? get age => birthYear == null ? null : DateTime.now().year - birthYear!;
 
@@ -128,6 +138,7 @@ class FamilyMember {
     'birth_year': birthYear,
     'blood_type': bloodType,
     'allergies': allergies,
+    'phone': phone,
   };
 
   factory FamilyMember.fromMap(Map<String, dynamic> m) => FamilyMember(
@@ -137,6 +148,7 @@ class FamilyMember {
     birthYear: m['birth_year'] as int?,
     bloodType: m['blood_type'] as String?,
     allergies: List<String>.from(m['allergies'] as List? ?? const []),
+    phone: m['phone'] as String?,
   );
 
   static final fakes = [
@@ -146,12 +158,14 @@ class FamilyMember {
       relation: 'ona',
       birthYear: DateTime.now().year - 56,
       bloodType: 'B(III) Rh+',
+      phone: '+998 90 123 45 67',
     ),
     FamilyMember(
       id: 'fake-father',
       name: 'Akbar',
       relation: 'ota',
       birthYear: DateTime.now().year - 60,
+      phone: '+998 93 765 43 21',
       bloodType: 'A(II) Rh+',
       allergies: const ['Aspirin'],
     ),
