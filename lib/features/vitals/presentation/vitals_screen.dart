@@ -14,6 +14,7 @@ import 'breathing_screen.dart';
 import 'labels.dart';
 import 'widgets/add_vital_sheet.dart';
 import 'widgets/bmi_card.dart';
+import 'widgets/steps_card.dart';
 import 'widgets/vital_chart.dart';
 
 /// Vitals: tiles with the latest value of each kind, a 7-day chart of the
@@ -165,6 +166,8 @@ class _Body extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 96),
       children: [
+        const SizedBox(height: AppSpacing.sm),
+        const StepsCard(),
         _SecretHeader(now: now),
         Wrap(
           spacing: 10,

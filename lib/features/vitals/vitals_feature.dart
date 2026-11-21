@@ -9,6 +9,7 @@ import '../../core/widgets/app_card.dart';
 import 'presentation/breathing_screen.dart';
 import 'presentation/vitals_home_card.dart';
 import 'presentation/vitals_screen.dart';
+import 'presentation/widgets/steps_card.dart';
 
 /// The ONLY public file of the `vitals` feature.
 final List<RouteBase> vitalsRoutes = [
@@ -29,6 +30,11 @@ final List<HomeCardSpec> vitalsHomeCards = [
     id: 'vitals',
     order: 70,
     builder: (context) => const VitalsHomeCard(),
+  ),
+  HomeCardSpec(
+    id: 'steps',
+    order: 72,
+    builder: (context) => const StepsHomeCard(),
   ),
   HomeCardSpec(
     id: 'breathing',
