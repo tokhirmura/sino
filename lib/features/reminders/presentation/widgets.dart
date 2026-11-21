@@ -8,6 +8,7 @@ import '../../../core/widgets/app_card.dart';
 import '../application/reminders_providers.dart';
 import '../data/models.dart';
 import 'labels.dart';
+import 'motion.dart';
 
 /// Required on every medical screen.
 class RemindersDisclaimer extends StatelessWidget {
@@ -107,10 +108,18 @@ String reminderErrorText(BuildContext context, Object error) {
 /// One dose of a day: time, medicine, dose, person, status and the
 /// «Ichdim» / undo button.
 class DoseTile extends ConsumerStatefulWidget {
-  const DoseTile({super.key, required this.dose, required this.now});
+  const DoseTile({
+    super.key,
+    required this.dose,
+    required this.now,
+    this.index,
+  });
 
   final Dose dose;
   final DateTime now;
+
+  /// Position in a list → staggered entrance.
+  final int? index;
 
   @override
   ConsumerState<DoseTile> createState() => _DoseTileState();
@@ -148,9 +157,10 @@ class _DoseTileState extends ConsumerState<DoseTile> {
     final members = ref.watch(familyMembersProvider).value ?? const [];
     final who = memberName(members, r.memberId);
     final takenAt = d.log?.takenAt;
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AppCard(
+        animate: widget.index == null,
         padding: const EdgeInsets.all(12),
         color: status == DoseStatus.due ? color.withValues(alpha: 0.10) : null,
         // Narrow card (small phone, large font): the button goes under the
@@ -239,6 +249,8 @@ class _DoseTileState extends ConsumerState<DoseTile> {
         ),
       ),
     );
+    final i = widget.index;
+    return i == null ? tile : tile.staggerIn(i);
   }
 
   /// «Ichdim» / undo / progress, or `null` (a later day's dose).

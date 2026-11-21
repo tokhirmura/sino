@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/storage/prefs.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_card.dart';
@@ -394,16 +395,11 @@ class _FormState extends ConsumerState<_Form> {
           ],
         ),
         const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: _saving ? null : _save,
-          icon: _saving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.check_rounded),
-          label: Text(context.tr(uz: 'Saqlash', ru: 'Сохранить', en: 'Save')),
+        PrimaryButton(
+          onPressed: _save,
+          loading: _saving,
+          icon: Icons.check_rounded,
+          label: context.tr(uz: 'Saqlash', ru: 'Сохранить', en: 'Save'),
         ),
         if (_editing) ...[
           const SizedBox(height: 8),

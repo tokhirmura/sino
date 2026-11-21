@@ -35,6 +35,9 @@
   работают и без уведомлений. Разрешение спрашивает UI: `ref.read(reminderNotificationsProvider).requestPermission()`.
 
 ## Экраны
+- **Design 2.0:** `/reminders` — `GradientHeader` (назад, история, `StatTile` «Bugun ichildi» / «Faol»),
+  `SkeletonLoader`, `EmptyState(actionLabel:)`, каскад карточек (`presentation/motion.dart`, `DoseTile(index:)`),
+  «Saqlash» — `PrimaryButton`.
 - **`/reminders`**: карточка «соблюдение за 7 дней» + следующая доза → история; «Bugun» — дозы сегодня по времени
   (статус, член семьи, «Ichdim» / отмена — `markTaken` / `undo`); «Barcha eslatmalar» — все напоминания с
   переключателем паузы, тап → изменить; FAB «Qo‘shish». Пусто → `EmptyState` с кнопкой.

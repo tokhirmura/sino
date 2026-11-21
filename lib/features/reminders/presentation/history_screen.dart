@@ -45,7 +45,7 @@ class IntakeHistoryScreen extends ConsumerWidget {
         loading: () => const SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.all(16),
-          child: SkeletonList(count: 4),
+          child: SkeletonLoader(count: 4),
         ),
         data: (_) {
           final days = <(DateTime, List<Dose>)>[];
