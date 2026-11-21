@@ -35,8 +35,11 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   `dayLogsProvider(day)` (`DayLogsNotifier`: оптимистичные add / setServings / remove, откат и rethrow при ошибке;
   несохранённые записи — id `pending-…`), `waterProvider(day)` (`WaterNotifier`, 0…20), `kcalGoalFromProfileProvider`,
   `manualKcalGoalProvider` (prefs `nutrition.kcal_goal`, 800–6000, `null` = из профиля), `kcalGoalProvider`
-- `presentation/nutrition_screen.dart` — экран дня; `labels.dart` — названия приёмов пищи, даты, единицы;
-  `widgets/` — `DaySwitcher`, `CalorieSummaryCard` (кольцо, БЖУ, non birligi, диалог цели), `WaterCard`,
+- `presentation/nutrition_screen.dart` — экран дня (дизайн 2.0: `Scaffold` без AppBar, первым — `GradientHeader` с
+  `DaySwitcher(onDark: true)` и `StatTile` «Yeyildi» (цифры плавно растут) / «Suv» л / «Maqsad»; загрузка —
+  `SkeletonLoader`; пустой день — `EmptyState` с кнопкой «Taom qo‘shish»); `labels.dart` — названия приёмов пищи, даты, единицы;
+  `widgets/` — `DaySwitcher`, `CalorieSummaryCard` (`AnimatedProgressRing`: бренд-градиент, сверх цели — шафран→терракота; число «qoldi» плавно
+  меняется, ключ `nutrition-kcal-left`; БЖУ, non birligi, диалог цели), `WaterCard`,
   `MealSection` (порции ±0.5, свайп/корзина — удалить, «Qaytarish»), `add_food_sheet.dart` (поиск, приём, порция),
   `nutrition_home_card.dart` (карточка главной, те же `dayLogsProvider`/`waterProvider`, что и вкладка)
 - `data/dasturxon.dart` — «Dasturxon» (S2-1): `HomeMeasure` (kosa, likopcha, dona, piyola, choy_qoshiq), `DasturxonItem`
@@ -46,7 +49,8 @@ Fake-режим: пользовательские данные в prefs (`nutrit
 - `application/nutrition_providers.dart` (ещё) — `dasturxonItemsProvider`, `dasturxonProvider` (блюда + строки каталога,
   порядок из JSON; нет в каталоге / порция не в граммах — пропуск)
 - `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов
-- Тесты: `test/features/nutrition/`
+- Тесты: `test/features/nutrition/`; `module_c_screens_test.dart` — все экраны модуля C в uz/ru/en × светлая/тёмная
+  на маленьком телефоне (без переполнения и узбекских строк в ru/en)
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
 ## Чеклист задач
@@ -66,7 +70,7 @@ Fake-режим: пользовательские данные в prefs (`nutrit
 эмулятор Android, симулятор iOS — в обоих режимах (`env.json` и `USE_FAKE=true`).
 - [x] S2-1 «Dasturxon» — данные: `assets/wellness/dasturxon.json` (12 самых частых блюд × местные меры
   kosa / likopcha / dona / piyola / choy qoshiq → граммы), модель, пересчёт мера → порции `foods`, тесты
-- [ ] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`;
+- [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`;
   кольцо калорий — `AnimatedProgressRing`, цифры плавно меняются при добавлении еды
 - [ ] S2-5 «Dasturxon» — быстрое добавление: 12 блюд крупными кнопками, выбор меры и количества (1 kosa, 2 dona),
   добавление в дневник одним нажатием

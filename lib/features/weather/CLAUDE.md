@@ -37,8 +37,13 @@
 - `application/weather_providers.dart` — `weatherPlaceProvider` (по умолчанию Toshkent — без запроса геолокации),
   `weatherReportProvider` (без авто-retry: иначе повторный запрос разрешения; `gps` без координат → кэш `gps` или
   `LocationUnavailableException`), `todayAqiKey`
-- `presentation/weather_screen.dart` — чипы «Joylashuvim» + города, баннер «Internet yo‘q — oxirgi saqlangan prognoz
-  (N soat oldin)», сейчас (градиент), AQI с кнопкой «Uyda mashg‘ulot» при AQI > 100, советы, 24 часа, 7 дней,
+- `application/weather_logic.dart` (ещё) — `DayPart` / `dayPartOf(time)` (S2-2): tong 05–10, kun 10–17, kech 17–21, tun
+  21–05 по местному времени места; `labels.dart` — `dayPartGradient`, `dayPartText`; цвета AQI — только `AppColors`
+- `presentation/weather_screen.dart` — дизайн 2.0: сверху `_Hero` на `GradientBackdrop` с градиентом по времени суток
+  (метка «Kech», назад, обновить), крупная температура 88, небо, ощущается, влажность/ветер/мин–макс; при AQI > 100
+  сразу под ним — красно-шафрановый баннер `weather-air-alert` (`airAlertText`) с кнопкой «Uyda» → вкладка Sport;
+  загрузка — `SkeletonLoader`; ниже — чипы «Joylashuvim» + города, баннер «Internet yo‘q — oxirgi saqlangan prognoz
+  (N soat oldin)», AQI, советы, 24 часа, 7 дней,
   дисклеймер; `weather_home_card.dart`; `labels.dart`
 - Тесты: `test/features/weather/`
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
@@ -54,6 +59,6 @@
 эмулятор Android, симулятор iOS — в обоих режимах (`env.json` и `USE_FAKE=true`).
 - [x] S2-1 Воздух: `airAlert(aqi)` — состояние-предупреждение при AQI > 100, текст «Havo ifloslangan (AQI 156) —
   bugun uyda mashq qiling» (uz/ru/en), тесты
-- [ ] S2-2 Дизайн 2.0: фон по времени суток (tong, kun, kech, tun), крупная температура, при AQI > 100 — сверху
+- [x] S2-2 Дизайн 2.0: фон по времени суток (tong, kun, kech, tun), крупная температура, при AQI > 100 — сверху
   красно-жёлтый баннер
 - [ ] S2-7 (если останется время) Утреннее уведомление при высоком AQI, выключается в настройках

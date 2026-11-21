@@ -54,7 +54,9 @@
 - `presentation/workout_player_screen.dart` — плеер: кольцо-таймер, «× 12 marta» + «Bajarildi», отдых с «+15 s» и
   «O‘tkazib yuborish», пауза, «Keyingi», выход с диалогом (продолжить / завершить и сохранить / выйти без сохранения),
   финал: минуты, ~ккал, XP, «Ketma-ket N kun!» после сохранения (ошибка — «Qayta urinish»)
-- `presentation/workouts_screen.dart` — нет плана: форма генератора; есть — сводка недели и дни, «Yangi reja tuzish»
+- `presentation/workouts_screen.dart` — дизайн 2.0: `GradientHeader` (с планом — `StatTile` серия / минут в неделю /
+  ~ккал, появление `flutter_animate`), `SkeletonLoader`, нет плана — `EmptyState` + форма (`PrimaryButton`
+  «Reja tuzish»); нет плана: форма генератора; есть — сводка недели и дни, «Yangi reja tuzish»
   (bottom sheet); `labels.dart` — названия видов/целей/уровней/дней недели, дозировка; `widgets/plan_form.dart`,
   `widgets/plan_day_card.dart`, `widgets/workouts_home_card.dart`
 - Тесты: `test/features/workouts/`
@@ -77,6 +79,6 @@
 эмулятор Android, симулятор iOS — в обоих режимах (`env.json` и `USE_FAKE=true`).
 - [x] S2-1 Воздух: AQI > 100 → состояние-предупреждение «Havo ifloslangan (AQI 156) — bugun uyda mashq qiling»
   (uz/ru/en), выбор «uyda» генератором — чистая функция `adjustForAir`, тесты
-- [ ] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
+- [x] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
 - [ ] S2-4 Плеер 2.0: голосовой счёт `flutter_tts` («Bir, ikki, uch…», «Dam oling»); нет узбекского голоса — русский,
   выбор в настройках; в конце — confetti и XP
