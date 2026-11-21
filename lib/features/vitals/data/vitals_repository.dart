@@ -26,6 +26,10 @@ abstract class VitalsRepository {
   Future<void> addAll(List<VitalInput> items);
 
   Future<void> remove(String id);
+
+  /// Changes a row's value (and time); `false` if the row is gone (deleted
+  /// by the user) — the caller adds a new one.
+  Future<bool> update(String id, {required double value, DateTime? measuredAt});
 }
 
 const _timeout = Duration(seconds: 10);
@@ -98,6 +102,25 @@ class SupabaseVitalsRepository implements VitalsRepository {
   @override
   Future<void> remove(String id) =>
       _client.from('vitals').delete().eq('id', id).timeout(_timeout);
+
+  @override
+  Future<bool> update(
+    String id, {
+    required double value,
+    DateTime? measuredAt,
+  }) async {
+    final rows = await _client
+        .from('vitals')
+        .update({
+          'value': value,
+          if (measuredAt != null)
+            'measured_at': measuredAt.toUtc().toIso8601String(),
+        })
+        .eq('id', id)
+        .select('id')
+        .timeout(_timeout);
+    return rows.isNotEmpty;
+  }
 }
 
 /// Offline: measurements in SharedPreferences, first filled with the
@@ -214,6 +237,27 @@ class FakeVitalsRepository implements VitalsRepository {
       for (final v in list)
         if (v.id != id) v,
     ]);
+  }
+
+  @override
+  Future<bool> update(
+    String id, {
+    required double value,
+    DateTime? measuredAt,
+  }) async {
+    final list = await _all();
+    final i = list.indexWhere((v) => v.id == id);
+    if (i < 0) return false;
+    final v = list[i];
+    list[i] = Vital(
+      id: v.id,
+      kind: v.kind,
+      value: value,
+      value2: v.value2,
+      measuredAt: measuredAt ?? v.measuredAt,
+    );
+    await _save(list);
+    return true;
   }
 }
 
