@@ -290,6 +290,9 @@ void main() {
       );
       final i = sinoDayInput(raw, now);
       expect(i.doses.where((d) => d.taken), hasLength(1)); // 08:00 only
+      // Morning: a third of the evening values, not 1 240 kcal at 9 am.
+      expect(i.kcal, (1240 * 0.3333).roundToDouble());
+      expect(i.glasses, 2);
       final idx = computeSinoIndex(i, kcalGoal: 2270, now: now)!;
       expect(idx.part(SinoPart.medicines)!.target, 1);
     });

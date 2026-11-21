@@ -214,7 +214,8 @@ SinoRaw parseSinoRows({
 }
 
 /// Plausible week of «Aziz» from `assets/core/sino_week.json`, laid out
-/// relative to today. Today's doses after the current time stay untaken.
+/// relative to today. Today's doses after the current time stay untaken,
+/// today's food, water and steps grow with the time of day.
 class FakeSinoDataRepository implements SinoDataRepository {
   FakeSinoDataRepository({DateTime Function()? clock, AssetBundle? bundle})
     : _clock = clock ?? DateTime.now,
@@ -226,7 +227,7 @@ class FakeSinoDataRepository implements SinoDataRepository {
   @override
   Future<SinoRaw> load({required DateTime from, required DateTime to}) async {
     final json = jsonDecode(
-      await _bundle.loadString('assets/core/sino_week.json'),
+      await _bundle.loadString('assets/core/sino_week.json', cache: false),
     ) as Map<String, dynamic>;
     return buildFakeSinoRaw(json, now: _clock(), from: from, to: to);
   }
@@ -257,15 +258,25 @@ SinoRaw buildFakeSinoRaw(
   final sessions = <DateTime>[];
   final vitals = <VitalRow>[];
 
+  // Today grows during the day: by ~17:30 the JSON values are reached.
+  final hours = now.hour + now.minute / 60;
+  final todayShare = (((hours - 7) / 14).clamp(0.25, 1.0) / 0.75).clamp(
+    0.3,
+    1.0,
+  );
+
   DateTime at(DateTime day, int minutes) => day.add(Duration(minutes: minutes));
   bool past(DateTime t) => !t.isAfter(now);
 
   for (final d in json['days'] as List) {
     final day = today.subtract(Duration(days: (d['days_ago'] as num).toInt()));
     if (day.isBefore(start) || day.isAfter(end)) continue;
-    if (d['kcal'] != null) food.add(FoodRow(day, (d['kcal'] as num) * 1.0));
+    final k = day == today ? todayShare : 1.0;
+    if (d['kcal'] != null) {
+      food.add(FoodRow(day, ((d['kcal'] as num) * k).roundToDouble()));
+    }
     if (d['glasses'] != null) {
-      water.add(WaterRow(day, (d['glasses'] as num).toInt()));
+      water.add(WaterRow(day, ((d['glasses'] as num) * k).round()));
     }
     for (final id in (d['taken'] as List?) ?? const []) {
       final r = byId[id];
@@ -283,7 +294,11 @@ SinoRaw buildFakeSinoRaw(
     if (d['steps'] != null) {
       final t = at(day, 21 * 60);
       vitals.add(
-        VitalRow('steps', (d['steps'] as num) * 1.0, past(t) ? t : now),
+        VitalRow(
+          'steps',
+          ((d['steps'] as num) * k).roundToDouble(),
+          past(t) ? t : now,
+        ),
       );
     }
   }

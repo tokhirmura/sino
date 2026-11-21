@@ -281,18 +281,38 @@ class SinoDay {
 /// "Now" for the index; overridden in tests.
 final sinoClockProvider = Provider<DateTime Function()>((_) => DateTime.now);
 
-/// The last 7 days, oldest first, today last.
-final sinoWeekProvider = FutureProvider<List<SinoDay>>((ref) async {
+/// Days loaded for the streak (the week view uses the last 7).
+const sinoHistoryDays = 30;
+
+/// Index that keeps a streak going.
+const sinoStreakThreshold = 60;
+
+/// Days in a row with index ≥ [sinoStreakThreshold], ending today — or
+/// yesterday while today is still below it (the day isn't over yet).
+/// [days] — oldest first, today last.
+int sinoStreak(List<SinoDay> days) {
+  bool good(SinoDay d) => (d.index?.score ?? -1) >= sinoStreakThreshold;
+  var i = days.length - 1;
+  if (i >= 0 && !good(days[i])) i--;
+  var streak = 0;
+  for (; i >= 0 && good(days[i]); i--) {
+    streak++;
+  }
+  return streak;
+}
+
+/// The last [sinoHistoryDays] days, oldest first, today last.
+final sinoHistoryProvider = FutureProvider<List<SinoDay>>((ref) async {
   final now = ref.watch(sinoClockProvider)();
   final today = dateOnly(now);
-  final from = today.subtract(const Duration(days: 6));
+  final from = today.subtract(const Duration(days: sinoHistoryDays - 1));
   final profile = await ref.watch(currentUserProvider.future);
   final goal = sinoKcalGoal(profile, year: now.year);
   final raw = await ref
       .watch(sinoDataRepositoryProvider)
       .load(from: from, to: today);
   return [
-    for (var i = 0; i < 7; i++)
+    for (var i = 0; i < sinoHistoryDays; i++)
       () {
         final input = sinoDayInput(raw, from.add(Duration(days: i)));
         return SinoDay(
@@ -303,8 +323,19 @@ final sinoWeekProvider = FutureProvider<List<SinoDay>>((ref) async {
   ];
 });
 
-/// Today's index; `null` when nothing is logged today.
+/// The last 7 days, oldest first, today last.
+final sinoWeekProvider = FutureProvider<List<SinoDay>>((ref) async {
+  final days = await ref.watch(sinoHistoryProvider.future);
+  return days.sublist(days.length - 7);
+});
+
+/// Today (last of the week); its index is `null` when nothing is logged.
 final sinoTodayProvider = FutureProvider<SinoDay>((ref) async {
   final week = await ref.watch(sinoWeekProvider.future);
   return week.last;
 });
+
+/// Current streak (see [sinoStreak]).
+final sinoStreakProvider = FutureProvider<int>(
+  (ref) async => sinoStreak(await ref.watch(sinoHistoryProvider.future)),
+);

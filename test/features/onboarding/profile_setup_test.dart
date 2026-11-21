@@ -112,7 +112,10 @@ void main() {
     await _tap(tester, find.widgetWithText(FilledButton, 'Saqlash'));
 
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Salom, Madina'), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'^Xayrli (tong|kun|kech), Madina$')),
+      findsOneWidget,
+    );
 
     final saved = container.read(fakeProfileProvider);
     expect(saved.fullName, 'Madina');
@@ -142,7 +145,10 @@ void main() {
     await tester.enterText(_field('Vazn'), '76');
     await _tap(tester, find.widgetWithText(FilledButton, 'Saqlash'));
 
-    expect(find.text('Salom, Aziz'), findsOneWidget); // first name only
+    expect(
+      find.textContaining(RegExp(r'^Xayrli (tong|kun|kech), Aziz$')),
+      findsOneWidget,
+    ); // first name only
     expect(container.read(setupPrefillProvider), isNull);
   });
 

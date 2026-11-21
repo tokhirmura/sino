@@ -172,14 +172,30 @@ class _RingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     if (colors.length < 2) {
       paint.color = colors.isEmpty ? track : colors.first;
-    } else {
-      paint.shader = SweepGradient(
+      canvas.drawArc(arcRect, -math.pi / 2, sweep, false, paint);
+      return;
+    }
+    // A sweep gradient can't color the round start cap (it lies "before"
+    // angle 0 and would get the end color), so the arc gets butt caps and
+    // both rounded ends are drawn as dots in their own colors.
+    paint
+      ..strokeCap = StrokeCap.butt
+      ..shader = SweepGradient(
         colors: colors,
         endAngle: math.max(sweep, 0.01),
         transform: const GradientRotation(-math.pi / 2),
       ).createShader(arcRect);
-    }
     canvas.drawArc(arcRect, -math.pi / 2, sweep, false, paint);
+    final c = arcRect.center, r = arcRect.width / 2;
+    Offset at(double a) => c + Offset(math.cos(a), math.sin(a)) * r;
+    final dot = Paint()..style = PaintingStyle.fill;
+    canvas
+      ..drawCircle(at(-math.pi / 2), stroke / 2, dot..color = colors.first)
+      ..drawCircle(
+        at(-math.pi / 2 + sweep),
+        stroke / 2,
+        dot..color = colors.last,
+      );
   }
 
   @override

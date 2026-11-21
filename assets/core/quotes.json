@@ -1,0 +1,25 @@
+{
+  "_comment": "Kun hikmati (home): 20 health proverbs and sayings, uz (Latin) + ru/en translation. One per day: day of year % 20.",
+  "quotes": [
+    {"uz": "Sog‘liq — tuman boylik.", "ru": "Здоровье — несметное богатство.", "en": "Health is untold wealth."},
+    {"uz": "Sog‘lom tanda — sog‘lom aql.", "ru": "В здоровом теле — здоровый дух.", "en": "A sound mind in a sound body."},
+    {"uz": "Dardini yashirgan — davosini topmas.", "ru": "Кто скрывает недуг, тот не найдёт лекарства.", "en": "Who hides their pain will not find the cure."},
+    {"uz": "Sog‘liqning qadrini kasal bilar.", "ru": "Цену здоровья знает больной.", "en": "Only the sick know the worth of health."},
+    {"uz": "Oz-oz o‘rganib dono bo‘lur, qatra-qatra yig‘ilib daryo bo‘lur.", "ru": "Понемногу учась, становятся мудрыми; по капле собирается река.", "en": "Little by little one grows wise; drop by drop a river is made."},
+    {"uz": "Harakat — hayot.", "ru": "Движение — это жизнь.", "en": "Movement is life."},
+    {"uz": "Suv — hayot manbai.", "ru": "Вода — источник жизни.", "en": "Water is the source of life."},
+    {"uz": "Me’yorida yegan kasal bo‘lmas.", "ru": "Кто ест в меру, тот не болеет.", "en": "Eat in moderation and you will stay well."},
+    {"uz": "Uyqu — eng yaxshi dori.", "ru": "Сон — лучшее лекарство.", "en": "Sleep is the best medicine."},
+    {"uz": "Tozalik — salomatlik garovi.", "ru": "Чистота — залог здоровья.", "en": "Cleanliness is the guarantee of health."},
+    {"uz": "Kulgi umrni uzaytirar.", "ru": "Смех продлевает жизнь.", "en": "Laughter lengthens life."},
+    {"uz": "Ko‘ngil tinch bo‘lsa, tan sog‘ bo‘lur.", "ru": "Спокойна душа — здорово тело.", "en": "A calm heart keeps the body well."},
+    {"uz": "Ko‘p yurgan ko‘p yashar.", "ru": "Кто много ходит, тот долго живёт.", "en": "Walk more, live longer."},
+    {"uz": "Bugungi ishni ertaga qoldirma.", "ru": "Не откладывай на завтра то, что можно сделать сегодня.", "en": "Don’t put off until tomorrow what you can do today."},
+    {"uz": "Sabr tagi — sariq oltin.", "ru": "Терпение — чистое золото.", "en": "Patience is pure gold."},
+    {"uz": "Yaxshi so‘z — jon ozig‘i.", "ru": "Доброе слово — пища для души.", "en": "A kind word feeds the soul."},
+    {"uz": "Kasallikning oldini olish davolashdan oson.", "ru": "Болезнь легче предупредить, чем лечить.", "en": "Preventing illness is easier than curing it."},
+    {"uz": "Meva-sabzavot — dasturxon ko‘rki, tan quvvati.", "ru": "Фрукты и овощи — украшение стола и сила тела.", "en": "Fruit and vegetables: the beauty of the table, the strength of the body."},
+    {"uz": "Erta turgan — ko‘p ulgurar.", "ru": "Кто рано встаёт, тот многое успевает.", "en": "Rise early and you get more done."},
+    {"uz": "Har kuni ozgina harakat — katta natija.", "ru": "Каждый день понемногу — большой результат.", "en": "A little every day adds up to a lot."}
+  ]
+}
