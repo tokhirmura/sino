@@ -37,6 +37,15 @@ class Food {
 
   /// Portion description, e.g. `300 g`.
   final String? portion;
+
+  /// Grams in one [portion] (`300 g` → 300), `null` if it is not in grams.
+  double? get portionGrams {
+    final m = _grams.firstMatch(portion ?? '');
+    return m == null ? null : double.parse(m[1]!.replaceAll(',', '.'));
+  }
+
+  static final _grams = RegExp(r'^\s*(\d+(?:[.,]\d+)?)\s*(?:g|г)\s*$');
+
   final double kcal;
   final double protein;
   final double fat;

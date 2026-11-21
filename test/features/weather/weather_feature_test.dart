@@ -70,6 +70,11 @@ void main() {
     expect(_text(tester, 'weather-aqi-level'), 'Sezgir guruhlar uchun zararli');
     expect(find.byKey(const Key('weather-tip-airSensitive')), findsOneWidget);
     expect(find.byKey(const Key('weather-home-workout')), findsOneWidget);
+    expect(
+      _text(tester, 'weather-air-alert-text'),
+      'Havo ifloslangan (AQI 135) — bugun uyda mashq qiling',
+    );
+    expect(find.byKey(const Key('weather-daypart')), findsOneWidget);
     expect(find.byKey(const Key('weather-hours')), findsOneWidget);
     expect(find.text('Bugun'), findsOneWidget); // 7 days
     expect(find.byKey(const Key('weather-offline')), findsNothing);
@@ -82,6 +87,7 @@ void main() {
     expect(_text(tester, 'weather-aqi'), '58');
     expect(find.byKey(const Key('weather-tip-goodDay')), findsOneWidget);
     expect(find.byKey(const Key('weather-home-workout')), findsNothing);
+    expect(find.byKey(const Key('weather-air-alert')), findsNothing);
     expect(prefs.getString(WeatherPlaceNotifier.key), 'samarkand');
     expect(jsonDecode(prefs.getString(todayAqiKey)!)['aqi'], 58);
 

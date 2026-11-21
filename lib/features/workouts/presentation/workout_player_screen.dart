@@ -12,6 +12,8 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/emoji_box.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/loading_view.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/progress_ring.dart';
 import '../application/plan_generator.dart';
 import '../application/workout_run.dart';
@@ -44,7 +46,7 @@ class WorkoutPlayerScreen extends ConsumerWidget {
     return AsyncValueView(
       value: plan,
       onRetry: () => ref.invalidate(latestPlanProvider),
-      loading: () => scaffold(const Center(child: CircularProgressIndicator())),
+      loading: () => scaffold(const LoadingView()),
       data: (p) {
         PlanDay? planDay;
         for (final d in p?.days ?? const <PlanDay>[]) {
@@ -66,8 +68,7 @@ class WorkoutPlayerScreen extends ConsumerWidget {
         return AsyncValueView(
           value: catalog,
           onRetry: () => ref.invalidate(exercisesProvider),
-          loading: () =>
-              scaffold(const Center(child: CircularProgressIndicator())),
+          loading: () => scaffold(const LoadingView()),
           data: (byId) => _Player(
             day: d,
             steps: buildSteps(
@@ -434,19 +435,17 @@ class _Running extends StatelessWidget {
               ],
               Expanded(
                 flex: 2,
-                child: FilledButton.icon(
+                child: PrimaryButton(
                   key: const Key('player-skip'),
                   onPressed: onSkip,
-                  icon: const Icon(Icons.skip_next_rounded),
-                  label: Text(
-                    ready
-                        ? context.tr(uz: 'Boshlash', ru: 'Начать', en: 'Start')
-                        : context.tr(
-                            uz: 'O‘tkazib yuborish',
-                            ru: 'Пропустить',
-                            en: 'Skip',
-                          ),
-                  ),
+                  icon: Icons.skip_next_rounded,
+                  label: ready
+                      ? context.tr(uz: 'Boshlash', ru: 'Начать', en: 'Start')
+                      : context.tr(
+                          uz: 'O‘tkazib yuborish',
+                          ru: 'Пропустить',
+                          en: 'Skip',
+                        ),
                 ),
               ),
             ],
@@ -473,13 +472,11 @@ class _Running extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 flex: 3,
-                child: FilledButton.icon(
+                child: PrimaryButton(
                   key: const Key('player-done'),
                   onPressed: onDone,
-                  icon: const Icon(Icons.check_rounded),
-                  label: Text(
-                    context.tr(uz: 'Bajarildi', ru: 'Готово', en: 'Done'),
-                  ),
+                  icon: Icons.check_rounded,
+                  label: context.tr(uz: 'Bajarildi', ru: 'Готово', en: 'Done'),
                 ),
               ),
             ],
@@ -656,12 +653,7 @@ class _Finish extends ConsumerWidget {
             future: saving,
             builder: (context, snap) {
               if (snap.connectionState != ConnectionState.done) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
+                return const LoadingView(compact: true);
               }
               if (snap.hasError) {
                 return ErrorView(
@@ -703,10 +695,11 @@ class _Finish extends ConsumerWidget {
             },
           ),
         const SizedBox(height: 20),
-        FilledButton(
+        PrimaryButton(
           key: const Key('player-finish-close'),
           onPressed: onClose,
-          child: Text(context.tr(uz: 'Yopish', ru: 'Закрыть', en: 'Close')),
+          icon: Icons.check_rounded,
+          label: context.tr(uz: 'Yopish', ru: 'Закрыть', en: 'Close'),
         ),
         const SizedBox(height: 16),
         Text(
