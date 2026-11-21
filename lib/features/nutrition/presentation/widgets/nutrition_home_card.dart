@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/app_lang.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/progress_ring.dart';
@@ -157,7 +158,7 @@ class NutritionHomeCard extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(99),
+                  borderRadius: BorderRadius.circular(AppRadius.chip),
                   child: LinearProgressIndicator(
                     value: ((glasses ?? 0) / WaterLog.goal).clamp(0.0, 1.0),
                     minHeight: 6,

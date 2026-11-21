@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_lang.dart';
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/pill.dart';
@@ -29,7 +30,7 @@ class CalorieSummaryCard extends ConsumerWidget {
     final eaten = totals.kcal.round();
     final left = goal - eaten;
     final over = left < 0;
-    final ringColor = over ? AppColors.coral : AppColors.good;
+    final ringColor = over ? AppColors.coral : AppColors.primary;
     final goals = macroGoals(goal);
     final unit = kcalUnit(context);
 
@@ -39,42 +40,35 @@ class CalorieSummaryCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              ProgressRing(
-                value: goal <= 0 ? 0 : totals.kcal / goal,
-                size: 128,
-                strokeWidth: 12,
-                color: ringColor,
-                semanticsLabel: context.tr(
-                  uz: 'Kaloriya: $eaten / $goal',
-                  ru: 'Калории: $eaten / $goal',
-                  en: 'Calories: $eaten / $goal',
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${left.abs()}',
-                      key: const Key('nutrition-kcal-left'),
-                      style: text.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: over ? AppColors.coral : null,
-                      ),
-                    ),
-                    Text(
-                      over
-                          ? context.tr(
-                              uz: '$unit ortiqcha',
-                              ru: '$unit сверх',
-                              en: '$unit over',
-                            )
-                          : context.tr(
-                              uz: '$unit qoldi',
-                              ru: '$unit осталось',
-                              en: '$unit left',
-                            ),
-                      style: text.bodySmall,
-                    ),
-                  ],
+              TweenAnimationBuilder<double>(
+                key: const Key('nutrition-kcal-left'),
+                tween: Tween(end: left.abs().toDouble()),
+                duration: AppMotion.slow,
+                curve: AppMotion.enter,
+                builder: (_, v, _) => AnimatedProgressRing(
+                  value: goal <= 0 ? 0 : totals.kcal / goal,
+                  size: 128,
+                  strokeWidth: 12,
+                  colors: over
+                      ? const [AppColors.saffron, AppColors.coral]
+                      : const [AppColors.primary, AppColors.secondary],
+                  label: '${v.round()}',
+                  caption: over
+                      ? context.tr(
+                          uz: '$unit ortiqcha',
+                          ru: '$unit сверх',
+                          en: '$unit over',
+                        )
+                      : context.tr(
+                          uz: '$unit qoldi',
+                          ru: '$unit осталось',
+                          en: '$unit left',
+                        ),
+                  semanticsLabel: context.tr(
+                    uz: 'Kaloriya: $eaten / $goal',
+                    ru: 'Калории: $eaten / $goal',
+                    en: 'Calories: $eaten / $goal',
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -224,7 +218,7 @@ class _MacroBar extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         ClipRRect(
-          borderRadius: BorderRadius.circular(99),
+          borderRadius: BorderRadius.circular(AppRadius.chip),
           child: TweenAnimationBuilder<double>(
             tween: Tween(end: goal <= 0 ? 0 : (value / goal).clamp(0.0, 1.0)),
             duration: const Duration(milliseconds: 500),
