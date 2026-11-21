@@ -53,3 +53,6 @@ core `fakeFamilyProvider` (изменения сохраняются в prefs).
 - [x] P1-5 QR для врача (`qr_flutter`) с выбором, что видно
 - [x] P1-5 Настройки: язык uz/ru/en (сохраняется в `profiles.lang`), тёмная тема, выход из аккаунта
 - [x] P1-6 Тёмная тема и uz/ru/en (проверяет `test/module_a_screens_test.dart`: 3 языка × 2 темы, 360×640)
+
+## Спринт 2.0 (план — в `home/CLAUDE.md`)
+- [ ] S2-3 Экран достижений в профиле: 8 значков `AchievementBadge`, новое — с confetti; таблица `achievements`
