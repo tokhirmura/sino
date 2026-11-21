@@ -54,6 +54,14 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   likopcha ½/1/1½, dona 1–4, piyola 1–3, choy qoshiq 1–3) с ~ккал; **одно нажатие на количество — добавлено**
   (`dayLogsProvider.add`, SnackBar «Palov (osh) — 1 likopcha · Kechki ovqat»). `labels.dart` — `countText` (½, 1½),
   `measureText` (uz «2 dona», ru «2 миски / ½ тарелки», en «2 bowls»), `formatServings` до 0.01 (0.25 порции)
+- Напоминания о воде (S2-7): `application/water_reminders.dart` — `waterReminderHours` (9, 11 … 21),
+  `waterRemindersProvider` (prefs `nutrition.water_notify`, по умолчанию вкл.; `nutrition.water_notify_asked` —
+  разрешение спрошено один раз, когда `WaterCard` показана впервые; `nutrition.water_notify_last` — язык
+  запланированного или `off`, пересоздаёт только при изменении), `waterNotificationText`. `data/water_notifications.dart` —
+  `LocalWaterNotifications`: 7 ежедневных (`DateTimeComponents.time`) уведомлений, id `2100000100 + час`, payload
+  `wellness:water`, канал `sino_wellness`; Noop вне Android/iOS и в тестах. В `WaterCard` — колокольчик
+  `nutrition-water-notify` (вкл./выкл., SnackBar). ID модуля C ≥ 2 100 000 000 — не пересекаются с `reminders`
+  (< 2 000 000 000, payload `reminder:`)
 - `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов
 - Тесты: `test/features/nutrition/`; `module_c_screens_test.dart` — все экраны модуля C в uz/ru/en × светлая/тёмная
   на маленьком телефоне (без переполнения и узбекских строк в ru/en)
@@ -80,4 +88,4 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   кольцо калорий — `AnimatedProgressRing`, цифры плавно меняются при добавлении еды
 - [x] S2-5 «Dasturxon» — быстрое добавление: 12 блюд крупными кнопками, выбор меры и количества (1 kosa, 2 dona),
   добавление в дневник одним нажатием
-- [ ] S2-7 (если останется время) Напоминание о воде каждые 2 ч (9:00–21:00), выключается в настройках
+- [x] S2-7 Напоминание о воде каждые 2 ч (9:00–21:00), выключается в настройках

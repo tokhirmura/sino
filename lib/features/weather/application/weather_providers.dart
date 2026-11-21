@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/prefs.dart';
 import '../data/models.dart';
 import '../data/weather_repository.dart';
+import 'air_notify.dart';
 
 /// Selected place: a city id or `gps`. Tashkent by default (no location
 /// prompt until the user picks «my location»).
@@ -118,6 +120,16 @@ class WeatherReportNotifier extends AsyncNotifier<WeatherReport> {
               'place': report.place.name,
             }),
           );
+    }
+    // Morning air notification from this report's forecast (S2-7); never
+    // holds the report back.
+    if (ref.mounted) {
+      unawaited(
+        ref
+            .read(airNotifyProvider.notifier)
+            .sync(report)
+            .catchError((Object _) {}),
+      );
     }
     return report;
   }

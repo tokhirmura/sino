@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,17 +10,40 @@ import '../../../../core/widgets/async_value_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../application/nutrition_math.dart';
 import '../../application/nutrition_providers.dart';
+import '../../application/water_reminders.dart';
 import '../../data/models.dart';
 
 /// 8 glasses of water for [day]: tap a glass to set the count, ± buttons,
-/// one-line hint about the day's balance.
-class WaterCard extends ConsumerWidget {
+/// one-line hint about the day's balance; the bell turns the reminders
+/// every 2 hours (9:00–21:00) on and off (S2-7).
+class WaterCard extends ConsumerStatefulWidget {
   const WaterCard({super.key, required this.day});
 
   final DateTime day;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WaterCard> createState() => _WaterCardState();
+}
+
+class _WaterCardState extends ConsumerState<WaterCard> {
+  @override
+  void initState() {
+    super.initState();
+    // Reminders are on by default: ask for notifications once, schedule.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(
+        ref
+            .read(waterRemindersProvider.notifier)
+            .askOnce()
+            .catchError((Object _) {}),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final day = widget.day;
     final provider = waterProvider(day);
     return AsyncValueView(
       value: ref.watch(provider),
@@ -88,6 +113,7 @@ class _WaterBody extends StatelessWidget {
                 '${context.tr(uz: 'l', ru: 'л', en: 'L')}',
                 style: text.bodySmall,
               ),
+              const _ReminderBell(),
             ],
           ),
           const SizedBox(height: 12),
@@ -236,6 +262,75 @@ class _HintText extends StatelessWidget {
       key: const Key('nutrition-water-hint'),
       style: Theme.of(context).textTheme.bodySmall
           ?.copyWith(color: color, fontWeight: FontWeight.w600),
+    );
+  }
+}
+
+/// Water reminders on / off; a SnackBar says what changed.
+class _ReminderBell extends ConsumerWidget {
+  const _ReminderBell();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(waterRemindersProvider);
+    final hours =
+        '${waterReminderHours.first}:00–${waterReminderHours.last}:00';
+    return IconButton(
+      key: const Key('nutrition-water-notify'),
+      visualDensity: VisualDensity.compact,
+      tooltip: on
+          ? context.tr(
+              uz: 'Suv eslatmalarini o‘chirish',
+              ru: 'Выключить напоминания о воде',
+              en: 'Turn water reminders off',
+            )
+          : context.tr(
+              uz: 'Suv eslatmalarini yoqish',
+              ru: 'Включить напоминания о воде',
+              en: 'Turn water reminders on',
+            ),
+      isSelected: on,
+      color: AppColors.sky,
+      onPressed: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        final msg = (
+          on: context.tr(
+            uz: 'Suv eslatmalari yoqildi: har 2 soatda, $hours',
+            ru: 'Напоминания о воде включены: каждые 2 ч, $hours',
+            en: 'Water reminders on: every 2 hours, $hours',
+          ),
+          off: context.tr(
+            uz: 'Suv eslatmalari o‘chirildi',
+            ru: 'Напоминания о воде выключены',
+            en: 'Water reminders off',
+          ),
+          denied: context.tr(
+            uz:
+                'Bildirishnomalarga ruxsat yo‘q — telefon sozlamalarida '
+                'Sino uchun yoqing',
+            ru: 'Уведомления запрещены — включите их для Sino в настройках',
+            en: 'Notifications are off — allow them for Sino in Settings',
+          ),
+        );
+        final granted = await ref
+            .read(waterRemindersProvider.notifier)
+            .setEnabled(!on);
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                on
+                    ? msg.off
+                    : granted
+                    ? msg.on
+                    : msg.denied,
+              ),
+            ),
+          );
+      },
+      selectedIcon: const Icon(Icons.notifications_active_rounded),
+      icon: const Icon(Icons.notifications_off_outlined),
     );
   }
 }

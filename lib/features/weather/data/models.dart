@@ -250,6 +250,14 @@ class AirQuality {
   Map<String, dynamic> toJson() => {'us_aqi': aqi, 'pm2_5': pm25, 'pm10': pm10};
 }
 
+/// Forecast US AQI of one hour (local time of the place).
+class AqiHour {
+  const AqiHour(this.time, this.aqi);
+
+  final DateTime time;
+  final int aqi;
+}
+
 /// Local ISO time without zone, as Open-Meteo sends it.
 String _naive(DateTime t) => t.toIso8601String().split('.').first;
 
@@ -264,6 +272,7 @@ class WeatherReport {
     required this.hours,
     required this.days,
     this.air,
+    this.airHours = const [],
     this.fromCache = false,
   });
 
@@ -280,6 +289,10 @@ class WeatherReport {
   /// `null` when the air quality service did not answer.
   final AirQuality? air;
 
+  /// Hourly AQI forecast (today and tomorrow) for the morning alert
+  /// (S2-7); empty when the service did not send it.
+  final List<AqiHour> airHours;
+
   /// Shown from the offline cache (no network).
   final bool fromCache;
 
@@ -291,6 +304,7 @@ class WeatherReport {
         hours: hours,
         days: days,
         air: air,
+        airHours: airHours,
         fromCache: fromCache ?? this.fromCache,
       );
 
@@ -340,6 +354,17 @@ class WeatherReport {
         ),
     ];
     final aqCurrent = air?['current'];
+    final aqHourly = air?['hourly'];
+    final airHours = <AqiHour>[];
+    if (aqHourly is Map) {
+      final times = aqHourly['time'] as List? ?? const [];
+      final values = aqHourly['us_aqi'] as List? ?? const [];
+      for (var i = 0; i < times.length && i < values.length; i++) {
+        final v = values[i];
+        if (v is! num) continue;
+        airHours.add(AqiHour(DateTime.parse('${times[i]}'), v.round()));
+      }
+    }
     return WeatherReport(
       place: place,
       fetchedAt: fetchedAt,
@@ -349,6 +374,7 @@ class WeatherReport {
       air: aqCurrent is Map && aqCurrent['us_aqi'] != null
           ? AirQuality.fromJson(Map<String, dynamic>.from(aqCurrent))
           : null,
+      airHours: airHours,
     );
   }
 
@@ -372,6 +398,11 @@ class WeatherReport {
       'uv_index_max': [for (final x in days) x.uv],
     },
     if (air != null) 'air': air!.toJson(),
+    if (airHours.isNotEmpty)
+      'air_hourly': {
+        'time': [for (final x in airHours) _naive(x.time)],
+        'us_aqi': [for (final x in airHours) x.aqi],
+      },
   };
 
   factory WeatherReport.fromJson(Map<String, dynamic> m) {
@@ -380,7 +411,7 @@ class WeatherReport {
         Map<String, dynamic>.from(m['place'] as Map),
       ),
       forecast: m,
-      air: m['air'] == null ? null : {'current': m['air']},
+      air: {'current': m['air'], 'hourly': m['air_hourly']},
       fetchedAt: DateTime.parse(m['fetched_at'] as String).toLocal(),
     );
     return r;
