@@ -7,10 +7,12 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/widgets.dart';
 import '../application/nutrition_math.dart';
 import '../application/nutrition_providers.dart';
+import '../data/dasturxon.dart';
 import '../data/models.dart';
 import 'labels.dart';
 import 'widgets/add_food_sheet.dart';
 import 'widgets/calorie_summary_card.dart';
+import 'widgets/dasturxon_card.dart';
 import 'widgets/day_switcher.dart';
 import 'widgets/meal_section.dart';
 import 'widgets/water_card.dart';
@@ -35,6 +37,34 @@ class NutritionScreen extends ConsumerWidget {
         await ref
             .read(logsProvider.notifier)
             .add(choice.food, choice.meal, servings: choice.servings);
+      } catch (e) {
+        if (context.mounted) _snack(context, errorMessage(context, e));
+      }
+    }
+
+    Future<void> addDish(DasturxonDish dish) async {
+      final choice = await showDasturxonSheet(
+        context,
+        dish: dish,
+        meal: MealLabel.forHour(DateTime.now().hour),
+      );
+      if (choice == null || !context.mounted) return;
+      final name = context.trMap(dish.food.name);
+      final amount = measureText(context, choice.measure, choice.count);
+      final meal = choice.meal.label(context);
+      try {
+        await ref
+            .read(logsProvider.notifier)
+            .add(dish.food, choice.meal, servings: choice.servings);
+        if (!context.mounted) return;
+        _snack(
+          context,
+          context.tr(
+            uz: '$name — $amount · $meal',
+            ru: '$name — $amount · $meal',
+            en: '$name — $amount · $meal',
+          ),
+        );
       } catch (e) {
         if (context.mounted) _snack(context, errorMessage(context, e));
       }
@@ -152,6 +182,8 @@ class NutritionScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.cardGap),
                     ],
                     CalorieSummaryCard(totals: totalsOf(list), goal: goal),
+                    const SizedBox(height: AppSpacing.cardGap),
+                    DasturxonCard(onPick: addDish),
                     const SizedBox(height: AppSpacing.cardGap),
                     WaterCard(day: day),
                     for (final meal in Meal.values)

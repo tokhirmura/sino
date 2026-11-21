@@ -328,5 +328,5 @@ class _Locator implements WeatherLocator {
   final ({double lat, double lng})? at;
 
   @override
-  Future<({double lat, double lng})?> current() async => at;
+  Future<({double lat, double lng})?> current({bool ask = true}) async => at;
 }

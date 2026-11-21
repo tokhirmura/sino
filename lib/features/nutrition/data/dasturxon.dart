@@ -60,9 +60,14 @@ class DasturxonItem {
     required this.slug,
     required this.foodId,
     required this.measures,
+    this.label = const {},
   });
 
   final String slug;
+
+  /// Short name for the big button `{uz, ru, en}` («Shashlik», not «Mol
+  /// go‘shtidan shashlik»); empty — the catalog name is used.
+  final Map<String, dynamic> label;
 
   /// `foods.id`.
   final String foodId;
@@ -78,6 +83,7 @@ class DasturxonItem {
       slug: m['slug'] as String,
       foodId: m['food_id'] as String,
       measures: measures,
+      label: Map<String, dynamic>.from(m['label'] as Map? ?? const {}),
     );
   }
 }
@@ -87,8 +93,12 @@ List<DasturxonItem> parseDasturxon(String json) => [
     DasturxonItem.fromJson(x as Map<String, dynamic>),
 ];
 
+/// Not cached by the bundle: a cached future can outlive the widget test
+/// that started it (the fake repositories do the same).
 Future<List<DasturxonItem>> loadDasturxon([AssetBundle? bundle]) async =>
-    parseDasturxon(await (bundle ?? rootBundle).loadString(dasturxonAsset));
+    parseDasturxon(
+      await (bundle ?? rootBundle).loadString(dasturxonAsset, cache: false),
+    );
 
 /// Portions of [food] in [count] × [m] (e.g. 2 dona somsa), to 0.01;
 /// `null` when the food's portion has no grams.
@@ -97,6 +107,16 @@ double? dasturxonServings(Food food, DasturxonMeasure m, {double count = 1}) {
   if (g == null || g <= 0) return null;
   return (m.grams * count / g * 100).round() / 100;
 }
+
+/// Ready-made amounts of the quick-add sheet (S2-5): a bowl is eaten in
+/// halves, pieces and cups — whole.
+List<double> presetCounts(HomeMeasure m) => switch (m) {
+  HomeMeasure.kosa => const [0.5, 1, 2],
+  HomeMeasure.likopcha => const [0.5, 1, 1.5],
+  HomeMeasure.dona => const [1, 2, 3, 4],
+  HomeMeasure.piyola => const [1, 2, 3],
+  HomeMeasure.choyQoshiq => const [1, 2, 3],
+};
 
 /// A dish joined with its catalog row.
 typedef DasturxonDish = ({DasturxonItem item, Food food});
