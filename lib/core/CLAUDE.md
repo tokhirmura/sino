@@ -19,3 +19,6 @@
   Пакеты для всех: flutter_animate, share_plus, screenshot, confetti, flutter_tts, pedometer, flutter_timezone
   (+ ACTIVITY_RECOGNITION / NSMotionUsageDescription, TTS_SERVICE в queries). Иконка и сплэш —
   `tool/core/gen_icon.dart` → `assets/branding/`. Тесты — `test/core/design_v2_test.dart`.
+- [x] S2-3 Достижения: `data/achievements.dart` — `Achievement` (8 кодов, emoji, uz/ru/en названия и подсказки),
+  `AchievementsRepository` (Supabase `achievements` + Fake в prefs `core.fake_achievements`), `achievementsProvider`;
+  `AppRoutes.achievements`; миграция `20261121120000_core_achievements.sql` (RLS + GRANT)

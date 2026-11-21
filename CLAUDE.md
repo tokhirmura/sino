@@ -39,6 +39,7 @@ lib/
                             # profileRepositoryProvider (сохранить profiles), profileGateProvider (анкета),
                             # fakeProfileProvider (fake-профиль в prefs; по умолчанию «Aziz, 29»),
                             # fakeFamilyProvider (fake-семья в prefs; меняет фича profile)
+    data/achievements.dart  # Achievement (8 значков), achievementsRepositoryProvider, achievementsProvider
     l10n/app_lang.dart      # AppLang, appLangProvider, context.tr(uz:, ru:, en:), context.trMap(json)
     routing/app_routes.dart # AppRoutes.* (пути, в т.ч. profileSetup), rootNavigatorKey
     storage/prefs.dart      # sharedPreferencesProvider
@@ -81,7 +82,8 @@ final medicinesRepositoryProvider = Provider<MedicinesRepository>((ref) =>
 
 ## Схема БД (`supabase/migrations/20261111120000_core_schema.sql`)
 - **core:** `profiles` (id = auth.users.id, создаётся триггером при регистрации), `family_members`,
-  `medical_records` (source `davlat|xususiy`), `lab_results`
+  `medical_records` (source `davlat|xususiy`), `lab_results`, `achievements` (unique user_id+code,
+  `20261121120000_core_achievements.sql`)
 - **B:** `medicines` (description/warning jsonb `{uz,ru,en}`, analogs text[]), `pharmacies`, `pharmacy_stock`
   (unique pharmacy+medicine), `reservations` (status `pending|ready|picked|cancelled`, **realtime**),
   `reminders` (days int[] 1=Пн…7=Вс), `reminder_logs`, `doctors`, `appointments` (status `booked|done|cancelled`)

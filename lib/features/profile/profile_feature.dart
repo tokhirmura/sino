@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/contracts/home_card.dart';
 import '../../core/routing/app_routes.dart';
+import 'presentation/achievements_screen.dart';
 import 'presentation/doctor_qr_screen.dart';
 import 'presentation/edit_profile_screen.dart';
 import 'presentation/family_member_screen.dart';
@@ -34,6 +35,11 @@ final List<RouteBase> profileRoutes = [
         path: 'qr',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const DoctorQrScreen(),
+      ),
+      GoRoute(
+        path: 'achievements',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AchievementsScreen(),
       ),
       GoRoute(
         path: 'family/new',

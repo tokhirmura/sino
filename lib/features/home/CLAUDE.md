@@ -16,6 +16,15 @@
   одна на день (номер дня в году % 20); оригинал всегда на узбекском, в ru/en под ним перевод.
 - «Xizmatlar» 3×3 и «Siz uchun» — карточки всех фич из `homeCardsProvider` (сортировка по `order`).
 
+**Достижения** (`application/achievements_check.dart`): при каждой загрузке истории `earnedAchievements` проверяет
+8 значков core `Achievement` по 30 дням — первая тренировка, 7 дней подряд по 8 стаканов, 3 дня подряд все дозы приняты,
+первая бронь (`reservations`, свои строки), 10 000 шагов за день, индекс 90+ (минимум 3 части; сегодня — только после
+21:00), 7 дней подряд индекс ≥ 60, «полный день» (все 5 частей). Новые сразу сохраняются (`achievementsRepositoryProvider`)
+и празднуются диалогом «Yangi yutuq!» с confetti (`widgets/achievement_celebration.dart`, «Barcha yutuqlar» →
+`AppRoutes.achievements`). Под `flutter test` диалог выключен (`achievementCelebrationProvider`) — confetti идёт по
+настоящим часам, а диалог закрыл бы экраны в тестах коллег; тесты home включают его сами. Fake: у «Aziz» открываются
+4 из 8.
+
 Обновление: при возврате на вкладку (слушает `GoRouter.routerDelegate`) и pull-to-refresh — `sinoHistoryProvider`
 перечитывается, строка-итог и индекс сразу учитывают воду/еду/лекарства, отмеченные в других фичах.
 
@@ -38,7 +47,8 @@
 
 ## Таблицы БД
 Только чтение своих строк: `food_logs` (+ `foods.kcal`), `water_logs`, `reminders`, `reminder_logs`,
-`workout_sessions`, `vitals` (`steps`, `sleep`); `profiles` — через `currentUserProvider`.
+`workout_sessions`, `vitals` (`steps`, `sleep`), `reservations` (есть ли хоть одна); `profiles` — через
+`currentUserProvider`. Запись: `achievements` (через core-репозиторий, insert … on conflict do nothing).
 
 ## Файлы
 - `home_feature.dart` — единственный публичный файл (`homeRoutes`, `homeHomeCards`)
@@ -61,7 +71,7 @@
   живая строка-итог («Bugun 1 240 kkal, 5 stakan suv, dorilar vaqtida ✓»); большое анимированное кольцо индекса с
   раскладкой по тапу; серия дней (индекс ≥ 60) и полоска «7 kun» цветными точками; поговорка дня
   (20 шт. в `assets/core/quotes.json`, uz + ru/en); дальше `allHomeCards`; всё с анимацией появления
-- [ ] S2-3 Достижения: 8 значков (первая тренировка, 7 дней воды, все лекарства вовремя 3 дня, первая бронь,
+- [x] S2-3 Достижения: 8 значков (первая тренировка, 7 дней воды, все лекарства вовремя 3 дня, первая бронь,
   10 000 шагов, индекс 90+ …); таблица `achievements` новой миграцией `*_core_achievements.sql` с RLS + GRANT;
   новое достижение — confetti; экран достижений в профиле (см. `profile/CLAUDE.md`)
 - [ ] S2-4 Недельный отчёт `/report` (`AppRoutes.report`): индекс по дням на fl_chart, лучший день, вода,

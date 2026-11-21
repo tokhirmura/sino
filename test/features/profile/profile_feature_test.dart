@@ -51,7 +51,15 @@ void main() {
     expect(root.path, AppRoutes.profile);
     expect(
       [for (final r in root.routes.whereType<GoRoute>()) r.path],
-      ['edit', 'records', 'labs', 'qr', 'family/new', 'family/:id'],
+      [
+        'edit',
+        'records',
+        'labs',
+        'qr',
+        'achievements',
+        'family/new',
+        'family/:id',
+      ],
     );
   });
 

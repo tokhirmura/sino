@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/backend/backend.dart';
+import '../../../core/data/achievements.dart';
 import '../../../core/data/user.dart';
 import '../../../core/l10n/app_lang.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/theme_mode.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_scaffold.dart';
@@ -33,7 +36,8 @@ class ProfileScreen extends ConsumerWidget {
           ref
             ..invalidate(familyMembersProvider)
             ..invalidate(medicalRecordsProvider)
-            ..invalidate(labResultsProvider);
+            ..invalidate(labResultsProvider)
+            ..invalidate(achievementsProvider);
           return ref.refresh(currentUserProvider.future);
         },
         child: ListView(
@@ -49,6 +53,8 @@ class ProfileScreen extends ConsumerWidget {
               data: (u) =>
                   u == null ? const SizedBox.shrink() : _UserCard(user: u),
             ),
+            const SizedBox(height: AppSpacing.cardGap),
+            const _AchievementsCard(),
             SectionTitle(
               context.tr(
                 uz: 'Tibbiy karta',
@@ -169,6 +175,85 @@ class _UserCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// «Yutuqlar 4 / 8» + a strip of all badges → `/profile/achievements`.
+class _AchievementsCard extends ConsumerWidget {
+  const _AchievementsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unlocked = ref.watch(achievementsProvider).value;
+    final total = Achievement.values.length;
+    final theme = Theme.of(context);
+    return AppCard(
+      key: const ValueKey('profile-achievements'),
+      onTap: () => context.push(AppRoutes.achievements),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.tr(uz: 'Yutuqlar', ru: 'Достижения', en: 'Badges'),
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              if (unlocked != null)
+                Pill('${unlocked.length} / $total', color: AppColors.saffron),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final a in Achievement.values)
+                _MiniMedal(
+                  emoji: a.emoji,
+                  unlocked: unlocked?.containsKey(a) ?? false,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniMedal extends StatelessWidget {
+  const _MiniMedal({required this.emoji, required this.unlocked});
+
+  final String emoji;
+  final bool unlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: unlocked ? AppColors.saffronGradient : null,
+        color: unlocked ? null : scheme.surfaceContainerHighest,
+      ),
+      child: Opacity(
+        opacity: unlocked ? 1 : 0.35,
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 17, height: 1.1),
+          textScaler: TextScaler.noScaling,
+        ),
       ),
     );
   }

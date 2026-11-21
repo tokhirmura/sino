@@ -17,4 +17,5 @@ abstract final class PrefKeys {
   static const fakeProfile = 'core.fake_profile';
   static const fakeFamily = 'core.fake_family';
   static const theme = 'core.theme';
+  static const fakeAchievements = 'core.fake_achievements';
 }

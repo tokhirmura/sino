@@ -14,6 +14,7 @@ import 'package:sino/features/onboarding/presentation/widgets/email_auth_view.da
 import 'package:sino/features/onboarding/presentation/widgets/intro_slides.dart';
 import 'package:sino/features/onboarding/presentation/widgets/one_id_view.dart';
 import 'package:sino/features/onboarding/presentation/widgets/sign_in_options.dart';
+import 'package:sino/features/profile/presentation/achievements_screen.dart';
 import 'package:sino/features/profile/presentation/doctor_qr_screen.dart';
 import 'package:sino/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sino/features/profile/presentation/family_member_screen.dart';
@@ -52,6 +53,7 @@ final _screens = <String, (Widget Function(), {bool data})>{
   'medical records': (() => const MedicalRecordsScreen(), data: true),
   'lab results': (() => const LabResultsScreen(), data: false),
   'doctor qr': (() => const DoctorQrScreen(), data: false),
+  'achievements': (() => const AchievementsScreen(), data: false),
   'sos': (() => const SosScreen(), data: false),
   'assistant': (() => const AssistantScreen(), data: false),
   for (final id in ['cpr', 'choking', 'bleeding', 'burns', 'stroke', 'heat'])
