@@ -284,6 +284,12 @@ void main() {
     'new': () => const ReminderFormScreen(),
     'edit': () => const ReminderFormScreen(reminderId: 'fake-rem-amlodipine'),
     'history': () => const IntakeHistoryScreen(),
+    'home card': () => Scaffold(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [Builder(builder: remindersHomeCards.single.builder)],
+      ),
+    ),
   };
   for (final MapEntry(key: name, value: build) in screens.entries) {
     for (final lang in AppLang.values) {
@@ -291,7 +297,8 @@ void main() {
         testWidgets('$name · ${lang.name} · ${dark ? 'dark' : 'light'}', (
           tester,
         ) async {
-          tester.view.physicalSize = const Size(360, 640);
+          // Smallest common phone + enlarged system font.
+          tester.view.physicalSize = const Size(320, 568);
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.reset);
           final prefs = await fakePrefs(signedIn: true);
@@ -308,6 +315,11 @@ void main() {
                 locale: lang.locale,
                 supportedLocales: AppLang.locales,
                 localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(context)
+                      .copyWith(textScaler: const TextScaler.linear(1.3)),
+                  child: child!,
+                ),
                 home: build(),
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -67,7 +68,7 @@ class LocalReminderNotifications implements ReminderNotifications {
   Future<bool> _init() => _ready ??= () async {
     try {
       tzdata.initializeTimeZones();
-      tz.setLocalLocation(_deviceLocation());
+      tz.setLocalLocation(await deviceLocation());
       await _plugin.initialize(
         settings: const InitializationSettings(
           android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -85,18 +86,29 @@ class LocalReminderNotifications implements ReminderNotifications {
     }
   }();
 
-  /// No timezone-name package in the app: take Asia/Tashkent when the
-  /// device offset matches it (the target market), else any zone with the
-  /// device's current offset.
-  static tz.Location _deviceLocation() {
-    final offset = DateTime.now().timeZoneOffset;
-    final tashkent = tz.getLocation('Asia/Tashkent');
-    if (tashkent.currentTimeZone.offset == offset) return tashkent;
+  /// The device's IANA zone from `flutter_timezone`. If the platform call
+  /// fails or the name is unknown to the tz database (old aliases), falls
+  /// back to a zone with the device's current UTC offset, then UTC.
+  @visibleForTesting
+  static Future<tz.Location> deviceLocation({
+    Future<String> Function()? zoneName,
+    Duration? offset,
+  }) async {
+    try {
+      final name = await (zoneName ?? _platformZoneName)();
+      return tz.getLocation(name);
+    } catch (e) {
+      debugPrint('Device timezone unavailable, using offset: $e');
+    }
+    final off = offset ?? DateTime.now().timeZoneOffset;
     for (final l in tz.timeZoneDatabase.locations.values) {
-      if (l.currentTimeZone.offset == offset) return l;
+      if (l.currentTimeZone.offset == off) return l;
     }
     return tz.UTC;
   }
+
+  static Future<String> _platformZoneName() async =>
+      (await FlutterTimezone.getLocalTimezone()).identifier;
 
   @override
   Future<bool> requestPermission() async {

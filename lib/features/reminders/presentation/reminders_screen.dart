@@ -216,7 +216,7 @@ class _SummaryCard extends ConsumerWidget {
                               '${next.reminder.name}',
                         ),
                   style: text.bodyMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 2,

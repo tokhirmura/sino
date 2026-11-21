@@ -121,8 +121,10 @@ class _DayScore extends StatelessWidget {
     final color = taken == all ? AppColors.good : AppColors.amber;
     return Text(
       '$taken / $all',
-      style: Theme.of(context).textTheme.labelLarge
-          ?.copyWith(color: color, fontWeight: FontWeight.w700),
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+        color: AppColors.readable(color, Theme.of(context).brightness),
+        fontWeight: FontWeight.w700,
+      ),
     );
   }
 }
@@ -150,7 +152,7 @@ class _AdherenceCard extends ConsumerWidget {
             percent == null ? '—' : '$percent%',
             style: text.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: color,
+              color: AppColors.readable(color, Theme.of(context).brightness),
             ),
           ),
           const SizedBox(width: 14),

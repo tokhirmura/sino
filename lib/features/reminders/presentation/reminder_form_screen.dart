@@ -305,7 +305,9 @@ class _FormState extends ConsumerState<_Form> {
                   textAlign: TextAlign.end,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: text.labelLarge?.copyWith(color: AppColors.primary),
+                  style: text.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],
