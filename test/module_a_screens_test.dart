@@ -9,6 +9,7 @@ import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/features/assistant/presentation/assistant_screen.dart';
 import 'package:sino/features/home/presentation/home_screen.dart';
+import 'package:sino/features/home/presentation/report_screen.dart';
 import 'package:sino/features/onboarding/presentation/profile_setup_screen.dart';
 import 'package:sino/features/onboarding/presentation/widgets/email_auth_view.dart';
 import 'package:sino/features/onboarding/presentation/widgets/intro_slides.dart';
@@ -47,6 +48,7 @@ final _screens = <String, (Widget Function(), {bool data})>{
   'oneid': (() => _body(OneIdView(onBack: () {})), data: true),
   'profile setup': (() => const ProfileSetupScreen(), data: false),
   'home': (() => const HomeScreen(), data: false),
+  'weekly report': (() => const ReportScreen(), data: false),
   'profile': (() => const ProfileScreen(), data: true),
   'edit profile': (() => const EditProfileScreen(), data: false),
   'family form': (() => const FamilyMemberScreen(), data: false),

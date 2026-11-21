@@ -27,6 +27,7 @@ final List<List<RouteBase>> tabBranchRoutes = [
 
 /// Full-screen routes (outside the shell, cover the NavigationBar).
 final List<RouteBase> fullscreenRoutes = [
+  ...homeFullscreenRoutes,
   ...onboardingRoutes,
   ...sosRoutes,
   ...assistantRoutes,

@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sino/app/feature_registry.dart';
+import 'package:sino/core/routing/app_routes.dart';
 import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/core/widgets/money.dart';
 
@@ -54,7 +56,10 @@ void main() {
     final orders = [for (final c in allHomeCards) c.order];
     expect(orders, [...orders]..sort());
     expect(tabBranchRoutes, hasLength(5));
-    expect(allRoutes, hasLength(13));
+    expect(allRoutes, hasLength(14));
+    expect([
+      for (final r in allRoutes.whereType<GoRoute>()) r.path,
+    ], contains(AppRoutes.report));
   });
 
   test('text on brand buttons is readable in both themes (WCAG AA)', () {

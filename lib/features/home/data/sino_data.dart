@@ -51,6 +51,7 @@ class ReminderRow {
     this.days = const [1, 2, 3, 4, 5, 6, 7],
     this.active = true,
     this.memberId,
+    this.since,
   });
 
   final String id;
@@ -60,6 +61,10 @@ class ReminderRow {
 
   /// Set for a family member's medicine — not counted in the user's index.
   final String? memberId;
+
+  /// Local day the reminder was created (`created_at`); doses before it
+  /// don't exist. `null` — always existed.
+  final DateTime? since;
 }
 
 class DoseLogRow {
@@ -128,7 +133,7 @@ class SupabaseSinoDataRepository implements SinoDataRepository {
           .lte('date', toKey),
       _client
           .from('reminders')
-          .select('id, member_id, time, days, active')
+          .select('id, member_id, time, days, active, created_at')
           .eq('user_id', uid),
       _client
           .from('reminder_logs')
@@ -211,6 +216,9 @@ SinoRaw parseSinoRows({
           ],
           active: m['active'] as bool? ?? true,
           memberId: m['member_id'] as String?,
+          since: m['created_at'] == null
+              ? null
+              : dateOnly(local(m['created_at'])),
         ),
     ],
     doseLogs: [
@@ -273,6 +281,10 @@ SinoRaw buildFakeSinoRaw(
         id: r['id'] as String,
         minutes: minutesOf(r['time'] as String),
         days: [for (final d in r['days'] as List) (d as num).toInt()],
+        // Aziz set up his medicines at the start of the fake week.
+        since: today.subtract(
+          Duration(days: (r['since_days_ago'] as num?)?.toInt() ?? 6),
+        ),
       ),
   ];
   final byId = {for (final r in reminders) r.id: r};

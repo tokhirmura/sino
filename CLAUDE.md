@@ -56,13 +56,15 @@ lib/
 
 ## Контракт фичи
 - `lib/features/<x>/<x>_feature.dart` экспортирует только `final List<RouteBase> <x>Routes` и
-  `final List<HomeCardSpec> <x>HomeCards` (может быть пустым).
+  `final List<HomeCardSpec> <x>HomeCards` (может быть пустым). Фича-вкладка, которой нужен полноэкранный
+  маршрут **вне** своего пути (например `/report` у home), дополнительно экспортирует
+  `final List<RouteBase> <x>FullscreenRoutes` — лид подключает его в `fullscreenRoutes`.
 - Фичи-вкладки (home, pharmacy, nutrition, workouts, profile) описывают свой **корневой маршрут** с путём из
   `AppRoutes`; подмаршруты — в `routes:` этого корневого `GoRoute`. Подмаршрут, который должен перекрыть
   NavigationBar, ставит `parentNavigatorKey: rootNavigatorKey`.
 - Фичи **не импортируют друг друга**. Общее — только из `lib/core`.
 - Переход в другую фичу: `context.push(AppRoutes.x)` для полноэкранных
-  (`/reminders /doctors /vitals /weather /sos /assistant`), `context.go(AppRoutes.x)` — переключить вкладку.
+  (`/reminders /doctors /vitals /weather /sos /assistant /report`), `context.go(AppRoutes.x)` — переключить вкладку.
 - Контракт: `/pharmacy?q=<запрос>` открывает поиск аптеки с готовым запросом →
   `context.go(AppRoutes.pharmacySearch(q))`; экран получает `initialQuery`.
 - `order` карточек на главной (меньше = выше): sos 10, weather 20, reminders 30, pharmacy 40, nutrition 50,

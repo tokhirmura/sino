@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/app_lang.dart';
+import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../application/home_today.dart';
@@ -15,6 +17,7 @@ String weekdayShort(AppLang lang, int weekday) => switch (lang) {
 }[weekday - 1];
 
 /// Streak of days with index ≥ 60 and the last 7 days as colored dots.
+/// Tap → weekly report (`/report`).
 class WeekStripCard extends StatelessWidget {
   const WeekStripCard({
     super.key,
@@ -33,6 +36,7 @@ class WeekStripCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     return AppCard(
       key: const ValueKey('week-strip'),
+      onTap: () => context.push(AppRoutes.report),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -64,9 +68,21 @@ class WeekStripCard extends StatelessWidget {
                 ),
               ),
               Text(
-                context.tr(uz: '7 kun', ru: '7 дней', en: '7 days'),
-                style: text.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                context.tr(uz: 'Hisobot', ru: 'Отчёт', en: 'Report'),
+                key: const ValueKey('open-report'),
+                style: text.labelLarge?.copyWith(
+                  color: AppColors.readable(
+                    AppColors.primary,
+                    Theme.of(context).brightness,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: AppColors.readable(
+                  AppColors.primary,
+                  Theme.of(context).brightness,
                 ),
               ),
             ],
