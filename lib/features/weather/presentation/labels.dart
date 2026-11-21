@@ -20,6 +20,14 @@ String skyText(BuildContext context, int code) => switch (skyOf(code)) {
   Sky.storm => context.tr(uz: 'Momaqaldiroq', ru: 'Гроза', en: 'Thunderstorm'),
 };
 
+/// «Havo ifloslangan (AQI 156) — bugun uyda mashq qiling» — the same words
+/// as the workouts generator uses.
+String airAlertText(BuildContext context, AirAlert a) => context.tr(
+  uz: 'Havo ifloslangan (AQI ${a.aqi}) — bugun uyda mashq qiling',
+  ru: 'Воздух загрязнён (AQI ${a.aqi}) — сегодня тренируйтесь дома',
+  en: 'The air is polluted (AQI ${a.aqi}) — work out at home today',
+);
+
 Color aqiColor(AqiLevel l) => switch (l) {
   AqiLevel.good => AppColors.good,
   AqiLevel.moderate => AppColors.amber,

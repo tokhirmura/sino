@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/backend/backend.dart';
 import '../../../core/data/user.dart';
 import '../../../core/storage/prefs.dart';
+import '../data/dasturxon.dart';
 import '../data/models.dart';
 import '../data/nutrition_repository.dart';
 import 'nutrition_math.dart';
@@ -16,6 +17,25 @@ DateTime dayOf(DateTime d) => DateTime(d.year, d.month, d.day);
 final foodsCatalogProvider = FutureProvider<List<Food>>(
   (ref) => ref.watch(nutritionRepositoryProvider).foods(),
 );
+
+/// «Dasturxon» dishes from assets (S2-1).
+final dasturxonItemsProvider = FutureProvider<List<DasturxonItem>>(
+  (ref) => loadDasturxon(),
+);
+
+/// Dasturxon dishes joined with the catalog (same uuids in assets and
+/// Supabase), in the asset order; dishes missing from the catalog or without
+/// a portion in grams are skipped.
+final dasturxonProvider = FutureProvider<List<DasturxonDish>>((ref) async {
+  final items = await ref.watch(dasturxonItemsProvider.future);
+  final foods = await ref.watch(foodsCatalogProvider.future);
+  final byId = {for (final f in foods) f.id: f};
+  return [
+    for (final i in items)
+      if (byId[i.foodId] case final f? when f.portionGrams != null)
+        (item: i, food: f),
+  ];
+});
 
 /// How far back the diary goes (days before today).
 const nutritionHistoryDays = 365;

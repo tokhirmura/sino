@@ -9,6 +9,7 @@ import 'package:sino/app/app.dart';
 import 'package:sino/core/l10n/app_lang.dart';
 import 'package:sino/core/theme/app_theme.dart';
 import 'package:sino/features/workouts/application/air_quality.dart';
+import 'package:sino/features/workouts/application/plan_generator.dart';
 import 'package:sino/features/workouts/data/models.dart';
 import 'package:sino/features/workouts/data/workouts_repository.dart';
 import 'package:sino/features/workouts/presentation/workouts_screen.dart';
@@ -67,6 +68,48 @@ void main() {
     expect(readTodayAqi(prefs, DateTime.now())!.isBad, isFalse);
   });
 
+  group('adjustForAir', () {
+    TodayAqi aqi(int v) => TodayAqi(aqi: v, at: DateTime(2026, 11, 21, 9));
+    const run = PlanParams(type: WorkoutType.run, goal: WorkoutGoal.endurance);
+
+    test('AQI ≤ 100 or unknown: nothing changes', () {
+      for (final a in [null, aqi(58), aqi(100)]) {
+        final r = adjustForAir(run, a);
+        expect(r.params, run);
+        expect(r.homeForAir, isFalse);
+        expect(adjustForAir(const PlanParams(), a).homeForAir, isFalse);
+      }
+    });
+
+    test('AQI 101: an outdoor sport becomes «at home», the rest stays', () {
+      final r = adjustForAir(run, aqi(101));
+      expect(r.homeForAir, isTrue);
+      expect(r.params.type, WorkoutType.home);
+      expect(r.params.goal, WorkoutGoal.endurance);
+      expect(r.params.daysPerWeek, run.daysPerWeek);
+    });
+
+    test('AQI > 100, no plan yet (defaults): the generator picks home', () {
+      final r = adjustForAir(const PlanParams(), aqi(156));
+      expect(r.homeForAir, isTrue);
+      expect(r.params.type, WorkoutType.home);
+    });
+
+    test('AQI > 100: indoor sports the user chose are kept', () {
+      for (final t in [
+        WorkoutType.gym,
+        WorkoutType.yoga,
+        WorkoutType.swim,
+        WorkoutType.kurash,
+      ]) {
+        final p = PlanParams(type: t, goal: WorkoutGoal.gain);
+        final r = adjustForAir(p, aqi(156));
+        expect(r.params, p, reason: t.name);
+        expect(r.homeForAir, isFalse, reason: t.name);
+      }
+    });
+  });
+
   testWidgets('AQI > 100: the generator picks «at home» by itself', (
     tester,
   ) async {
@@ -74,8 +117,7 @@ void main() {
     expect(find.byKey(const Key('workouts-air-banner')), findsOneWidget);
     expect(
       tester.widget<Text>(find.byKey(const Key('workouts-air-text'))).data,
-      'Bugun havo sifati yomon (AQI 135, Toshkent) — generator ochiq havo '
-      'o‘rniga uyda mashg‘ulotni tanladi.',
+      'Havo ifloslangan (AQI 135, Toshkent) — bugun uyda mashq qiling',
     );
     expect(_selected(tester, 'workouts-type-home'), isTrue);
 

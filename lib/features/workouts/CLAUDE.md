@@ -42,8 +42,9 @@
   `sessionsProvider`, `streakProvider`, `planActionsProvider` (`create(params)`: генерация → `workout_plans`),
   `nextWorkoutProvider`, `sessionActionsProvider` (`save(planDay, kcal)` → `workout_sessions`, обновляет серию)
 - `application/air_quality.dart` — `readTodayAqi` (prefs `weather.today_aqi` от фичи weather, свежее 6 ч),
-  `TodayAqi.isBad` (AQI > 100), `isOutdoor` (бег). Форма генератора: плохой воздух и бег/план по умолчанию → «uyda»
-  с баннером «generator … uyda mashg‘ulotni tanladi»; выбрал бег — предупреждение и кнопка «Uyda». План бега в такой
+  `TodayAqi.isBad` (AQI > 100), `isOutdoor` (бег), `adjustForAir(params, aqi)` (S2-1, чистая функция: AQI > 100 и бег / параметры по умолчанию → «uyda»,
+  `homeForAir`; зал, йога, плавание, кураш не трогает). Форма генератора: плохой воздух и бег/план по умолчанию → «uyda»
+  с баннером `airAlertText` «Havo ifloslangan (AQI 135, Toshkent) — bugun uyda mashq qiling» (тот же текст, что у weather); выбрал бег — предупреждение и кнопка «Uyda». План бега в такой
   день — карточка-предупреждение «Uyda reja»
 - `application/workout_run.dart` — плеер без Flutter: `buildSteps` (подходы + отдых `params.rest_seconds` между ними,
   после последнего нет), `WorkoutRun` (ready 5 с → work → rest → … → done; `tick` раз в секунду, `completeSet`,
@@ -70,3 +71,12 @@
 - [x] P1-5 Плеер тренировки на весь экран: подходы/повторы, таймер, отдых с отсчётом (можно пропустить),
   финал с ~ккал и XP → `workout_sessions`; серия дней по сессиям
 - [x] P1-6 Генератор учитывает AQI (при AQI > 100 советует «uyda»)
+
+## Sprint 2.0
+Номер задачи — из плана спринта (S2-1 … S2-7). Одна задача = один PR. Проверка экранов: телефон Android (USB),
+эмулятор Android, симулятор iOS — в обоих режимах (`env.json` и `USE_FAKE=true`).
+- [x] S2-1 Воздух: AQI > 100 → состояние-предупреждение «Havo ifloslangan (AQI 156) — bugun uyda mashq qiling»
+  (uz/ru/en), выбор «uyda» генератором — чистая функция `adjustForAir`, тесты
+- [ ] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
+- [ ] S2-4 Плеер 2.0: голосовой счёт `flutter_tts` («Bir, ikki, uch…», «Dam oling»); нет узбекского голоса — русский,
+  выбор в настройках; в конце — confetti и XP

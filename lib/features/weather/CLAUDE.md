@@ -31,6 +31,9 @@
   «сейчас»), `WeatherCache`, `WeatherLocator` (Geolocator: low accuracy 8 с → last known; Fake — Toshkent)
 - `application/weather_logic.dart` — `AqiLevel` (0–50 … 301+), `outdoorAqiLimit` = 100, `weatherTips` (воздух, дождь
   в ближайшие 6 ч, жара ≥ 32, холод ≤ 0 по «ощущается», УФ ≥ 6, ветер ≥ 35 км/ч, иначе «хороший день»), WMO → `Sky`
+- `application/weather_logic.dart` (ещё) — `AirAlert` / `airAlert(aqi)` / `reportAirAlert(report)` (S2-1): предупреждение
+  при AQI > 100, `severe` > 150 — для баннера, карточки и утреннего уведомления; текст — `airAlertText` в `labels.dart`
+  («Havo ifloslangan (AQI 156) — bugun uyda mashq qiling», тот же у workouts)
 - `application/weather_providers.dart` — `weatherPlaceProvider` (по умолчанию Toshkent — без запроса геолокации),
   `weatherReportProvider` (без авто-retry: иначе повторный запрос разрешения; `gps` без координат → кэш `gps` или
   `LocationUnavailableException`), `todayAqiKey`
@@ -45,3 +48,12 @@
   и тренировки, офлайн-кэш последнего прогноза
 - [x] P1-6 Карточка главной (order 20): температура, город, AQI; при плохом воздухе — «дома»
 - [x] P1-6 Сегодняшний AQI для генератора тренировок (`weather.today_aqi`)
+
+## Sprint 2.0
+Номер задачи — из плана спринта (S2-1 … S2-7). Одна задача = один PR. Проверка экранов: телефон Android (USB),
+эмулятор Android, симулятор iOS — в обоих режимах (`env.json` и `USE_FAKE=true`).
+- [x] S2-1 Воздух: `airAlert(aqi)` — состояние-предупреждение при AQI > 100, текст «Havo ifloslangan (AQI 156) —
+  bugun uyda mashq qiling» (uz/ru/en), тесты
+- [ ] S2-2 Дизайн 2.0: фон по времени суток (tong, kun, kech, tun), крупная температура, при AQI > 100 — сверху
+  красно-жёлтый баннер
+- [ ] S2-7 (если останется время) Утреннее уведомление при высоком AQI, выключается в настройках

@@ -27,6 +27,11 @@
 - `application/vitals_math.dart` — `weekSeries` (7 точек, старые → сегодня; за день: шаги — максимум, вес и сон —
   последнее, остальное — среднее), `inputRange` (отсев опечаток), `bmi` / `bmiLevel` (18.5 / 25 / 30), `testHistory`
   (по одному реалистичному значению на каждый пустой день × вид за 7 дней; детерминированно; не в будущем)
+- `application/vital_zones.dart` — зоны (S2-1, общая информация, не диагноз): `VitalZone` low / normal / elevated
+  (yuqori me’yor) / high; давление (ESH) < 90 · 90–129 · 130–139 · ≥ 140 и < 60 · 60–84 · 85–89 · ≥ 90 — берётся
+  более тревожное (`worse`: high > elevated > low > normal); сахар натощак < 3.9 · 3.9–5.5 · 5.6–6.9 · ≥ 7.0;
+  `ZoneBand` (from ≤ v < to) — `systolicBands`, `diastolicBands`, `glucoseBands`, `chartBands(kind)` для графика;
+  `zoneOf(vital)`. «Me’yor» совпадает со `status` normal. Тексты — `zoneText`, `zoneColor`, `zoneDisclaimer` в `labels.dart`
 - `application/vitals_providers.dart` — `vitalsWeekProvider(kind)`, `vitalsWeekAllProvider` (вся неделя одним
   запросом — экран и карточка), `latestVitalProvider(kind)`, `selectedVitalKindProvider`, `vitalsDevModeProvider`
   (prefs `vitals.dev_mode`), `vitalsActionsProvider` (`add`, `remove`, `fillTestHistory` → сколько добавлено)
@@ -52,3 +57,14 @@
 - [x] P1-7 Графики за 7 дней (`fl_chart`), калькулятор ИМТ, общие ориентиры нормы с дисклеймером
 - [x] P1-7 Скрытая кнопка «заполнить тестовой историей» (только режим разработчика)
 - [x] P2-9 Дыхательное упражнение 4-7-8 с анимацией круга (маршрут внутри фичи)
+
+## Sprint 2.0
+Номер задачи — из плана спринта (S2-1 … S2-7). Одна задача = один PR. Проверка экранов: телефон Android (USB),
+эмулятор Android, симулятор iOS — в обоих режимах (`env.json` и `USE_FAKE=true`).
+- [x] S2-1 Зоны давления и сахара: past / me’yor / yuqori me’yor / baland (общая информация, не диагноз) — функции
+  расчёта, полосы зон для графика, тесты
+- [ ] S2-2 Дизайн 2.0: `GradientHeader`, `StatTile`, `SkeletonLoader`, `EmptyState`, `PrimaryButton`, `flutter_animate`
+- [ ] S2-3 Шаги: `pedometer` — реальные шаги за сегодня, цель 8000, кольцо; итог дня → `vitals` (kind = 'steps',
+  лид берёт в индекс Sino); запрос разрешения, понятный текст при отказе; проверить на телефоне (эмулятор не считает)
+- [ ] S2-6 Давление и сахар 2.0: цветные зоны на графике, последние 30 дней, «Shifokorga yuborish» — скриншот графика
+  и таблицы через `share_plus`, дисклеймер «Shifokor maslahatini almashtirmaydi»
