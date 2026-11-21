@@ -23,6 +23,9 @@ abstract final class AppRoutes {
   /// Badges screen (profile sub-route, covers the NavigationBar).
   static const achievements = '/profile/achievements';
 
+  /// Weekly report (home feature, full-screen).
+  static const report = '/report';
+
   /// First-run questionnaire; the router forces it while the profile is empty.
   static const profileSetup = '/profile-setup';
 

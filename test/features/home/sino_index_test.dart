@@ -183,6 +183,17 @@ void main() {
       expect(i.sleepHours, 7.5);
     });
 
+    test('no doses before the reminder was created', () {
+      final raw = SinoRaw(
+        reminders: [ReminderRow(id: 'a', minutes: 8 * 60, since: _day)],
+      );
+      expect(sinoDayInput(raw, _day).doses, hasLength(1));
+      expect(
+        sinoDayInput(raw, _day.subtract(const Duration(days: 1))).doses,
+        isEmpty,
+      );
+    });
+
     test('empty day → no data', () {
       final i = sinoDayInput(const SinoRaw(), _day);
       expect(i.kcal, isNull);

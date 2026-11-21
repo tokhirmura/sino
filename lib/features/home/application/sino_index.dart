@@ -229,7 +229,10 @@ SinoDayInput sinoDayInput(SinoRaw raw, DateTime day) {
   };
   final doses = [
     for (final r in raw.reminders)
-      if (r.active && r.memberId == null && r.days.contains(d.weekday))
+      if (r.active &&
+          r.memberId == null &&
+          r.days.contains(d.weekday) &&
+          (r.since == null || !d.isBefore(r.since!)))
         SinoDose(
           at: d.add(Duration(minutes: r.minutes)),
           taken: takenIds.contains(r.id),
