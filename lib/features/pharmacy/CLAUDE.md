@@ -94,7 +94,7 @@ Fake-режим: пользовательские данные в prefs (`pharma
 
 ## Таблицы БД
 `medicines`, `pharmacies`, `pharmacy_stock`, `reservations` (realtime), `home_meds`
-(`20261121160000_pharmacy_home_meds.sql`: RLS `user_id = auth.uid()`, GRANT authenticated + service_role;
+(`20261121170000_pharmacy_home_meds.sql`: RLS `user_id = auth.uid()`, GRANT authenticated + service_role;
 `medicine_id` → `medicines` `on delete set null`, вручную — только `name`)
 
 ## Файлы
@@ -134,7 +134,7 @@ Fake-режим: пользовательские данные в prefs (`pharma
 - Общие правила — в корневом `CLAUDE.md`. Чужие папки, `lib/core`, `lib/app` не трогать.
 
 ## Нужно от лида
-- `supabase db push` для `supabase/migrations/20261121160000_pharmacy_home_meds.sql` (таблица `home_meds`).
+- `supabase db push` для `supabase/migrations/20261121170000_pharmacy_home_meds.sql` (таблица `home_meds`).
 - `supabase db push` для `supabase/migrations/20261117120000_pharmacy_seed.sql` (каталоги модуля B: лекарства,
   аптеки, остатки, врачи).
 
@@ -166,7 +166,7 @@ Fake-режим: пользовательские данные в prefs (`pharma
 **Сделано:** см. «Чеклист задач → Sprint 2.0 B+». Всё работает офлайн (fake) и с Supabase; `flutter test` — зелёный.
 
 **Нужно сделать лиду**
-1. `supabase db push` — новая миграция `20261121160000_pharmacy_home_meds.sql` (таблица `home_meds`, RLS,
+1. `supabase db push` — новая миграция `20261121170000_pharmacy_home_meds.sql` (таблица `home_meds`, RLS,
    GRANT). Без неё экран «Uy dorixonasi» в Supabase-режиме покажет ошибку с «Qayta urinish» (fake работает).
 2. Если ещё не применена — `20261117120000_pharmacy_seed.sql` (каталоги лекарств, аптек, остатков, врачей).
 
