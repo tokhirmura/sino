@@ -29,6 +29,9 @@ abstract class NutritionRepository {
 
   Future<void> removeLog(String logId);
 
+  /// Latest logs of any day, newest first (for «Recently eaten»).
+  Future<List<FoodLog>> latestLogs({int limit = 60});
+
   /// Glasses of water on [day] (0 when nothing logged).
   Future<int> waterFor(DateTime day);
 
@@ -48,6 +51,27 @@ List<Food> searchFoods(List<Food> foods, String query) {
       ].any((s) => normalizeFoodText(s).contains(q)))
         f,
   ];
+}
+
+/// Foods of [logs] (newest first) without repeats, at most [limit]:
+/// «Recently eaten». A custom food repeats when name and calories match.
+List<({Food food, double servings})> recentFoods(
+  Iterable<FoodLog> logs, {
+  int limit = 10,
+}) {
+  final seen = <String>{};
+  final out = <({Food food, double servings})>[];
+  for (final l in logs) {
+    final f = l.food;
+    final key = f.isCustom
+        ? 'c:${normalizeFoodText('${f.name['uz'] ?? f.name.values.firstOrNull}')}'
+              '|${f.kcal.round()}'
+        : f.id;
+    if (!seen.add(key)) continue;
+    out.add((food: f, servings: l.servings));
+    if (out.length == limit) break;
+  }
+  return out;
 }
 
 String normalizeFoodText(String s) => s
@@ -104,7 +128,8 @@ class SupabaseNutritionRepository implements NutritionRepository {
           'user_id': _uid,
           'date': dateKey(day),
           'meal': meal.name,
-          'food_id': food.id,
+          'food_id': food.isCustom ? null : food.id,
+          if (food.isCustom) 'custom_food': food.toJson(),
           'servings': servings,
         })
         .select('*, foods(*)')
@@ -123,6 +148,20 @@ class SupabaseNutritionRepository implements NutritionRepository {
   @override
   Future<void> removeLog(String logId) =>
       _client.from('food_logs').delete().eq('id', logId).timeout(_timeout);
+
+  @override
+  Future<List<FoodLog>> latestLogs({int limit = 60}) async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return const [];
+    final rows = await _client
+        .from('food_logs')
+        .select('*, foods(*)')
+        .eq('user_id', uid)
+        .order('created_at', ascending: false)
+        .limit(limit)
+        .timeout(_timeout);
+    return [for (final r in rows) FoodLog.fromJson(r)];
+  }
 
   @override
   Future<int> waterFor(DateTime day) async {
@@ -266,6 +305,14 @@ class FakeNutritionRepository implements NutritionRepository {
       for (final l in logs)
         if (l.id != logId) l,
     ]);
+  }
+
+  @override
+  Future<List<FoodLog>> latestLogs({int limit = 60}) async {
+    final logs = [
+      ...await _allLogs(),
+    ]..sort((a, b) => (b.createdAt ?? b.date).compareTo(a.createdAt ?? a.date));
+    return logs.take(limit).toList();
   }
 
   Future<Map<String, int>> _water() async {

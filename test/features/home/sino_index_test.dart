@@ -212,6 +212,13 @@ void main() {
           'servings': 1.5,
           'foods': {'kcal': 600},
         },
+        // Homemade / barcode / photo: no catalog row, kcal in custom_food.
+        {
+          'date': '2026-11-18',
+          'servings': 2,
+          'foods': null,
+          'custom_food': {'kcal': 250, 'source': 'recipe'},
+        },
       ],
       water: [
         {'date': '2026-11-18', 'glasses': 5},
@@ -235,7 +242,7 @@ void main() {
         {'kind': 'steps', 'value': 8123, 'measured_at': '2026-11-18T16:00:00Z'},
       ],
     );
-    expect(raw.food.single.kcal, 900);
+    expect([for (final f in raw.food) f.kcal], [900, 500]);
     expect(raw.water.single.glasses, 5);
     expect(raw.reminders.single.minutes, 510);
     expect(raw.reminders.single.days, [1, 3, 5]);

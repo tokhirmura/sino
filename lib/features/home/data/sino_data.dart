@@ -30,7 +30,8 @@ class SinoRaw {
   final List<VitalRow> vitals;
 }
 
-/// One `food_logs` row: kcal = servings × `foods.kcal`.
+/// One `food_logs` row: kcal = servings × `foods.kcal` (or
+/// `custom_food.kcal` for homemade / barcode / photo entries).
 class FoodRow {
   const FoodRow(this.date, this.kcal);
   final DateTime date;
@@ -121,7 +122,7 @@ class SupabaseSinoDataRepository implements SinoDataRepository {
     final rows = await Future.wait<List<Map<String, dynamic>>>([
       _client
           .from('food_logs')
-          .select('date, servings, foods(kcal)')
+          .select('date, servings, foods(kcal), custom_food')
           .eq('user_id', uid)
           .gte('date', fromKey)
           .lte('date', toKey),
@@ -195,7 +196,10 @@ SinoRaw parseSinoRows({
         FoodRow(
           DateTime.parse(m['date'] as String),
           num0(m['servings']) *
-              num0((m['foods'] as Map<String, dynamic>?)?['kcal']),
+              num0(
+                ((m['foods'] ?? m['custom_food'])
+                    as Map<String, dynamic>?)?['kcal'],
+              ),
         ),
     ],
     water: [
