@@ -114,3 +114,12 @@ String kcalUnit(BuildContext context) =>
     context.tr(uz: 'kkal', ru: 'ккал', en: 'kcal');
 
 String gramUnit(BuildContext context) => context.tr(uz: 'g', ru: 'г', en: 'g');
+
+/// Small mark of where a custom food came from (`null` for the catalog).
+String? sourceBadge(FoodSource s) => switch (s) {
+  FoodSource.catalog => null,
+  FoodSource.photo => '📷',
+  FoodSource.recipe => '🍳',
+  FoodSource.barcode => '🏷️',
+  FoodSource.quick => '⚡',
+};

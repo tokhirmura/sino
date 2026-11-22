@@ -21,7 +21,7 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   «N / 8» с кнопкой «+1 stakan»; тап → вкладка на сегодня. Загрузка/ошибка — `ShortcutCard` с подписью
 
 ## Таблицы БД
-`foods`, `food_logs`, `water_logs`
+`foods`, `food_logs` (+ `custom_food` jsonb, `food_id` nullable), `water_logs`. Edge Function `food-vision`.
 
 ## Файлы
 - `nutrition_feature.dart` — единственный публичный файл (`nutritionRoutes`, `nutritionHomeCards`)
@@ -63,6 +63,34 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   `wellness:water`, канал `AppNotificationChannel.wellness`; Noop вне Android/iOS и в тестах выбирает core. В `WaterCard` — колокольчик
   `nutrition-water-notify` (вкл./выкл., SnackBar). ID модуля C ≥ 2 100 000 000 — не пересекаются с `reminders`
   (< 2 000 000 000, payload `reminder:`)
+- **4 способа добавить еду** (лист «Ovqat qo‘shish» → 4 кнопки `nutrition-mode-*`; лист — один `CustomScrollView`):
+  - Своя еда не из каталога: `Food.source` (`FoodSource.catalog|photo|recipe|barcode|quick`), `Food.custom(...)` (id
+    `custom-…`), `isCustom`. В БД — `food_logs.food_id = null` + `custom_food` jsonb (миграция
+    `20261121180000_wellness_custom_food.sql`, check: food_id или custom_food.kcal). `FoodLog.fromJson` берёт `foods`,
+    иначе `custom_food`. Порция своей еды = съеденное количество (servings 1). Значок источника в строке дневника (`sourceBadge`).
+    Home (`sino_data.dart`) считает kcal из `foods` или `custom_food`
+  - 📷 **Rasmdan (beta)** — `presentation/photo_food_screen.dart`, `data/food_vision.dart`: `image_picker` (≤1024 px) →
+    Edge Function `supabase/functions/food-vision` (Gemini/Claude с картинкой, те же секреты, что у `assistant`; деплой
+    `npx supabase functions deploy food-vision --use-api`) → до 3 вариантов с % уверенности, ползунок граммов. Fake-режим или
+    ошибка функции → `DemoFoodVisionRepository` (3 блюда каталога по байтам фото) с плашкой «Demo-taxmin». Фото не хранится
+  - 👩‍🍳 **O‘zim pishirdim** — `presentation/recipe_screen.dart`, `data/ingredients.dart` (+ `assets/wellness/ingredients.json`,
+    51 сырой продукт на 100 г, `piece_g`, алиасы uz/ru/en: префикс слова, `$` — слово целиком, длинный алиас побеждает).
+    `parseRecipe(text)`: строки / запятые / «va, и, and, +»; число (1,5 · 1/2 · ½ · yarim · пол-) + единица (g, kg, ml, l,
+    ta/dona/шт, osh/choy qoshiq, ст./ч. л., stakan, piyola, kosa, chimdim) в любом порядке; без количества — штука или 100 г
+    с пометкой «?»; нераспознанное — плашка «Tanilmadi». Порции котла, «сколько съели», подсказка при > 40 % ккал из жира,
+    примеры (palov/omlet/salat) на языке приложения. «Mening retseptlarim» — `myRecipesProvider` (prefs `nutrition.my_recipes`, ≤ 20)
+  - 🏷️ **Shtrix-kod** — `presentation/barcode_food_screen.dart`, `data/products.dart`: камера `mobile_scanner` (EAN/UPC) или
+    ввод кода, список «Mashhur mahsulotlar» (`assets/wellness/products.json`, 28 товаров на 100 г/мл: Rollton, батон, кола…).
+    Поиск: запомненные (prefs `nutrition.products`) → assets → Open Food Facts (только не-fake, `productsHttpClientProvider`),
+    найденное запоминается. Не найдено → «Yorliqdan kiritish» (ккал/БЖУ на 100, упаковка) → запоминается по коду.
+    Карточка: «светофор» сахар/жир/соль (пороги UK FSA, для напитков — половина), Nutri-Score, состав; количество — пачка / ½ / 100 г / своё
+  - ⚡ **Faqat kkal** — `widgets/quick_kcal_dialog.dart`: название (необяз.) + ккал (+ БЖУ)
+  - «Yaqinda yeganlaringiz» — `recentFoodsProvider` (`latestLogs` → `recentFoods`, без повторов) — чипы в листе, одно нажатие
+  - «Kechagidek» — в пустом приёме пищи кнопка `nutrition-repeat-<meal>`: добавить то же, что было днём раньше
+  - `application/add_food_providers.dart` — провайдеры выше, `summarizeRecipe`, `recipeFood`, `searchProducts`;
+    `widgets/add_food_parts.dart` — `ChoiceTile`, `NutrientLine`, `showNutritionSnack`
+  - Тесты: `add_food_data_test.dart` (парсер, модели, товары + MockClient OFF, демо-фото, рецепты),
+    `add_food_ui_test.dart` (все потоки), `add_food_screens_test.dart` (360×640, uz/ru/en × светлая/тёмная)
 - `tool/wellness/gen_seed.dart` + `seed_sql.dart` — генератор seed-миграции каталогов
 - Тесты: `test/features/nutrition/`; `module_c_screens_test.dart` — все экраны модуля C в uz/ru/en × светлая/тёмная
   на маленьком телефоне (без переполнения и узбекских строк в ru/en)
@@ -77,8 +105,10 @@ Fake-режим: пользовательские данные в prefs (`nutrit
   «non birligi» (углеводы / 12)
 - [x] P0-2 Вода — 8 стаканов в `water_logs`; простая подсказка по балансу дня
 - [x] P0-4 `nutritionHomeCards`: калории и вода сегодня
-- [ ] P2-8 «Taomni rasmdan aniqlash»: `image_picker` + мок-распознавание (анимация, 3 варианта, «beta»),
-  фото в Supabase Storage (bucket и политики — попросить лида миграцией core)
+- [x] P2-8 «Taomni rasmdan aniqlash»: `image_picker` + распознавание (Edge Function `food-vision`, офлайн — демо;
+  анимация, 3 варианта, «beta»). Фото в Storage не сохраняем — не нужно для оценки (сделано лидом)
+- [x] Ещё способы добавить (лид): «O‘zim pishirdim» (текст ингредиентов → КБЖУ), штрих-код (+ Open Food Facts),
+  «Faqat kkal», «Yaqinda», «Kechagidek»
 
 ## Sprint 2.0
 Номер задачи — из плана спринта (S2-1 … S2-7). Одна задача = один PR. Проверка экранов: телефон Android (USB),

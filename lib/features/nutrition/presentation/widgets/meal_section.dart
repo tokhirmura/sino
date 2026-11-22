@@ -17,6 +17,9 @@ class MealSection extends StatelessWidget {
     required this.onAdd,
     required this.onServings,
     required this.onRemove,
+    this.repeatFrom = const [],
+    this.repeatToday = true,
+    this.onRepeat,
   });
 
   final Meal meal;
@@ -24,6 +27,14 @@ class MealSection extends StatelessWidget {
   final VoidCallback onAdd;
   final void Function(FoodLog log, double servings) onServings;
   final ValueChanged<FoodLog> onRemove;
+
+  /// The same meal of the previous day: offered as «like yesterday» while
+  /// this meal is empty.
+  final List<FoodLog> repeatFrom;
+
+  /// The shown day is today («Kechagidek»), else «as the day before».
+  final bool repeatToday;
+  final VoidCallback? onRepeat;
 
   @override
   Widget build(BuildContext context) {
@@ -74,15 +85,29 @@ class MealSection extends StatelessWidget {
               color: meal.color.withValues(alpha: 0.06),
               onTap: onAdd,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Text(
-                context.tr(
-                  uz: 'Hali hech narsa yo‘q — qo‘shish uchun bosing',
-                  ru: 'Пока пусто — нажмите, чтобы добавить',
-                  en: 'Nothing yet — tap to add',
-                ),
-                style: text.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr(
+                      uz: 'Hali hech narsa yo‘q — qo‘shish uchun bosing',
+                      ru: 'Пока пусто — нажмите, чтобы добавить',
+                      en: 'Nothing yet — tap to add',
+                    ),
+                    style: text.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (repeatFrom.isNotEmpty && onRepeat != null) ...[
+                    const SizedBox(height: 8),
+                    _RepeatButton(
+                      meal: meal,
+                      logs: repeatFrom,
+                      today: repeatToday,
+                      onTap: onRepeat!,
+                    ),
+                  ],
+                ],
               ),
             )
           else
@@ -105,6 +130,45 @@ class MealSection extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// «↻ Kechagidek · 2 ta · 650 kkal»: adds the previous day's meal again.
+class _RepeatButton extends StatelessWidget {
+  const _RepeatButton({
+    required this.meal,
+    required this.logs,
+    required this.today,
+    required this.onTap,
+  });
+
+  final Meal meal;
+  final List<FoodLog> logs;
+  final bool today;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = logs.length;
+    final kcal = '${totalsOf(logs).kcal.round()} ${kcalUnit(context)}';
+    final label = today
+        ? context.tr(
+            uz: 'Kechagidek · $n ta · $kcal',
+            ru: 'Как вчера · $n шт. · $kcal',
+            en: 'Same as yesterday · $n · $kcal',
+          )
+        : context.tr(
+            uz: 'Oldingi kundagidek · $n ta · $kcal',
+            ru: 'Как днём раньше · $n шт. · $kcal',
+            en: 'Same as the day before · $n · $kcal',
+          );
+    return FilledButton.tonalIcon(
+      key: Key('nutrition-repeat-${meal.name}'),
+      style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+      onPressed: onTap,
+      icon: const Icon(Icons.replay_rounded, size: 18),
+      label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -157,6 +221,7 @@ class _LogTile extends StatelessWidget {
                     '${log.kcal.round()} ${kcalUnit(context)}',
                     if (portion != null)
                       '${formatServings(log.servings)} × $portion',
+                    ?sourceBadge(log.food.source),
                   ].join(' · '),
                   style: text.bodySmall,
                 ),

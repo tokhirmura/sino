@@ -12,7 +12,33 @@ String dateKey(DateTime d) {
 
 double _d(Object? v) => (v as num?)?.toDouble() ?? 0;
 
-/// A row of the `foods` catalog. Nutrients are per one [portion].
+/// Where a food comes from. Only [catalog] foods are rows of `foods`; the
+/// others live inside their diary row (`food_logs.custom_food`).
+enum FoodSource {
+  /// The `foods` catalog.
+  catalog,
+
+  /// Estimated from a photo.
+  photo,
+
+  /// Cooked at home: the user listed the ingredients.
+  recipe,
+
+  /// A store product (barcode or the popular products list).
+  barcode,
+
+  /// «Just calories» — typed by hand.
+  quick;
+
+  static FoodSource fromName(String? s) =>
+      values.firstWhere((v) => v.name == s, orElse: () => FoodSource.catalog);
+}
+
+/// Prefix of ids of foods that are not in the catalog.
+const customFoodPrefix = 'custom-';
+
+/// A food: a row of the `foods` catalog or a custom one ([source] ≠
+/// catalog). Nutrients are per one [portion].
 class Food {
   const Food({
     required this.id,
@@ -24,9 +50,43 @@ class Food {
     this.protein = 0,
     this.fat = 0,
     this.carbs = 0,
+    this.source = FoodSource.catalog,
+    this.barcode,
   });
 
+  /// Custom food (not in `foods`) with a fresh id.
+  factory Food.custom({
+    required FoodSource source,
+    required Map<String, dynamic> name,
+    required double kcal,
+    String? emoji,
+    String? portion,
+    double protein = 0,
+    double fat = 0,
+    double carbs = 0,
+    String? barcode,
+  }) => Food(
+    id: '$customFoodPrefix${source.name}-${DateTime.now().microsecondsSinceEpoch}',
+    source: source,
+    name: name,
+    emoji: emoji,
+    portion: portion,
+    kcal: kcal,
+    protein: protein,
+    fat: fat,
+    carbs: carbs,
+    barcode: barcode,
+  );
+
   final String id;
+
+  final FoodSource source;
+
+  /// EAN / UPC of a store product.
+  final String? barcode;
+
+  /// Not a row of the `foods` catalog.
+  bool get isCustom => source != FoodSource.catalog;
 
   /// Asset-only readable id (`palov`); `null` for rows from Supabase.
   final String? slug;
@@ -61,6 +121,8 @@ class Food {
     protein: _d(m['protein']),
     fat: _d(m['fat']),
     carbs: _d(m['carbs']),
+    source: FoodSource.fromName(m['source'] as String?),
+    barcode: m['barcode'] as String?,
   );
 
   Map<String, dynamic> toJson() => {
@@ -73,6 +135,8 @@ class Food {
     'protein': protein,
     'fat': fat,
     'carbs': carbs,
+    if (isCustom) 'source': source.name,
+    if (barcode != null) 'barcode': barcode,
   };
 }
 
@@ -86,7 +150,8 @@ enum Meal {
       values.firstWhere((m) => m.name == s, orElse: () => Meal.snack);
 }
 
-/// A row of `food_logs` with the joined [food] (`select('*, foods(*)')`).
+/// A row of `food_logs` with the joined [food] (`select('*, foods(*)')`);
+/// a custom food comes from `custom_food` instead (then `foods` is null).
 class FoodLog {
   const FoodLog({
     required this.id,
@@ -126,7 +191,15 @@ class FoodLog {
     id: m['id'] as String,
     date: _dateOnly(DateTime.parse(m['date'] as String)),
     meal: Meal.fromName(m['meal'] as String?),
-    food: Food.fromJson(Map<String, dynamic>.from(m['foods'] as Map)),
+    food: switch ((m['foods'], m['custom_food'])) {
+      (final Map f, _) => Food.fromJson(Map<String, dynamic>.from(f)),
+      (_, final Map c) => Food.fromJson({
+        'id': '$customFoodPrefix${m['id']}',
+        'source': FoodSource.quick.name,
+        ...Map<String, dynamic>.from(c),
+      }),
+      _ => throw FormatException('food_logs ${m['id']}: no food'),
+    },
     servings: (m['servings'] as num?)?.toDouble() ?? 1,
     createdAt: m['created_at'] == null
         ? null
@@ -138,8 +211,13 @@ class FoodLog {
     'id': id,
     'date': dateKey(date),
     'meal': meal.name,
-    'food_id': food.id,
-    'foods': food.toJson(),
+    if (food.isCustom) ...{
+      'food_id': null,
+      'custom_food': food.toJson(),
+    } else ...{
+      'food_id': food.id,
+      'foods': food.toJson(),
+    },
     'servings': servings,
     if (createdAt != null) 'created_at': createdAt!.toUtc().toIso8601String(),
   };

@@ -32,11 +32,42 @@ class NutritionScreen extends ConsumerWidget {
 
     Future<void> add(Meal meal) async {
       final choice = await showAddFoodSheet(context, meal: meal);
-      if (choice == null) return;
+      if (choice == null || !context.mounted) return;
+      final food = choice.food;
+      final name = context.trMap(food.name);
+      final kcal =
+          '${(food.kcal * choice.servings).round()} ${kcalUnit(context)}';
+      final mealName = choice.meal.label(context);
       try {
         await ref
             .read(logsProvider.notifier)
-            .add(choice.food, choice.meal, servings: choice.servings);
+            .add(food, choice.meal, servings: choice.servings);
+        // Photo / homemade / barcode: confirm what exactly went in.
+        if (food.isCustom && context.mounted) {
+          _snack(context, '${food.emoji ?? ''} $name · $kcal · $mealName');
+        }
+      } catch (e) {
+        if (context.mounted) _snack(context, errorMessage(context, e));
+      }
+    }
+
+    Future<void> repeat(Meal meal, List<FoodLog> from) async {
+      final notifier = ref.read(logsProvider.notifier);
+      final label = meal.label(context);
+      final n = from.length;
+      try {
+        for (final l in from) {
+          await notifier.add(l.food, meal, servings: l.servings);
+        }
+        if (!context.mounted) return;
+        _snack(
+          context,
+          context.tr(
+            uz: '$label: $n ta taom qo‘shildi',
+            ru: '$label: добавлено блюд — $n',
+            en: '$label: $n added',
+          ),
+        );
       } catch (e) {
         if (context.mounted) _snack(context, errorMessage(context, e));
       }
@@ -112,6 +143,12 @@ class NutritionScreen extends ConsumerWidget {
 
     final list = logs.value;
     final water = ref.watch(waterProvider(day)).value;
+    final prevDay = DateTime(day.year, day.month, day.day - 1);
+    final prevLogs = [
+      for (final l in ref.watch(dayLogsProvider(prevDay)).value ?? const [])
+        if (!isPendingLog(l)) l,
+    ];
+    final isToday = day == dayOf(DateTime.now());
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -196,6 +233,15 @@ class NutritionScreen extends ConsumerWidget {
                         onAdd: () => add(meal),
                         onServings: setServings,
                         onRemove: remove,
+                        repeatFrom: [
+                          for (final l in prevLogs)
+                            if (l.meal == meal) l,
+                        ],
+                        repeatToday: isToday,
+                        onRepeat: () => repeat(meal, [
+                          for (final l in prevLogs)
+                            if (l.meal == meal) l,
+                        ]),
                       ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
